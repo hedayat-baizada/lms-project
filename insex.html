@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>University Portal System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-white text-gray-900">
+
+<!-- ================= NAVBAR ================= -->
+<header class="flex justify-between items-center px-10 py-5 border-b">
+  <h1 class="text-xl font-bold">University Portal</h1>
+
+  <div class="space-x-3">
+    <button onclick="openLogin()" class="px-4 py-2 border rounded-lg hover:bg-gray-100">
+      Login
+    </button>
+
+    <button onclick="openRegister()" class="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800">
+      Register
+    </button>
+  </div>
+</header>
+
+<!-- ================= LANDING PAGE ================= -->
+<section id="home" class="text-center py-24 px-6">
+  <h2 class="text-5xl font-bold mb-4">Welcome to Our University</h2>
+
+  <p class="text-gray-500 max-w-xl mx-auto">
+    A modern university system where students can register, login and access their dashboard.
+  </p>
+
+  <div class="mt-8 space-x-3">
+    <button onclick="openRegister()" class="bg-blue-700 text-white px-6 py-3 rounded-lg">
+      Apply Now
+    </button>
+
+    <button onclick="openLogin()" class="border px-6 py-3 rounded-lg">
+      Student Login
+    </button>
+  </div>
+</section>
+
+<!-- ================= DASHBOARD ================= -->
+<section id="dashboard" class="hidden p-10">
+
+  <div class="bg-blue-50 p-6 rounded-xl mb-6">
+    <h2 class="text-2xl font-bold">Student Dashboard</h2>
+    <p class="text-gray-600">Welcome, <span id="studentName">Student</span></p>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-6">
+
+    <div class="p-5 border rounded-xl">
+      <h3 class="font-bold mb-2">Profile</h3>
+      <p id="profileInfo" class="text-gray-600 text-sm"></p>
+    </div>
+
+    <div class="p-5 border rounded-xl">
+      <h3 class="font-bold mb-2">Admission Status</h3>
+      <p class="text-green-600">Approved (Demo)</p>
+    </div>
+
+    <div class="p-5 border rounded-xl">
+      <h3 class="font-bold mb-2">Messages</h3>
+      <p class="text-gray-600">No new messages</p>
+    </div>
+
+  </div>
+
+  <button onclick="logout()" class="mt-10 px-5 py-2 bg-red-600 text-white rounded-lg">
+    Logout
+  </button>
+</section>
+
+<!-- ================= REGISTER MODAL ================= -->
+<div id="registerModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center">
+
+  <div class="bg-white p-8 rounded-2xl w-full max-w-2xl">
+
+    <h2 class="text-2xl font-bold mb-5">Student Registration</h2>
+
+    <div class="grid md:grid-cols-2 gap-3">
+
+      <input id="regName" type="text" placeholder="Full Name" class="p-3 border rounded-lg"/>
+      <input id="regFather" type="text" placeholder="Father Name" class="p-3 border rounded-lg"/>
+      <input id="regAge" type="number" placeholder="Age" class="p-3 border rounded-lg"/>
+      <input id="regID" type="text" placeholder="ID Card" class="p-3 border rounded-lg"/>
+
+    </div>
+
+    <input id="regLocation" type="text" placeholder="Current Location"
+      class="w-full mt-3 p-3 border rounded-lg"/>
+
+    <button onclick="registerUser()"
+      class="w-full mt-5 bg-blue-700 text-white py-3 rounded-lg">
+      Submit Register
+    </button>
+
+    <button onclick="closeModals()" class="mt-3 text-gray-500 text-sm">
+      Close
+    </button>
+
+  </div>
+</div>
+
+<!-- ================= LOGIN MODAL ================= -->
+<div id="loginModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center">
+
+  <div class="bg-white p-8 rounded-2xl w-full max-w-md">
+
+    <h2 class="text-2xl font-bold mb-5">Student Login</h2>
+
+    <input id="loginName" type="text" placeholder="Full Name"
+      class="w-full p-3 border rounded-lg mb-3"/>
+
+    <input id="loginID" type="text" placeholder="ID Card"
+      class="w-full p-3 border rounded-lg mb-5"/>
+
+    <button onclick="loginUser()"
+      class="w-full bg-black text-white py-3 rounded-lg">
+      Login
+    </button>
+
+    <button onclick="closeModals()" class="mt-3 text-gray-500 text-sm">
+      Close
+    </button>
+
+  </div>
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+
+  let userData = null;
+
+  function openRegister() {
+    document.getElementById("registerModal").classList.remove("hidden");
+  }
+
+  function openLogin() {
+    document.getElementById("loginModal").classList.remove("hidden");
+  }
+
+  function closeModals() {
+    document.getElementById("registerModal").classList.add("hidden");
+    document.getElementById("loginModal").classList.add("hidden");
+  }
+
+  // REGISTER
+  function registerUser() {
+
+    userData = {
+      name: document.getElementById("regName").value,
+      father: document.getElementById("regFather").value,
+      age: document.getElementById("regAge").value,
+      id: document.getElementById("regID").value,
+      location: document.getElementById("regLocation").value
+    };
+
+    alert("Registration Successful!");
+
+    closeModals();
+    showDashboard();
+  }
+
+  // LOGIN
+  function loginUser() {
+
+    let name = document.getElementById("loginName").value;
+    let id = document.getElementById("loginID").value;
+
+    if (userData && userData.name === name && userData.id === id) {
+      alert("Login Successful!");
+      closeModals();
+      showDashboard();
+    } else {
+      alert("Invalid login (Try registering first)");
+    }
+  }
+
+  // SHOW DASHBOARD
+  function showDashboard() {
+    document.getElementById("home").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+
+    document.getElementById("studentName").innerText = userData.name;
+
+    document.getElementById("profileInfo").innerText =
+      "Father: " + userData.father +
+      " | Age: " + userData.age +
+      " | ID: " + userData.id +
+      " | Location: " + userData.location;
+  }
+
+  // LOGOUT
+  function logout() {
+    document.getElementById("dashboard").classList.add("hidden");
+    document.getElementById("home").classList.remove("hidden");
+  }
+
+</script>
+
+</body>
+</html>
