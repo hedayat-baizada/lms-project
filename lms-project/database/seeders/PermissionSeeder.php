@@ -142,12 +142,15 @@ class PermissionSeeder extends Seeder
         | Roles
         |--------------------------------------------------------------------------
         */
-
+        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
         $admin = Role::firstOrCreate(['name' => 'Admin']);
-        $teacher = Role::firstOrCreate(['name' => 'Teacher']);
-        $student = Role::firstOrCreate(['name' => 'Student']);
-        $volunteer = Role::firstOrCreate(['name' => 'Volunteer']);
         $admissionOfficer = Role::firstOrCreate(['name' => 'Admission Officer']);
+        $teacher = Role::firstOrCreate(['name' => 'Teacher']);        
+        $volunteer = Role::firstOrCreate(['name' => 'Volunteer']);
+        $courseManager = Role::firstOrCreate(['name' => 'Course Manager']);
+        $reportManager = Role::firstOrCreate(['name' => 'Report Manager']);
+        $student = Role::firstOrCreate(['name' => 'Student']);
+
 
         // Admin gets everything
         $admin->syncPermissions(Permission::all());
