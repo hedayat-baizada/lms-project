@@ -1,4 +1,4 @@
-// import { useCan } from '@/lib/can';
+import { useCan } from '@/lib/can';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -46,16 +46,19 @@ const mainNavItems: NavItem[] = [
                 title: 'Users',
                 url: '/users',
                 icon: Users,
+                permission: 'users.view',
             },
             {
                 title: 'Roles',
                 url: '/roles',
                 icon: Shield,
+                permission: 'roles.view',
             },
             {
                 title: 'Permissions',
                 url: '/permissions',
                 icon: KeyRound,
+                permission: 'permissions.view',
             },
         ],
     },
@@ -68,75 +71,150 @@ const mainNavItems: NavItem[] = [
                 title: 'Applications',
                 url: '/applications',
                 icon: FileText,
+                permission: 'applications.view',
             },
             {
                 title: 'Students',
                 url: '/students',
                 icon: GraduationCap,
+                permission: 'students.view',
             },
             {
                 title: 'Guardians',
                 url: '/guardians',
                 icon: UserRound,
+                permission: 'guardians.view',
             },
             {
                 title: 'Interviews',
                 url: '/interviews',
                 icon: ClipboardCheck,
+                permission: 'interviews.view',
             },
             {
                 title: 'Placement Tests',
                 url: '/placement-tests',
                 icon: FileCheck,
+                permission: 'placement-tests.view',
             },
         ],
     },
+
 
     {
         title: 'Academic',
         icon: GraduationCap,
         children: [
             {
+                title: 'Programs',
+                url: '/programs',
+                icon: BookOpen,
+                permission: 'programs.view',
+            },
+            {
                 title: 'Courses',
                 url: '/courses',
                 icon: BookMarked,
+                permission: 'courses.view',
             },
             {
                 title: 'Class Groups',
                 url: '/class-groups',
                 icon: Layers3,
+                permission: 'class-groups.view',
             },
             {
-                title: 'Attendance',
+                title: 'Student Attendance',
                 url: '/attendance',
                 icon: CalendarCheck,
+                permission: 'attendance.view',
             },
             {
                 title: 'Result Cards',
                 url: '/result-cards',
                 icon: Award,
+                permission: 'result-cards.view',
             },
         ],
     },
 
     {
-        title: 'Teaching',
+        title: 'Teachers',
         icon: Presentation,
         children: [
             {
                 title: 'Teachers',
                 url: '/teachers',
                 icon: Presentation,
+                permission: 'teachers.view',
             },
+            {
+                title: 'Teacher Attendance',
+                url: '/teacher-attendance',
+                icon: CalendarCheck,
+                permission: 'teacher-attendance.view',
+            },
+            {
+                title: 'Teacher Assignments',
+                url: '/teacher-assignments',
+                icon: BookMarked,
+                permission: 'teacher-assignments.view',
+            },
+        ],
+    },
+
+    {
+        title: 'Volunteers',
+        icon: HandHelping,
+        children: [
             {
                 title: 'Volunteers',
                 url: '/volunteers',
                 icon: HandHelping,
+                permission: 'volunteers.view',
             },
             {
-                title: 'Programs',
-                url: '/programs',
+                title: 'Volunteer Roles',
+                url: '/volunteer-roles',
+                icon: Shield,
+                permission: 'volunteer-roles.view',
+            },
+            {
+                title: 'Volunteer Attendance',
+                url: '/volunteer-attendance',
+                icon: CalendarCheck,
+                permission: 'volunteer-attendance.view',
+            },
+            {
+                title: 'Volunteer Assignments',
+                url: '/volunteer-assignments',
+                icon: ClipboardCheck,
+                permission: 'volunteer-assignments.view',
+            },
+        ],
+    },
+
+    {
+        title: 'Teaching Operations',
+        icon: BookOpen,
+        children: [
+            {
+                title: 'Lesson Plans',
+                url: '/lesson-plans',
                 icon: BookOpen,
+                permission: 'lesson-plans.view',
+            },
+            {
+                title: 'Class Schedule',
+                url: '/class-schedules',
+                icon: CalendarCheck,
+                permission: 'class-schedules.view',
+            },
+            {
+                title: 'Assessments',
+                url: '/assessments',
+                icon: FileCheck,
+                permission: 'assessments.view',
             },
         ],
     },
@@ -149,6 +227,7 @@ const mainNavItems: NavItem[] = [
                 title: 'Announcements',
                 url: '/announcements',
                 icon: Megaphone,
+                permission: 'announcements.view',
             },
         ],
     },
@@ -160,20 +239,48 @@ const mainNavItems: NavItem[] = [
             {
                 title: 'Student Reports',
                 url: '/reports/students',
-                icon: BarChart3,
+                icon: GraduationCap,
+                permission: 'reports.students.view',
             },
             {
                 title: 'Attendance Reports',
                 url: '/reports/attendance',
                 icon: CalendarCheck,
+                permission: 'reports.attendance.view',
             },
             {
                 title: 'Academic Reports',
                 url: '/reports/academic',
                 icon: BookMarked,
+                permission: 'reports.academic.view',
+            },
+            {
+                title: 'Teacher Reports',
+                url: '/reports/teachers',
+                icon: Presentation,
+                permission: 'reports.teachers.view',
+            },
+            {
+                title: 'Volunteer Reports',
+                url: '/reports/volunteers',
+                icon: HandHelping,
+                permission: 'reports.volunteers.view',
+            },
+            {
+                title: 'Admission Reports',
+                url: '/reports/admissions',
+                icon: FileText,
+                permission: 'reports.admissions.view',
+            },
+            {
+                title: 'Result Reports',
+                url: '/reports/results',
+                icon: Award,
+                permission: 'reports.results.view',
             },
         ],
     },
+
 
     {
         title: 'System',
@@ -183,11 +290,13 @@ const mainNavItems: NavItem[] = [
                 title: 'Audit Logs',
                 url: '/audit-logs',
                 icon: History,
+                permission: 'audit-logs',
             },
             {
                 title: 'Settings',
                 url: '/settings',
                 icon: Settings,
+                permission: 'settings',
             },
         ],
     },
@@ -207,7 +316,23 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    // const can = useCan();
+    const can = useCan();
+
+    const filteredItems = mainNavItems
+        .map(item => ({
+            ...item,
+            children: item.children?.filter(
+                child =>
+                    !child.permission ||
+                    can(child.permission)
+            ),
+        }))
+        .filter(
+            item =>
+                !item.children ||
+                item.children.length > 0
+        );
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -223,7 +348,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={filteredItems} />
             </SidebarContent>
 
             <SidebarFooter>
