@@ -150,4 +150,58 @@ public function storeDocument(Request $request, Application $application)
         ->route('apply.student.course', $application->id)
         ->with('message', 'Identity document saved successfully.');
 }
+
+
+
+public function course(Application $application)
+{
+    return Inertia::render('Apply/Course', [
+        'application' => $application,
+    ]);
+}
+
+public function storeCourse(Request $request, Application $application)
+{
+    $validated = $request->validate([
+        'course_category' => 'required|string',
+        'course_track' => 'nullable|string',
+        'requested_level' => 'nullable|string',
+        'selected_computer_topic' => 'nullable|string',
+    ]);
+
+    $testRequired = false;
+    $speakingRequired = false;
+
+    if ($validated['course_category'] === 'english') {
+        if ($validated['course_track'] === 'prep_cel') {
+            $testRequired = $validated['requested_level'] !== 'A1';
+            $speakingRequired = false;
+        }
+
+        if ($validated['course_track'] === 'cel') {
+            $testRequired = true;
+            $speakingRequired = true;
+        }
+    }
+
+    if ($validated['course_category'] === 'computer') {
+        $testRequired = false;
+        $speakingRequired = false;
+    }
+
+    $application->update([
+        'course_category' => $validated['course_category'],
+        'course_track' => $validated['course_track'] ?? null,
+        'requested_level_id' => null,
+        'selected_computer_topic' => $validated['selected_computer_topic'] ?? $validated['requested_level'] ?? null,
+        'test_required' => $testRequired,
+        'speaking_required' => $speakingRequired,
+    ]);
+
+    if ($testRequired) {
+        return redirect()->route('apply.student.test', $application->id);
+    }
+
+    return redirect()->route('apply.student.review', $application->id);
+}
 }
