@@ -2,6 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { useCan } from '@/lib/can';
+import { ArrowLeft } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -43,10 +44,12 @@ export default function Index({ roles }: Props) {
                     <div>
                         <button
                             onClick={() => window.history.back()}
-                            className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 text-sm"
+                            className="inline-flex w-fit items-center gap-2 rounded-xl border bg-card px-4 py-2 text-sm font-medium shadow-sm transition-all hover:bg-muted hover:shadow"
                         >
-                            ← Back
+                            <ArrowLeft className="h-4 w-4" />
+                            Back
                         </button>
+
 
                     </div>
                     <div>
@@ -64,10 +67,11 @@ export default function Index({ roles }: Props) {
 
                     {can('roles.create') && <Link
                         href={route('roles.create')}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                        className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
                     >
                         + Add Role
                     </Link>}
+
                 </div>
 
                 {/* Table */}
