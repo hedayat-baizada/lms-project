@@ -44,10 +44,15 @@ Route::get('/apply/student', [ApplicationController::class, 'student'])
 Route::post('/apply/student/personal-info', [ApplicationController::class, 'storePersonalInfo'])
     ->name('apply.student.personal-info.store');
 
-    Route::get('/apply/student/{application}/document', function () {
-    return 'Document step coming next';
-})->name('apply.student.document');
+    Route::get('/apply/student/{application}/document', [ApplicationController::class, 'document'])
+    ->name('apply.student.document');
 
+Route::post('/apply/student/{application}/document', [ApplicationController::class, 'storeDocument'])
+    ->name('apply.student.document.store');
+
+Route::get('/apply/student/{application}/course', function () {
+    return 'Course selection coming next';
+})->name('apply.student.course');
 Route::get('/track', function () {
     return Inertia::render('Apply/Track');
 })->name('apply.track');

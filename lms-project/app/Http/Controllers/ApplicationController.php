@@ -6,6 +6,9 @@ use App\Models\Application;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
+use App\Models\ApplicationDocument;
+use App\Models\GuardianInfo;
+
 class ApplicationController extends Controller
 {
     public function student()
@@ -76,4 +79,75 @@ class ApplicationController extends Controller
 
         return 'APP-' . $year . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
+
+
+
+
+    public function document(Application $application)
+{
+    return Inertia::render('Apply/Document', [
+        'application' => $application,
+    ]);
+}
+
+public function storeDocument(Request $request, Application $application)
+{
+    $validated = $request->validate([
+        'document_option' => 'required|string',
+        'document_number' => 'nullable|string|max:255',
+        'document_name' => 'nullable|string|max:255',
+        'document_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:4096',
+
+        'guardian_full_name' => 'nullable|string|max:255',
+        'guardian_relationship' => 'nullable|string|max:255',
+        'guardian_phone' => 'nullable|string|max:50',
+        'guardian_document_type' => 'nullable|string|max:255',
+        'guardian_document_number' => 'nullable|string|max:255',
+    ]);
+
+    $filePath = $request->file('document_file')->store('application-documents', 'public');
+
+    if ($validated['document_option'] === 'no_own_document') {
+        $request->validate([
+            'guardian_full_name' => 'required|string|max:255',
+            'guardian_relationship' => 'required|string|max:255',
+            'guardian_phone' => 'required|string|max:50',
+            'guardian_document_type' => 'required|string|max:255',
+            'guardian_document_number' => 'required|string|max:255',
+        ]);
+
+        GuardianInfo::create([
+            'application_id' => $application->id,
+            'full_name' => $validated['guardian_full_name'],
+            'relationship' => $validated['guardian_relationship'],
+            'phone' => $validated['guardian_phone'],
+            'document_type' => $validated['guardian_document_type'],
+            'document_number' => $validated['guardian_document_number'],
+        ]);
+
+        ApplicationDocument::create([
+            'application_id' => $application->id,
+            'document_owner_type' => 'guardian',
+            'document_type' => $validated['guardian_document_type'],
+            'document_name' => null,
+            'document_number' => $validated['guardian_document_number'],
+            'file_path' => $filePath,
+            'status' => 'pending',
+        ]);
+    } else {
+        ApplicationDocument::create([
+            'application_id' => $application->id,
+            'document_owner_type' => 'applicant',
+            'document_type' => $validated['document_option'],
+            'document_name' => $validated['document_name'] ?? null,
+            'document_number' => $validated['document_number'] ?? null,
+            'file_path' => $filePath,
+            'status' => 'pending',
+        ]);
+    }
+
+    return redirect()
+        ->route('apply.student.course', $application->id)
+        ->with('message', 'Identity document saved successfully.');
+}
 }
