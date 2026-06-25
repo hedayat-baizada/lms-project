@@ -27,6 +27,9 @@ import {
     BarChart3,
     History,
     Settings,
+    CircleUser,
+    BookUser, 
+    
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -120,24 +123,24 @@ const mainNavItems: NavItem[] = [
     },
 
     {
-        title: 'Teaching',
-        icon: Presentation,
+        title: 'Teacher',
+        icon: CircleUser,
         children: [
             {
-                title: 'Teachers',
-                url: '/teachers',
-                icon: Presentation,
+                title: 'Attendance',
+                url: '/teachers/attendance',
+                icon: BookUser,
             },
-            {
-                title: 'Volunteers',
-                url: '/volunteers',
-                icon: HandHelping,
-            },
-            {
-                title: 'Programs',
-                url: '/programs',
-                icon: BookOpen,
-            },
+            // {
+            //     title: 'Volunteers',
+            //     url: '/volunteers',
+            //     icon: HandHelping,
+            // },
+            // {
+            //     title: 'Programs',
+            //     url: '/programs',
+            //     icon: BookOpen,
+            // },
         ],
     },
 
