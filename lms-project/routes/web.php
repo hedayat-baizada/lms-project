@@ -69,6 +69,13 @@ Route::get('/apply/student/{application}/review', function () {
     return 'Review and submit coming next';
 })->name('apply.student.review');
 
+Route::post('/apply/student/{application}/test', [ApplicationController::class, 'storeTestAnswers'])
+    ->name('apply.student.test.store');
+
+Route::get('/apply/student/{application}/writing', function () {
+    return 'Writing step coming next';
+})->name('apply.student.writing');
+
 
 
 

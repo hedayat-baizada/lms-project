@@ -1,6 +1,7 @@
-import { usePage } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 
 type Question = {
+    test_question_id: number;
     id: number;
     display_order: number;
     question_text: string;
@@ -27,6 +28,25 @@ type PageProps = {
 export default function PlacementTestPage() {
     const { application, placementTest, questions } = usePage<PageProps>().props;
 
+    const { data, setData, post, processing, errors } = useForm<{
+        answers: Record<number, string>;
+    }>({
+        answers: {},
+    });
+
+    function setAnswer(testQuestionId: number, value: string) {
+        setData('answers', {
+            ...data.answers,
+            [testQuestionId]: value,
+        });
+    }
+
+    function submit(e: React.FormEvent) {
+        e.preventDefault();
+
+        post(`/apply/student/${application.id}/test`);
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 py-10">
             <div className="mx-auto max-w-4xl bg-white p-8 rounded shadow">
@@ -40,39 +60,58 @@ export default function PlacementTestPage() {
                     Test Code: {placementTest.test_code}
                 </p>
 
-                <div className="space-y-6">
+                {errors.answers && (
+                    <p className="mb-4 text-red-600">{errors.answers}</p>
+                )}
+
+                <form onSubmit={submit} className="space-y-6">
                     {questions.map((question) => (
-                        <div key={question.id} className="border rounded p-4">
+                        <div key={question.test_question_id} className="border rounded p-4">
                             <h2 className="font-semibold mb-3">
                                 {question.display_order}. {question.question_text}
                             </h2>
 
                             {question.question_type === 'mcq' && (
                                 <div className="space-y-2">
-                                    <label className="block">
-                                        <input type="radio" name={`question_${question.id}`} /> A. {question.option_a}
-                                    </label>
-
-                                    <label className="block">
-                                        <input type="radio" name={`question_${question.id}`} /> B. {question.option_b}
-                                    </label>
-
-                                    <label className="block">
-                                        <input type="radio" name={`question_${question.id}`} /> C. {question.option_c}
-                                    </label>
-
-                                    <label className="block">
-                                        <input type="radio" name={`question_${question.id}`} /> D. {question.option_d}
-                                    </label>
+                                    {(['a', 'b', 'c', 'd'] as const).map((option) => (
+                                        <label key={option} className="block">
+                                            <input
+                                                type="radio"
+                                                name={`question_${question.test_question_id}`}
+                                                value={option}
+                                                checked={data.answers[question.test_question_id] === option}
+                                                onChange={(e) =>
+                                                    setAnswer(question.test_question_id, e.target.value)
+                                                }
+                                            />{' '}
+                                            {option.toUpperCase()}.{' '}
+                                            {question[`option_${option}` as keyof Question]}
+                                        </label>
+                                    ))}
                                 </div>
                             )}
 
                             {question.question_type === 'text' && (
-                                <textarea className="w-full border rounded p-2" rows={3} />
+                                <textarea
+                                    className="w-full border rounded p-2"
+                                    rows={3}
+                                    value={data.answers[question.test_question_id] ?? ''}
+                                    onChange={(e) =>
+                                        setAnswer(question.test_question_id, e.target.value)
+                                    }
+                                />
                             )}
                         </div>
                     ))}
-                </div>
+
+                    <button
+                        type="submit"
+                        disabled={processing}
+                        className="w-full bg-blue-600 text-white py-3 rounded"
+                    >
+                        {processing ? 'Submitting...' : 'Submit Test'}
+                    </button>
+                </form>
             </div>
         </div>
     );

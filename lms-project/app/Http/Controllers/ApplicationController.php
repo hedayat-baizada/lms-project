@@ -5,6 +5,8 @@ use App\Models\PlacementQuestion;
 use App\Models\PlacementTest;
 use App\Models\PlacementTestQuestion;
 
+use App\Models\PlacementAnswer;
+
 use App\Models\Application;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,6 +17,41 @@ use App\Models\GuardianInfo;
 class ApplicationController extends Controller
 {
 
+
+    public function storeTestAnswers(Request $request, Application $application)
+{
+    $validated = $request->validate([
+        'answers' => 'required|array',
+    ]);
+
+    $placementTest = PlacementTest::where('application_id', $application->id)
+        ->where('status', 'in_progress')
+        ->firstOrFail();
+
+    foreach ($validated['answers'] as $testQuestionId => $answerText) {
+        PlacementAnswer::updateOrCreate(
+            [
+                'placement_test_id' => $placementTest->id,
+                'placement_test_question_id' => $testQuestionId,
+            ],
+            [
+                'question_id' => PlacementTestQuestion::findOrFail($testQuestionId)->placement_question_id,
+                'answer_text' => $answerText,
+            ]
+        );
+    }
+
+    $placementTest->update([
+        'status' => 'submitted',
+        'submitted_at' => now(),
+    ]);
+
+    if ($application->course_track === 'cel') {
+        return redirect()->route('apply.student.writing', $application->id);
+    }
+
+    return redirect()->route('apply.student.review', $application->id);
+}
     public function test(Application $application)
 {
     $placementTest = PlacementTest::where('application_id', $application->id)
@@ -63,17 +100,18 @@ class ApplicationController extends Controller
             ->sortBy('display_order')
             ->values()
             ->map(function ($testQuestion) {
-                return [
-                    'id' => $testQuestion->placementQuestion->id,
-                    'display_order' => $testQuestion->display_order,
-                    'question_text' => $testQuestion->placementQuestion->question_text,
-                    'question_type' => $testQuestion->placementQuestion->question_type,
-                    'option_a' => $testQuestion->placementQuestion->option_a,
-                    'option_b' => $testQuestion->placementQuestion->option_b,
-                    'option_c' => $testQuestion->placementQuestion->option_c,
-                    'option_d' => $testQuestion->placementQuestion->option_d,
-                ];
-            }),
+    return [
+        'test_question_id' => $testQuestion->id,
+        'id' => $testQuestion->placementQuestion->id,
+        'display_order' => $testQuestion->display_order,
+        'question_text' => $testQuestion->placementQuestion->question_text,
+        'question_type' => $testQuestion->placementQuestion->question_type,
+        'option_a' => $testQuestion->placementQuestion->option_a,
+        'option_b' => $testQuestion->placementQuestion->option_b,
+        'option_c' => $testQuestion->placementQuestion->option_c,
+        'option_d' => $testQuestion->placementQuestion->option_d,
+    ];
+}),
     ]);
 }
 
