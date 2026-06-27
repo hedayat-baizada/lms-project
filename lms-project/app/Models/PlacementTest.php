@@ -43,4 +43,8 @@ class PlacementTest extends Model
     {
         return $this->hasMany(PlacementAnswer::class);
     }
+    public function testQuestions()
+{
+    return $this->hasMany(PlacementTestQuestion::class);
+}
 }
