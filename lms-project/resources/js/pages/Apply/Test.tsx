@@ -1,4 +1,5 @@
 import { useForm, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 type Question = {
     test_question_id: number;
@@ -34,6 +35,9 @@ export default function PlacementTestPage() {
         answers: {},
     });
 
+    const [secondsLeft, setSecondsLeft] = useState(0);
+    const [submitted, setSubmitted] = useState(false);
+
     function setAnswer(testQuestionId: number, value: string) {
         setData('answers', {
             ...data.answers,
@@ -42,10 +46,40 @@ export default function PlacementTestPage() {
     }
 
     function submit(e: React.FormEvent) {
-        e.preventDefault();
+    e.preventDefault();
 
-        post(`/apply/student/${application.id}/test`);
+    setSubmitted(true);
+    post(`/apply/student/${application.id}/test`);
+}
+
+    useEffect(() => {
+    const expiryTime = new Date(placementTest.expires_at).getTime();
+
+    function updateTimer() {
+        const now = new Date().getTime();
+        const remaining = Math.max(0, Math.floor((expiryTime - now) / 1000));
+
+        setSecondsLeft(remaining);
+
+        if (remaining === 0 && !submitted) {
+            setSubmitted(true);
+            post(`/apply/student/${application.id}/test`);
+        }
     }
+
+    updateTimer();
+
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
+}, []);
+
+function formatTime(seconds: number) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
 
     return (
         <div className="min-h-screen bg-gray-100 py-10">
@@ -56,9 +90,15 @@ export default function PlacementTestPage() {
                     Applicant: {application.full_name}
                 </p>
 
-                <p className="text-gray-600 mb-6">
+                <div className="mb-6 flex items-center justify-between">
+                <p className="text-gray-600">
                     Test Code: {placementTest.test_code}
                 </p>
+
+                <div className="rounded bg-red-100 px-4 py-2 font-bold text-red-700">
+                    Time Left: {formatTime(secondsLeft)}
+                </div>
+            </div>
 
                 {errors.answers && (
                     <p className="mb-4 text-red-600">{errors.answers}</p>
