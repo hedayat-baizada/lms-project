@@ -62,9 +62,8 @@ Route::get('/apply/student/{application}/course', [ApplicationController::class,
 Route::post('/apply/student/{application}/course', [ApplicationController::class, 'storeCourse'])
     ->name('apply.student.course.store');
 
-Route::get('/apply/student/{application}/test', function () {
-    return 'Placement test coming next';
-})->name('apply.student.test');
+Route::get('/apply/student/{application}/test', [ApplicationController::class, 'test'])
+    ->name('apply.student.test');
 
 Route::get('/apply/student/{application}/review', function () {
     return 'Review and submit coming next';

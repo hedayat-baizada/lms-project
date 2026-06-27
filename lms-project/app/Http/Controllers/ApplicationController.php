@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\PlacementQuestion;
+use App\Models\PlacementTest;
+use App\Models\PlacementTestQuestion;
 
 use App\Models\Application;
 use Illuminate\Http\Request;
@@ -11,6 +14,70 @@ use App\Models\GuardianInfo;
 
 class ApplicationController extends Controller
 {
+
+    public function test(Application $application)
+{
+    $placementTest = PlacementTest::where('application_id', $application->id)
+        ->first();
+
+    if (! $placementTest) {
+        $testCode = 'prep_cel';
+        $durationMinutes = 50;
+
+        if ($application->course_track === 'cel') {
+            $testCode = collect(['cel_a', 'cel_b'])->random();
+            $durationMinutes = 80;
+        }
+
+        $placementTest = PlacementTest::create([
+            'application_id' => $application->id,
+            'test_type' => $application->course_track,
+            'test_code' => $testCode,
+            'is_required' => true,
+            'status' => 'in_progress',
+            'started_at' => now(),
+            'expires_at' => now()->addMinutes($durationMinutes),
+            'duration_minutes' => $durationMinutes,
+        ]);
+
+        $questions = PlacementQuestion::where('test_code', $testCode)
+            ->where('status', 'active')
+            ->inRandomOrder()
+            ->get();
+
+        foreach ($questions as $index => $question) {
+            PlacementTestQuestion::create([
+                'placement_test_id' => $placementTest->id,
+                'placement_question_id' => $question->id,
+                'display_order' => $index + 1,
+            ]);
+        }
+    }
+
+    $placementTest->load('testQuestions.placementQuestion');
+
+    return Inertia::render('Apply/Test', [
+        'application' => $application,
+        'placementTest' => $placementTest,
+        'questions' => $placementTest->testQuestions
+            ->sortBy('display_order')
+            ->values()
+            ->map(function ($testQuestion) {
+                return [
+                    'id' => $testQuestion->placementQuestion->id,
+                    'display_order' => $testQuestion->display_order,
+                    'question_text' => $testQuestion->placementQuestion->question_text,
+                    'question_type' => $testQuestion->placementQuestion->question_type,
+                    'option_a' => $testQuestion->placementQuestion->option_a,
+                    'option_b' => $testQuestion->placementQuestion->option_b,
+                    'option_c' => $testQuestion->placementQuestion->option_c,
+                    'option_d' => $testQuestion->placementQuestion->option_d,
+                ];
+            }),
+    ]);
+}
+
+
     public function student()
     {
         return Inertia::render('Apply/Student');
