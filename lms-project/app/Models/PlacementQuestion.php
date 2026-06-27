@@ -13,6 +13,13 @@ class PlacementQuestion extends Model
         'question_type',
         'marks',
         'status',
+        'test_code',
+        'question_number',
+        'option_a',
+        'option_b',
+        'option_c',
+        'option_d',
+        'correct_answer',
     ];
 
     public function answers()
