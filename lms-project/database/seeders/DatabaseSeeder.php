@@ -15,5 +15,6 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             AdminUserSeeder::class,
         ]);
+        $this->call(PlacementQuestionSeeder::class);
     }
 }
