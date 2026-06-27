@@ -12,6 +12,7 @@ class PlacementAnswer extends Model
         'answer_text',
         'score',
         'reviewer_notes',
+        'placement_test_question_id',
     ];
 
     public function placementTest()
@@ -23,4 +24,8 @@ class PlacementAnswer extends Model
     {
         return $this->belongsTo(PlacementQuestion::class, 'question_id');
     }
+    public function testQuestion()
+{
+    return $this->belongsTo(PlacementTestQuestion::class, 'placement_test_question_id');
+}
 }

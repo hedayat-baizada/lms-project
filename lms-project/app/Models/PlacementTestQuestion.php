@@ -21,4 +21,8 @@ class PlacementTestQuestion extends Model
     {
         return $this->belongsTo(PlacementQuestion::class);
     }
+    public function answer()
+{
+    return $this->hasOne(PlacementAnswer::class);
+}
 }
