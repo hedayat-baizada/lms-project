@@ -139,6 +139,34 @@ public function index()
 
 
 
+public function review(Application $application)
+{
+    $application->load([
+        'documents',
+        'guardianInfo',
+        'placementTest',
+    ]);
+
+    return Inertia::render('Apply/Review', [
+        'application' => $application,
+    ]);
+}
+
+public function submitFinal(Application $application)
+{
+    $application->update([
+        'status' => 'waiting_review',
+        'submitted_at' => now(),
+    ]);
+
+    return redirect()
+        ->route('apply.track')
+        ->with('message', 'Your application has been submitted and is waiting for review.');
+}
+
+
+
+
     public function show(Application $application)
 {
     $application->load([

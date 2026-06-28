@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "question_number": 1,
+    "question_text": "What is the correct way to introduce yourself?",
+    "question_type": "mcq",
+    "option_a": "Goodbye! My name is Tom.",
+    "option_b": "Hello! My name is Tom.",
+    "option_c": "How are you? My name is Tom.",
+    "option_d": "See you! My name is Tom.",
+    "correct_answer": "b"
+  },
+  {
+    "question_number": 2,
+    "question_text": "Which of the following is a correct sentence using the verb \"to be\"?",
+    "question_type": "mcq",
+    "option_a": "I is happy.",
+    "option_b": "He are sad.",
+    "option_c": "She is my friend.",
+    "option_d": "They am playing.",
+    "correct_answer": "c"
+  }
+]

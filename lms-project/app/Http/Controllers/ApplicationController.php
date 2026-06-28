@@ -17,6 +17,112 @@ use App\Models\GuardianInfo;
 class ApplicationController extends Controller
 {
 
+
+
+
+
+
+
+
+public function writing(Application $application)
+{
+    if ($application->course_track !== 'cel') {
+        return redirect()->route('apply.student.review', $application->id);
+    }
+
+    $placementTest = PlacementTest::where('application_id', $application->id)
+        ->firstOrFail();
+
+    return Inertia::render('Apply/Writing', [
+        'application' => $application,
+        'placementTest' => $placementTest,
+    ]);
+}
+
+public function storeWriting(Request $request, Application $application)
+{
+    $validated = $request->validate([
+        'writing_answer' => 'required|string|min:150',
+    ]);
+
+    $placementTest = PlacementTest::where('application_id', $application->id)
+        ->firstOrFail();
+
+    $placementTest->update([
+        'writing_answer' => $validated['writing_answer'],
+    ]);
+
+    return redirect()->route('apply.student.speaking', $application->id);
+}
+
+
+public function saveTestDrafts(Request $request, Application $application)
+{
+    $validated = $request->validate([
+        'answers' => 'nullable|array',
+    ]);
+
+    $answers = $validated['answers'] ?? [];
+
+    $placementTest = PlacementTest::where('application_id', $application->id)
+        ->where('status', 'in_progress')
+        ->firstOrFail();
+
+    foreach ($answers as $testQuestionId => $answerText) {
+        $testQuestion = PlacementTestQuestion::where('id', $testQuestionId)
+            ->where('placement_test_id', $placementTest->id)
+            ->first();
+
+        if (! $testQuestion) {
+            continue;
+        }
+
+        PlacementAnswer::updateOrCreate(
+            [
+                'placement_test_id' => $placementTest->id,
+                'placement_test_question_id' => $testQuestion->id,
+            ],
+            [
+                'question_id' => $testQuestion->placement_question_id,
+                'answer_text' => $answerText,
+            ]
+        );
+    }
+
+    return response()->json([
+        'saved' => true,
+    ]);
+}
+
+
+public function review(Application $application)
+{
+    $application->load([
+        'documents',
+        'guardianInfo',
+        'placementTest',
+    ]);
+
+    return Inertia::render('Apply/Review', [
+        'application' => $application,
+    ]);
+}
+
+public function submitFinal(Application $application)
+{
+    $application->update([
+        'status' => 'waiting_review',
+        'submitted_at' => now(),
+    ]);
+
+    return redirect()
+        ->route('apply.track')
+        ->with('message', 'Your application has been submitted and is waiting for review.');
+}
+
+
+
+
         public function saveTestDraft(Request $request, Application $application)
 {
     $validated = $request->validate([

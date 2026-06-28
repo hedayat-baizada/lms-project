@@ -82,10 +82,11 @@ Route::post('/apply/student/{application}/course', [ApplicationController::class
 Route::get('/apply/student/{application}/test', [ApplicationController::class, 'test'])
     ->name('apply.student.test');
 
-Route::get('/apply/student/{application}/review', function () {
-    return 'Review and submit coming next';
-})->name('apply.student.review');
+Route::get('/apply/student/{application}/review', [ApplicationController::class, 'review'])
+    ->name('apply.student.review');
 
+Route::post('/apply/student/{application}/review/submit', [ApplicationController::class, 'submitFinal'])
+    ->name('apply.student.submit-final');
 
 Route::post('/apply/student/{application}/test/draft', [ApplicationController::class, 'saveTestDraft'])
     ->name('apply.student.test.draft');
@@ -95,11 +96,20 @@ Route::post('/apply/student/{application}/test/draft', [ApplicationController::c
 Route::post('/apply/student/{application}/test', [ApplicationController::class, 'storeTestAnswers'])
     ->name('apply.student.test.store');
 
-Route::get('/apply/student/{application}/writing', function () {
-    return 'Writing step coming next';
-})->name('apply.student.writing');
+Route::get('/apply/student/{application}/writing', [ApplicationController::class, 'writing'])
+    ->name('apply.student.writing');
+
+Route::post('/apply/student/{application}/writing', [ApplicationController::class, 'storeWriting'])
+    ->name('apply.student.writing.store');
 
 
+    Route::get('/apply/student/{application}/speaking', function () {
+    return 'Speaking step coming next';
+})->name('apply.student.speaking');
+
+
+Route::post('/apply/student/{application}/test/drafts', [ApplicationController::class, 'saveTestDrafts'])
+    ->name('apply.student.test.drafts');
 
 
 Route::get('/track', function () {
