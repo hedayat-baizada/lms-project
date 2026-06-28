@@ -20,15 +20,24 @@ class ApplicationController extends Controller
 
     public function storeTestAnswers(Request $request, Application $application)
 {
-    $validated = $request->validate([
-        'answers' => 'required|array',
-    ]);
+  $validated = $request->validate([
+    'answers' => 'nullable|array',
+]);
+
+$answers = $validated['answers'] ?? [];
 
     $placementTest = PlacementTest::where('application_id', $application->id)
-        ->where('status', 'in_progress')
-        ->firstOrFail();
+    ->firstOrFail();
 
-    foreach ($validated['answers'] as $testQuestionId => $answerText) {
+if ($placementTest->status === 'submitted') {
+    if ($application->course_track === 'cel') {
+        return redirect()->route('apply.student.writing', $application->id);
+    }
+
+    return redirect()->route('apply.student.review', $application->id);
+}
+
+    foreach ($answers as $testQuestionId => $answerText) {
         PlacementAnswer::updateOrCreate(
             [
                 'placement_test_id' => $placementTest->id,
@@ -56,6 +65,13 @@ class ApplicationController extends Controller
 {
     $placementTest = PlacementTest::where('application_id', $application->id)
         ->first();
+        if ($placementTest && $placementTest->status === 'submitted') {
+    if ($application->course_track === 'cel') {
+        return redirect()->route('apply.student.writing', $application->id);
+    }
+
+    return redirect()->route('apply.student.review', $application->id);
+}
 
     if (! $placementTest) {
         $testCode = 'prep_cel';
