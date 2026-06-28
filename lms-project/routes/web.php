@@ -70,6 +70,10 @@ Route::get('/apply/student/{application}/review', function () {
 })->name('apply.student.review');
 
 
+Route::post('/apply/student/{application}/test/draft', [ApplicationController::class, 'saveTestDraft'])
+    ->name('apply.student.test.draft');
+
+
 
 Route::post('/apply/student/{application}/test', [ApplicationController::class, 'storeTestAnswers'])
     ->name('apply.student.test.store');

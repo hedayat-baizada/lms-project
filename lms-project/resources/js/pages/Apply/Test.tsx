@@ -1,5 +1,7 @@
 import { useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
+
 
 type Question = {
     test_question_id: number;
@@ -27,23 +29,36 @@ type PageProps = {
 };
 
 export default function PlacementTestPage() {
-    const { application, placementTest, questions } = usePage<PageProps>().props;
+    const { application, placementTest, questions, existingAnswers } = usePage<PageProps>().props;
 
     const { data, setData, post, processing, errors } = useForm<{
         answers: Record<number, string>;
     }>({
-        answers: {},
+       answers: existingAnswers ?? {},
     });
 
     const [secondsLeft, setSecondsLeft] = useState(0);
     const [submitted, setSubmitted] = useState(false);
 
-    function setAnswer(testQuestionId: number, value: string) {
-        setData('answers', {
-            ...data.answers,
-            [testQuestionId]: value,
-        });
-    }
+   function setAnswer(testQuestionId: number, value: string) {
+    setData('answers', {
+        ...data.answers,
+        [testQuestionId]: value,
+    });
+
+    router.post(
+        `/apply/student/${application.id}/test/draft`,
+        {
+            test_question_id: testQuestionId,
+            answer_text: value,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+        }
+    );
+}
 
     function submit(e: React.FormEvent) {
     e.preventDefault();

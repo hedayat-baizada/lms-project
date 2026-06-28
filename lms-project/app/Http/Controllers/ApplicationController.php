@@ -17,16 +17,49 @@ use App\Models\GuardianInfo;
 class ApplicationController extends Controller
 {
 
+        public function saveTestDraft(Request $request, Application $application)
+{
+    $validated = $request->validate([
+        'test_question_id' => 'required|integer',
+        'answer_text' => 'nullable',
+    ]);
+
+    $placementTest = PlacementTest::where('application_id', $application->id)
+        ->where('status', 'in_progress')
+        ->firstOrFail();
+
+    $testQuestion = PlacementTestQuestion::where('id', $validated['test_question_id'])
+        ->where('placement_test_id', $placementTest->id)
+        ->firstOrFail();
+
+    PlacementAnswer::updateOrCreate(
+        [
+            'placement_test_id' => $placementTest->id,
+            'placement_test_question_id' => $testQuestion->id,
+        ],
+        [
+            'question_id' => $testQuestion->placement_question_id,
+            'answer_text' => $validated['answer_text'],
+        ]
+    );
+
+    return back();
+}
+
+
+
+
+
 
     public function storeTestAnswers(Request $request, Application $application)
 {
-  $validated = $request->validate([
+ $validated = $request->validate([
     'answers' => 'nullable|array',
 ]);
 
 $answers = $validated['answers'] ?? [];
 
-    $placementTest = PlacementTest::where('application_id', $application->id)
+$placementTest = PlacementTest::where('application_id', $application->id)
     ->firstOrFail();
 
 if ($placementTest->status === 'submitted') {
@@ -109,6 +142,8 @@ if ($placementTest->status === 'submitted') {
 
     $placementTest->load('testQuestions.placementQuestion');
 
+    $existingAnswers = PlacementAnswer::where('placement_test_id', $placementTest->id)
+    ->pluck('answer_text', 'placement_test_question_id');
     return Inertia::render('Apply/Test', [
         'application' => $application,
         'placementTest' => $placementTest,
@@ -128,6 +163,8 @@ if ($placementTest->status === 'submitted') {
         'option_d' => $testQuestion->placementQuestion->option_d,
     ];
 }),
+
+'existingAnswers' => $existingAnswers,
     ]);
 }
 
