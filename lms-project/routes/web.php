@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\ApplicationController as AdminApplicationController;
+
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ApplicationController;
@@ -13,6 +15,21 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth'])->group(function () {
+
+Route::get('/applications', [AdminApplicationController::class, 'index'])
+    ->name('applications.index');
+
+    Route::get('/applications/{application}', [AdminApplicationController::class, 'show'])
+    ->name('applications.show');
+
+    Route::post('/applications/{application}/score', [AdminApplicationController::class, 'score'])
+    ->name('applications.score');
+
+    Route::post('/applications/{application}/reject', [AdminApplicationController::class, 'reject'])
+    ->name('applications.reject');
+
+Route::post('/applications/{application}/request-correction', [AdminApplicationController::class, 'requestCorrection'])
+    ->name('applications.request-correction');
    
 
     // Route::get('dashboard', function () {
