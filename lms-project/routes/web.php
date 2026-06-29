@@ -30,6 +30,15 @@ Route::get('/applications', [AdminApplicationController::class, 'index'])
 
 Route::post('/applications/{application}/request-correction', [AdminApplicationController::class, 'requestCorrection'])
     ->name('applications.request-correction');
+
+    Route::get('/applications/{application}/placement-test', [AdminApplicationController::class, 'placementTest'])
+    ->name('applications.placement-test');
+
+    Route::get('/applications/{application}/writing', [AdminApplicationController::class, 'writingReview'])
+    ->name('applications.writing');
+
+    Route::get('/applications/{application}/speaking', [AdminApplicationController::class, 'speakingReview'])
+    ->name('applications.speaking');
    
 
     // Route::get('dashboard', function () {

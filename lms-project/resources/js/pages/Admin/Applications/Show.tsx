@@ -1,102 +1,113 @@
 import AppLayout from '@/layouts/app-layout';
-import { Link } from '@inertiajs/react';
-import {  useForm } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 
 type Props = {
     application: any;
+    placementSummary: {
+        total: number;
+        correct: number;
+        wrong: number;
+        percentage: number;
+    };
 };
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
-    return (
-        <section className="rounded-lg border bg-white p-5 shadow-sm">
-            <h2 className="mb-4 text-xl font-semibold">{title}</h2>
-            {children}
-        </section>
-    );
-}
-
-export default function ApplicationShow({ application }: Props) {
-    const scoreForm = useForm({
-    written_score: application.placement_test?.written_score ?? '',
-    speaking_score: application.placement_test?.speaking_score ?? '',
-    reviewer_notes: application.placement_test?.reviewer_notes ?? '',
-});
-const decisionForm = useForm({
-    notes: '',
-    message: '',
-});
-
-function submitScore(e: React.FormEvent) {
-    e.preventDefault();
-    scoreForm.post(`/applications/${application.id}/score`, {
-        preserveScroll: true,
+export default function ApplicationShow({ application, placementSummary }: Props) {
+        const scoreForm = useForm({
+        written_score: application.placement_test?.written_score ?? '',
+        speaking_score: application.placement_test?.speaking_score ?? '',
+        reviewer_notes: application.placement_test?.reviewer_notes ?? '',
     });
-}
+
+    const decisionForm = useForm({
+        notes: '',
+        message: '',
+    });
+
+    function submitScore(e: React.FormEvent) {
+        e.preventDefault();
+
+        scoreForm.post(`/applications/${application.id}/score`, {
+            preserveScroll: true,
+        });
+    }
+
     return (
         <AppLayout>
-            <div className="space-y-6 p-6">
-                <div>
-                    <Link href="/applications" className="text-blue-600 hover:underline">
+            <div className="space-y-8 p-6">
+                <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 p-8 text-white shadow-xl">
+                    <Link href="/applications" className="text-sm text-blue-200 hover:underline">
                         ← Back to Applications
                     </Link>
 
-                    <h1 className="mt-4 text-2xl font-bold">
-                        Application Details
-                    </h1>
+                    <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                        <div>
+                            <p className="text-sm uppercase tracking-[0.3em] text-blue-200">
+                                Application Review
+                            </p>
 
-                    <p className="text-gray-600">
-                        Tracking Code: {application.tracking_code ?? '-'}
-                    </p>
+                            <h1 className="mt-3 text-4xl font-bold">
+                                {application.full_name ?? 'Applicant'}
+                            </h1>
 
-                    <span className="mt-2 inline-block rounded bg-gray-100 px-3 py-1 text-sm">
-                        Status: {application.status}
-                    </span>
+                            <p className="mt-2 text-blue-100">
+                                {application.tracking_code ?? '-'}
+                            </p>
+                        </div>
+
+                        <StatusBadge status={application.status} />
+                    </div>
                 </div>
 
-                <Card title="Applicant Information">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <p><strong>Full Name:</strong> {application.full_name}</p>
-                        <p><strong>Father Name:</strong> {application.father_name}</p>
-                        <p><strong>Email:</strong> {application.email}</p>
-                        <p><strong>Phone:</strong> {application.phone}</p>
-                        <p><strong>Date of Birth:</strong> {application.date_of_birth}</p>
-                        <p><strong>Gender:</strong> {application.gender}</p>
-                        <p className="md:col-span-2"><strong>Address:</strong> {application.address}</p>
-                    </div>
-                </Card>
+                <Section title="Applicant Information">
+                    <InfoGrid
+                        items={[
+                            ['Full Name', application.full_name],
+                            ['Father Name', application.father_name],
+                            ['Email', application.email],
+                            ['Phone', application.phone],
+                            ['Date of Birth', application.date_of_birth],
+                            ['Gender', application.gender],
+                            ['Address', application.address],
+                        ]}
+                    />
+                </Section>
 
-                <Card title="Course Selection">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <p><strong>Category:</strong> {application.course_category ?? '-'}</p>
-                        <p><strong>Track:</strong> {application.course_track ?? '-'}</p>
-                        <p><strong>Computer Topic:</strong> {application.selected_computer_topic ?? '-'}</p>
-                        <p><strong>Test Required:</strong> {application.test_required ? 'Yes' : 'No'}</p>
-                        <p><strong>Speaking Required:</strong> {application.speaking_required ? 'Yes' : 'No'}</p>
-                    </div>
-                </Card>
+                <Section title="Course Selection">
+                    <InfoGrid
+                        items={[
+                            ['Category', application.course_category],
+                            ['Track', application.course_track],
+                            ['Computer Topic', application.selected_computer_topic ?? '-'],
+                            ['Test Required', application.test_required ? 'Yes' : 'No'],
+                            ['Speaking Required', application.speaking_required ? 'Yes' : 'No'],
+                        ]}
+                    />
+                </Section>
 
-                <Card title="Uploaded Documents">
+                <Section title="Uploaded Documents">
                     {application.documents?.length === 0 && (
                         <p className="text-gray-500">No documents uploaded.</p>
                     )}
 
-                    <div className="space-y-4">
+                    <div className="grid gap-5 md:grid-cols-2">
                         {application.documents?.map((document: any) => (
-                            <div key={document.id} className="rounded border p-4">
-                                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                                    <p><strong>Owner:</strong> {document.document_owner_type}</p>
-                                    <p><strong>Type:</strong> {document.document_type}</p>
-                                    <p><strong>Number:</strong> {document.document_number ?? '-'}</p>
-                                    <p><strong>Status:</strong> {document.status}</p>
-                                </div>
+                            <div key={document.id} className="rounded-2xl border bg-slate-50 p-5">
+                                <InfoGrid
+                                    items={[
+                                        ['Owner', document.document_owner_type],
+                                        ['Type', document.document_type],
+                                        ['Number', document.document_number ?? '-'],
+                                        ['Status', document.status],
+                                    ]}
+                                />
 
                                 {document.file_url && (
-                                    <div className="mt-3">
+                                    <div className="mt-4">
                                         <a
                                             href={document.file_url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-blue-600 hover:underline"
+                                            className="font-medium text-blue-600 hover:underline"
                                         >
                                             Open Uploaded Document
                                         </a>
@@ -105,7 +116,7 @@ function submitScore(e: React.FormEvent) {
                                             <img
                                                 src={document.file_url}
                                                 alt="Uploaded document"
-                                                className="mt-3 max-h-72 rounded border"
+                                                className="mt-4 max-h-72 rounded-xl border bg-white object-contain"
                                             />
                                         )}
                                     </div>
@@ -113,140 +124,242 @@ function submitScore(e: React.FormEvent) {
                             </div>
                         ))}
                     </div>
-                </Card>
+                </Section>
 
-                <Card title="Placement Test">
-                    {!application.placement_test && (
-                        <p className="text-gray-500">No placement test found.</p>
-                    )}
+          <Section title="Placement Test">
+    {!application.placement_test && (
+        <p className="text-gray-500">No placement test found.</p>
+    )}
 
-                    {application.placement_test && (
-                        <div className="space-y-3">
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <p><strong>Test Code:</strong> {application.placement_test.test_code}</p>
-                                <p><strong>Status:</strong> {application.placement_test.status}</p>
-                                <p><strong>Started:</strong> {application.placement_test.started_at}</p>
-                                <p><strong>Submitted:</strong> {application.placement_test.submitted_at ?? '-'}</p>
-                            </div>
+    {application.placement_test && (
+        <div className="space-y-5">
+            <InfoGrid
+                items={[
+                    ['Test Code', application.placement_test.test_code],
+                    ['Status', application.placement_test.status],
+                    ['Started', application.placement_test.started_at],
+                    ['Submitted', application.placement_test.submitted_at ?? '-'],
+                ]}
+            />
 
-                            <div className="mt-4">
-                                <h3 className="mb-2 font-semibold">Applicant Answers</h3>
+            <div className="grid gap-4 md:grid-cols-4">
+                <MiniStat
+                    label="Total Answers"
+                    value={placementSummary.total}
+                    color="blue"
+                />
 
-                                {application.placement_test.answers?.length === 0 && (
-                                    <p className="text-gray-500">No answers saved.</p>
-                                )}
+                <MiniStat
+                    label="Correct"
+                    value={placementSummary.correct}
+                    color="green"
+                />
 
-                                <div className="space-y-2">
-                                    {application.placement_test.answers?.map((answer: any) => (
-                                        <div key={answer.id} className="rounded border p-3">
-                                            <p><strong>Question ID:</strong> {answer.question_id}</p>
-                                            <p><strong>Answer:</strong> {answer.answer_text ?? '-'}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </Card>
+                <MiniStat
+                    label="Wrong"
+                    value={placementSummary.wrong}
+                    color="red"
+                />
 
-                
-
-                <Card title="Review History">
-    <div className="space-y-4">
-        <div>
-            <h3 className="mb-2 font-semibold">Correction Requests</h3>
-
-            {application.correction_requests?.length === 0 && (
-                <p className="text-gray-500">No correction requests.</p>
-            )}
-
-            {application.correction_requests?.map((request: any) => (
-                <div key={request.id} className="rounded border p-3">
-                    <p><strong>Status:</strong> {request.status}</p>
-                    <p><strong>Message:</strong> {request.message}</p>
-                    <p className="text-sm text-gray-500">{request.created_at}</p>
-                </div>
-            ))}
-        </div>
-
-        <div>
-            <h3 className="mb-2 font-semibold">Reviewer Actions</h3>
-
-            {application.review_actions?.length === 0 && (
-                <p className="text-gray-500">No reviewer actions yet.</p>
-            )}
-
-            {application.review_actions?.map((action: any) => (
-                <div key={action.id} className="rounded border p-3">
-                    <p><strong>Action:</strong> {action.action}</p>
-                    <p><strong>Notes:</strong> {action.notes ?? '-'}</p>
-                    <p className="text-sm text-gray-500">{action.created_at}</p>
-                </div>
-            ))}
-        </div>
-    </div>
-</Card>
-
-
-
-
-                <Card title="Reviewer Decision">
-    <div className="grid gap-6 lg:grid-cols-2">
-        <form onSubmit={submitScore} className="space-y-4 rounded-lg border bg-gray-50 p-5">
-            <h3 className="text-lg font-semibold">Manual Scoring</h3>
-
-            <div>
-                <label className="mb-1 block text-sm font-medium">Written / MCQ Score</label>
-                <input
-                    type="number"
-                    className="w-full rounded-lg border px-3 py-2"
-                    value={scoreForm.data.written_score}
-                    onChange={(e) => scoreForm.setData('written_score', e.target.value)}
+                <MiniStat
+                    label="Score"
+                    value={`${placementSummary.percentage}%`}
+                    color="amber"
                 />
             </div>
 
-            <div>
-                <label className="mb-1 block text-sm font-medium">Speaking Score</label>
-                <input
-                    type="number"
-                    className="w-full rounded-lg border px-3 py-2"
-                    value={scoreForm.data.speaking_score}
-                    onChange={(e) => scoreForm.setData('speaking_score', e.target.value)}
-                />
+            <div className="rounded-2xl border bg-slate-50 p-5">
+                <p className="font-semibold">
+                    Overall MCQ Performance
+                </p>
+
+                <p className="mt-2 text-sm text-gray-600">
+                    {placementSummary.percentage >= 90 &&
+                        'Excellent performance.'}
+
+                    {placementSummary.percentage >= 70 &&
+                        placementSummary.percentage < 90 &&
+                        'Good performance.'}
+
+                    {placementSummary.percentage >= 50 &&
+                        placementSummary.percentage < 70 &&
+                        'Fair performance. Reviewer should inspect answers.'}
+
+                    {placementSummary.percentage < 50 &&
+                        'Needs improvement. Reviewer should carefully inspect answers.'}
+                </p>
             </div>
 
-            <div>
-                <label className="mb-1 block text-sm font-medium">Reviewer Notes</label>
-                <textarea
-                    className="w-full rounded-lg border px-3 py-2"
-                    rows={4}
-                    value={scoreForm.data.reviewer_notes}
-                    onChange={(e) => scoreForm.setData('reviewer_notes', e.target.value)}
-                />
-            </div>
-
-            <button
-                type="submit"
-                disabled={scoreForm.processing}
-                className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+            <Link
+                href={`/applications/${application.id}/placement-test`}
+                className="inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
             >
-                {scoreForm.processing ? 'Saving...' : 'Save Scores'}
-            </button>
-        </form>
+                View Questions & Answers →
+            </Link>
+        </div>
+    )}
+</Section>
 
-        <div className="space-y-4 rounded-lg border bg-gray-50 p-5">
-            <h3 className="text-lg font-semibold">Decision Actions</h3>
 
-            <div>
-                <label className="mb-1 block text-sm font-medium">Rejection Notes</label>
-                <textarea
-                    className="w-full rounded-lg border px-3 py-2"
-                    rows={3}
-                    value={decisionForm.data.notes}
-                    onChange={(e) => decisionForm.setData('notes', e.target.value)}
-                    placeholder="Write reason for rejection..."
-                />
-            </div>
+
+{application.course_track === 'cel' && (
+    <Section title="Writing Assessment">
+        <InfoGrid
+            items={[
+                [
+                    'Status',
+                    application.placement_test?.writing_answer
+                        ? 'Completed'
+                        : 'Not completed',
+                ],
+                [
+                    'Word Count',
+                    application.placement_test?.writing_answer
+                        ? application.placement_test.writing_answer
+                              .trim()
+                              .split(/\s+/)
+                              .filter(Boolean).length
+                        : 0,
+                ],
+            ]}
+        />
+
+        <Link
+            href={`/applications/${application.id}/writing`}
+            className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+        >
+            Review Writing →
+        </Link>
+    </Section>
+
+
+
+)}
+
+
+
+{application.course_track === 'cel' && (
+    <Section title="Speaking Assessment">
+        <InfoGrid
+            items={[
+                [
+                    'Status',
+                    application.speaking_test?.audio_path
+                        ? 'Completed'
+                        : 'Not completed',
+                ],
+                [
+                    'Submitted',
+                    application.speaking_test?.submitted_at ?? '-',
+                ],
+            ]}
+        />
+
+        <Link
+            href={`/applications/${application.id}/speaking`}
+            className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+        >
+            Review Speaking →
+        </Link>
+    </Section>
+)}
+                <Section title="Review History">
+                    <div className="grid gap-6 lg:grid-cols-2">
+                        <HistoryList
+                            title="Correction Requests"
+                            empty="No correction requests."
+                            items={application.correction_requests}
+                            render={(request: any) => (
+                                <>
+                                    <p><strong>Status:</strong> {request.status}</p>
+                                    <p><strong>Message:</strong> {request.message}</p>
+                                    <p className="mt-1 text-sm text-gray-500">{request.created_at}</p>
+                                </>
+                            )}
+                        />
+
+                        <HistoryList
+                            title="Reviewer Actions"
+                            empty="No reviewer actions yet."
+                            items={application.review_actions}
+                            render={(action: any) => (
+                                <>
+                                    <p><strong>Action:</strong> {action.action}</p>
+                                    <p><strong>Notes:</strong> {action.notes ?? '-'}</p>
+                                    <p className="mt-1 text-sm text-gray-500">{action.created_at}</p>
+                                </>
+                            )}
+                        />
+                    </div>
+                </Section>
+
+            <Section title="Assessment Evaluation">
+                    <div className="grid gap-6 lg:grid-cols-3">
+    <MiniStat
+        label="MCQ Score"
+        value={`${placementSummary.percentage}%`}
+        color="blue"
+    />
+
+    <MiniStat
+        label="Correct Answers"
+        value={placementSummary.correct}
+        color="green"
+    />
+
+    <MiniStat
+        label="Wrong Answers"
+        value={placementSummary.wrong}
+        color="red"
+    />
+</div>
+
+<form onSubmit={submitScore} className="mt-6 space-y-5 rounded-2xl border bg-slate-50 p-6">
+    <h3 className="text-xl font-bold">Manual Evaluation</h3>
+
+    <div className="grid gap-5 md:grid-cols-2">
+        <Input
+            label="Writing / MCQ Score"
+            type="number"
+            value={scoreForm.data.written_score}
+            onChange={(value) => scoreForm.setData('written_score', value)}
+        />
+
+        <Input
+            label="Speaking Score"
+            type="number"
+            value={scoreForm.data.speaking_score}
+            onChange={(value) => scoreForm.setData('speaking_score', value)}
+        />
+    </div>
+
+    <Textarea
+        label="Reviewer Notes"
+        value={scoreForm.data.reviewer_notes}
+        onChange={(value) => scoreForm.setData('reviewer_notes', value)}
+        placeholder="Write evaluation notes..."
+    />
+
+    <button
+        type="submit"
+        disabled={scoreForm.processing}
+        className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:bg-gray-400"
+    >
+        {scoreForm.processing ? 'Saving Evaluation...' : 'Save Evaluation'}
+    </button>
+</form>
+
+<div className="mt-6 rounded-2xl border bg-white p-6">
+    <h3 className="text-xl font-bold">Decision Actions</h3>
+
+    <div className="mt-5 grid gap-6 lg:grid-cols-2">
+        <div className="space-y-4 rounded-2xl border bg-red-50 p-5">
+            <Textarea
+                label="Rejection Notes"
+                value={decisionForm.data.notes}
+                onChange={(value) => decisionForm.setData('notes', value)}
+                placeholder="Write reason for rejection..."
+            />
 
             <button
                 type="button"
@@ -256,21 +369,19 @@ function submitScore(e: React.FormEvent) {
                         preserveScroll: true,
                     })
                 }
-                className="w-full rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700"
+                className="w-full rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700 disabled:bg-gray-400"
             >
                 Reject Application
             </button>
+        </div>
 
-            <div className="border-t pt-4">
-                <label className="mb-1 block text-sm font-medium">Correction Message</label>
-                <textarea
-                    className="w-full rounded-lg border px-3 py-2"
-                    rows={3}
-                    value={decisionForm.data.message}
-                    onChange={(e) => decisionForm.setData('message', e.target.value)}
-                    placeholder="Explain what the applicant must correct..."
-                />
-            </div>
+        <div className="space-y-4 rounded-2xl border bg-yellow-50 p-5">
+            <Textarea
+                label="Correction Message"
+                value={decisionForm.data.message}
+                onChange={(value) => decisionForm.setData('message', value)}
+                placeholder="Explain what the applicant must correct..."
+            />
 
             <button
                 type="button"
@@ -280,14 +391,160 @@ function submitScore(e: React.FormEvent) {
                         preserveScroll: true,
                     })
                 }
-                className="w-full rounded-lg bg-yellow-500 px-4 py-2 font-medium text-white hover:bg-yellow-600"
+                className="w-full rounded-xl bg-yellow-500 px-5 py-3 font-semibold text-white hover:bg-yellow-600 disabled:bg-gray-400"
             >
                 Request Correction
             </button>
         </div>
     </div>
-</Card>
+</div>
+                </Section>
             </div>
         </AppLayout>
+    );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+        <section className="rounded-3xl border bg-white p-6 shadow-sm">
+            <h2 className="mb-5 text-2xl font-bold text-slate-900">{title}</h2>
+            {children}
+        </section>
+    );
+}
+
+function InfoGrid({ items }: { items: [string, any][] }) {
+    return (
+        <div className="grid gap-4 md:grid-cols-2">
+            {items.map(([label, value]) => (
+                <div key={label} className="rounded-xl bg-slate-50 p-4">
+                    <p className="text-sm font-medium text-gray-500">{label}</p>
+                    <p className="mt-1 font-semibold text-slate-900">{value ?? '-'}</p>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+function StatusBadge({ status }: { status: string }) {
+    const styles: Record<string, string> = {
+        waiting_review: 'bg-yellow-100 text-yellow-800',
+        approved: 'bg-green-100 text-green-800',
+        rejected: 'bg-red-100 text-red-800',
+        need_correction: 'bg-orange-100 text-orange-800',
+        incomplete: 'bg-gray-100 text-gray-700',
+    };
+
+    return (
+        <span className={`rounded-full px-4 py-2 font-semibold ${styles[status] ?? 'bg-gray-100 text-gray-700'}`}>
+            {status?.replaceAll('_', ' ') ?? '-'}
+        </span>
+    );
+}
+
+function Input({
+    label,
+    type,
+    value,
+    onChange,
+}: {
+    label: string;
+    type: string;
+    value: any;
+    onChange: (value: string) => void;
+}) {
+    return (
+        <div>
+            <label className="mb-1 block text-sm font-medium">{label}</label>
+            <input
+                type={type}
+                className="w-full rounded-xl border px-4 py-3"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+        </div>
+    );
+}
+
+function Textarea({
+    label,
+    value,
+    onChange,
+    placeholder,
+}: {
+    label: string;
+    value: any;
+    onChange: (value: string) => void;
+    placeholder?: string;
+}) {
+    return (
+        <div>
+            <label className="mb-1 block text-sm font-medium">{label}</label>
+            <textarea
+                rows={4}
+                className="w-full rounded-xl border px-4 py-3"
+                value={value}
+                placeholder={placeholder}
+                onChange={(e) => onChange(e.target.value)}
+            />
+        </div>
+    );
+}
+
+function HistoryList({
+    title,
+    empty,
+    items,
+    render,
+}: {
+    title: string;
+    empty: string;
+    items: any[];
+    render: (item: any) => React.ReactNode;
+}) {
+    return (
+        <div>
+            <h3 className="mb-3 font-semibold">{title}</h3>
+
+            {items?.length === 0 && <p className="text-gray-500">{empty}</p>}
+
+            <div className="space-y-3">
+                {items?.map((item: any) => (
+                    <div key={item.id} className="rounded-xl border bg-slate-50 p-4">
+                        {render(item)}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+
+function MiniStat({
+    label,
+    value,
+    color,
+}: {
+    label: string;
+    value: string | number;
+    color: 'blue' | 'green' | 'red' | 'amber';
+}) {
+    const colors = {
+        blue: 'border-blue-500 bg-blue-50 text-blue-900',
+        green: 'border-green-500 bg-green-50 text-green-900',
+        red: 'border-red-500 bg-red-50 text-red-900',
+        amber: 'border-amber-500 bg-amber-50 text-amber-900',
+    };
+
+    return (
+        <div className={`rounded-2xl border-l-4 p-5 ${colors[color]}`}>
+            <p className="text-sm font-medium opacity-80">
+                {label}
+            </p>
+
+            <p className="mt-2 text-3xl font-bold">
+                {value}
+            </p>
+        </div>
     );
 }

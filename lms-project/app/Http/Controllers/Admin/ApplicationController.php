@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
@@ -11,6 +12,74 @@ use App\Models\ApplicationStatusLog;
 
 class ApplicationController extends Controller
 {
+
+
+public function speakingReview(Application $application)
+{
+    $application->load([
+        'speakingTest',
+        'placementTest',
+    ]);
+
+    $speakingPrompt = null;
+
+    if ($application->placementTest) {
+        $speakingPrompt = \App\Models\PlacementQuestion::where('test_code', $application->placementTest->test_code)
+            ->where('section', 'speaking')
+            ->where('status', 'active')
+            ->first();
+    }
+
+    return Inertia::render('Admin/Applications/SpeakingReview', [
+        'application' => [
+            ...$application->toArray(),
+            'speaking_test' => $application->speakingTest
+                ? [
+                    ...$application->speakingTest->toArray(),
+                    'audio_url' => $application->speakingTest->audio_path
+                        ? asset('storage/' . $application->speakingTest->audio_path)
+                        : null,
+                ]
+                : null,
+        ],
+        'speakingPrompt' => $speakingPrompt,
+    ]);
+}
+
+
+
+public function writingReview(Application $application)
+{
+    $application->load([
+        'placementTest',
+    ]);
+
+    $writingPrompt = null;
+
+    if ($application->placementTest) {
+        $writingPrompt = \App\Models\PlacementQuestion::where('test_code', $application->placementTest->test_code)
+            ->where('section', 'writing')
+            ->where('status', 'active')
+            ->first();
+    }
+
+    return Inertia::render('Admin/Applications/WritingReview', [
+        'application' => $application,
+        'writingPrompt' => $writingPrompt,
+    ]);
+}
+
+
+public function placementTest(Application $application)
+{
+    $application->load([
+        'placementTest.answers.question',
+    ]);
+
+    return Inertia::render('Admin/Applications/PlacementTest', [
+        'application' => $application,
+    ]);
+}
 
 
         public function reject(Application $application)
@@ -88,28 +157,83 @@ public function requestCorrection(Application $application)
 
 
 
-public function index()
-    {
-        $applications = Application::latest()
-            ->select([
-                'id',
-                'tracking_code',
-                'full_name',
-                'email',
-                'phone',
-                'course_category',
-                'course_track',
-                'selected_computer_topic',
-                'status',
-                'created_at',
-            ])
-            ->get();
+public function index(Request $request)
+{
+    $query = Application::query();
 
-        return Inertia::render('Admin/Applications/Index', [
-            'applications' => $applications,
-        ]);
+    /*
+    |--------------------------------------------------------------------------
+    | Search
+    |--------------------------------------------------------------------------
+    */
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->where('tracking_code', 'like', "%{$search}%")
+                ->orWhere('full_name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%");
+        });
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Status Filter
+    |--------------------------------------------------------------------------
+    */
+
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Course Filter
+    |--------------------------------------------------------------------------
+    */
+
+    if ($request->filled('course')) {
+        $query->where('course_track', $request->course);
+    }
+
+    $applications = $query
+        ->latest()
+        ->select([
+            'id',
+            'tracking_code',
+            'full_name',
+            'email',
+            'phone',
+            'course_category',
+            'course_track',
+            'selected_computer_topic',
+            'status',
+            'created_at',
+        ])
+        ->get();
+
+
+        $stats = [
+    'total' => Application::count(),
+    'waiting_review' => Application::where('status', 'waiting_review')->count(),
+    'approved' => Application::where('status', 'approved')->count(),
+    'rejected' => Application::where('status', 'rejected')->count(),
+    'need_correction' => Application::where('status', 'need_correction')->count(),
+];
+
+
+
+    return Inertia::render('Admin/Applications/Index', [
+    'applications' => $applications,
+    'filters' => [
+        'search' => $request->search,
+        'status' => $request->status,
+        'course' => $request->course,
+    ],
+    'stats' => $stats,
+]);
+}
 
 
     public function score(Application $application)
@@ -173,22 +297,50 @@ public function submitFinal(Application $application)
         'documents',
         'guardianInfo',
         'placementTest.testQuestions.placementQuestion',
-        'placementTest.answers',
+        'placementTest.answers.question',
         'correctionRequests',
         'reviewActions',
         'statusLogs',
     ]);
 
-    return Inertia::render('Admin/Applications/Show', [
-        'application' => [
-    ...$application->toArray(),
-    'documents' => $application->documents->map(function ($document) {
-        return [
-            ...$document->toArray(),
-            'file_url' => asset('storage/' . $document->file_path),
-        ];
-    }),
-],
-    ]);
+    $answers = $application->placementTest?->answers ?? collect();
+
+$totalAnswers = $answers->count();
+
+$correctAnswers = $answers
+    ->filter(function ($answer) {
+        return $answer->answer_text === $answer->question?->correct_answer;
+    })
+    ->count();
+
+$wrongAnswers = $totalAnswers - $correctAnswers;
+
+$percentage = $totalAnswers > 0
+    ? round(($correctAnswers / $totalAnswers) * 100)
+    : 0;
+
+    
+   return Inertia::render('Admin/Applications/Show', [
+    'application' => [
+        ...$application->toArray(),
+        'documents' => $application->documents->map(function ($document) {
+            return [
+                ...$document->toArray(),
+                'file_url' => asset('storage/' . $document->file_path),
+            ];
+        }),
+    ],
+    'placementSummary' => [
+        'total' => $totalAnswers,
+        'correct' => $correctAnswers,
+        'wrong' => $wrongAnswers,
+        'percentage' => $percentage,
+    ],
+]);
+
+
+
+
+
 }
 }

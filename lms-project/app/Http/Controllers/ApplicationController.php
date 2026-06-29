@@ -27,14 +27,20 @@ public function track(Request $request)
     $application = null;
 
     if ($trackingCode) {
-        $application = Application::with('documents')
-            ->where('tracking_code', $trackingCode)
-            ->first();
+       $application = Application::with([
+        'documents',
+        'correctionRequests',
+        'reviewActions',
+        'statusLogs',
+    ])
+    ->where('tracking_code', $trackingCode)
+    ->first();
     }
 
     return Inertia::render('Apply/Track', [
-        'application' => $application,
-    ]);
+    'application' => $application,
+    'trackingCode' => $trackingCode,
+]);
 }
 
 

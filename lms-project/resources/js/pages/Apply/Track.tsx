@@ -1,21 +1,30 @@
 import { useForm, usePage } from '@inertiajs/react';
+import { router} from '@inertiajs/react';
 
 type Props = {
     application: any | null;
+    trackingCode: string | null;
 };
 
 export default function TrackApplication() {
-    const { application } = usePage<Props>().props;
+   const { application, trackingCode } = usePage<Props>().props;
 
     const form = useForm({
-        tracking_code: '',
-    });
+    tracking_code: trackingCode ?? '',
+});
 
     function search(e: React.FormEvent) {
         e.preventDefault();
 
-        window.location.href =
-            `/track?tracking_code=${encodeURIComponent(form.data.tracking_code)}`;
+        router.get(
+    '/track',
+    { tracking_code: form.data.tracking_code },
+    {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    }
+);
     }
 
     function statusColor(status: string) {
@@ -252,9 +261,17 @@ export default function TrackApplication() {
                                 Reviewer Updates
                             </h3>
 
-                            {application.correction_request ? (
-                                <div className="rounded-xl bg-orange-50 p-4 text-orange-700">
-                                    {application.correction_request}
+                            {application.correction_requests?.length > 0 ? (
+                                <div className="space-y-3">
+                                    {application.correction_requests.map((request: any) => (
+                                        <div key={request.id} className="rounded-xl bg-orange-50 p-4 text-orange-700">
+                                            <p className="font-semibold">Correction Request</p>
+                                            <p className="mt-1">{request.message}</p>
+                                            <p className="mt-2 text-xs text-orange-500">
+                                                {new Date(request.created_at).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    ))}
                                 </div>
                             ) : (
                                 <p className="text-gray-500">
