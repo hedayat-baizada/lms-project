@@ -3,10 +3,14 @@ import { useForm } from '@inertiajs/react';
 type Props = {
     application: any;
     placementTest: any;
+    writingPrompt: {
+        question_text: string;
+        word_limit: number | null;
+        duration_minutes: number | null;
+    } | null;
 };
 
-export default function WritingTest({ application, placementTest }: Props) {
-    const form = useForm({
+export default function WritingTest({ application, placementTest, writingPrompt }: Props) {    const form = useForm({
         writing_answer: placementTest.writing_answer ?? '',
     });
 
@@ -14,6 +18,8 @@ export default function WritingTest({ application, placementTest }: Props) {
         .trim()
         .split(/\s+/)
         .filter(Boolean).length;
+
+        const minimumWords = writingPrompt?.word_limit ?? 150;
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
@@ -41,10 +47,10 @@ export default function WritingTest({ application, placementTest }: Props) {
                             Writing Prompt
                         </h2>
                         <p className="mt-2 text-gray-700">
-                            How would you describe yourself?
+                           {writingPrompt?.question_text ?? 'How would you describe yourself?'}
                         </p>
                         <p className="mt-1 text-sm text-gray-600">
-                            Minimum 150 words.
+                           Minimum {minimumWords} words.
                         </p>
                     </div>
 
@@ -61,18 +67,18 @@ export default function WritingTest({ application, placementTest }: Props) {
                                 onChange={(e) =>
                                     form.setData('writing_answer', e.target.value)
                                 }
-                                placeholder="Write at least 150 words..."
+                                placeholder={`Write at least ${minimumWords} words...`}
                             />
 
                             <div className="mt-2 flex items-center justify-between text-sm">
                                 <span
                                     className={
-                                        wordCount >= 150
+                                        wordCount >= minimumWords
                                             ? 'text-green-600'
                                             : 'text-red-600'
                                     }
                                 >
-                                    Word count: {wordCount} / 150
+                                    Word count: {wordCount} / {minimumWords}
                                 </span>
 
                                 {form.errors.writing_answer && (
@@ -85,12 +91,14 @@ export default function WritingTest({ application, placementTest }: Props) {
 
                         <button
                             type="submit"
-                            disabled={form.processing || wordCount < 150}
+                            disabled={form.processing || wordCount < minimumWords}
                             className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
                         >
                             {form.processing ? 'Saving...' : 'Continue to Speaking Test'}
                         </button>
                     </form>
+
+                    
                 </div>
             </div>
         </div>

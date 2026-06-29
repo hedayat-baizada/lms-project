@@ -103,13 +103,18 @@ Route::post('/apply/student/{application}/writing', [ApplicationController::clas
     ->name('apply.student.writing.store');
 
 
-    Route::get('/apply/student/{application}/speaking', function () {
-    return 'Speaking step coming next';
-})->name('apply.student.speaking');
+    Route::get('/apply/student/{application}/speaking', [ApplicationController::class, 'speaking'])
+    ->name('apply.student.speaking');
+
+Route::post('/apply/student/{application}/speaking', [ApplicationController::class, 'storeSpeaking'])
+    ->name('apply.student.speaking.store');
 
 
 Route::post('/apply/student/{application}/test/drafts', [ApplicationController::class, 'saveTestDrafts'])
     ->name('apply.student.test.drafts');
+
+    Route::post('/apply/student/{application}/speaking/start', [ApplicationController::class, 'startSpeaking'])
+    ->name('apply.student.speaking.start');
 
 
 Route::get('/track', function () {

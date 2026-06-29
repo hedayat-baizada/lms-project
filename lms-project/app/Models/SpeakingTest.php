@@ -11,7 +11,19 @@ class SpeakingTest extends Model
         'audio_path',
         'score',
         'reviewer_notes',
+        'status',
+        'started_at',
+        'expires_at',
+        'submitted_at',
+        'attempt_used',
     ];
+
+    protected $casts = [
+    'started_at' => 'datetime',
+    'expires_at' => 'datetime',
+    'submitted_at' => 'datetime',
+    'attempt_used' => 'boolean',
+];
 
     public function application()
     {

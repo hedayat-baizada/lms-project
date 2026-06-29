@@ -18,5 +18,24 @@
     "option_c": "She is my friend.",
     "option_d": "They am playing.",
     "correct_answer": "c"
-  }
+  },
+  {
+  "question_number": 1001,
+  "section": "writing",
+  "question_text": "How would you describe yourself?",
+  "question_type": "text",
+  "duration_minutes": 20,
+  "word_limit": 150,
+  "marks": 20,
+  "status": "active"
+},
+{
+  "question_number": 1002,
+  "section": "speaking",
+  "question_text": "Discuss your plan for further education.",
+  "question_type": "audio",
+  "duration_minutes": 2,
+  "marks": 20,
+  "status": "active"
+}
 ]

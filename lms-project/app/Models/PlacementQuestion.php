@@ -20,6 +20,9 @@ class PlacementQuestion extends Model
         'option_c',
         'option_d',
         'correct_answer',
+        'section',
+        'duration_minutes',
+        'word_limit',
     ];
 
     public function answers()

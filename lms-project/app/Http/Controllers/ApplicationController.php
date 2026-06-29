@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\PlacementQuestion;
 use App\Models\PlacementTest;
 use App\Models\PlacementTestQuestion;
+use App\Models\SpeakingTest;
 
 use App\Models\PlacementAnswer;
 
@@ -21,7 +22,30 @@ class ApplicationController extends Controller
 
 
 
+public function startSpeaking(Application $application)
+{
+    if ($application->course_track !== 'cel') {
+        return redirect()->route('apply.student.review', $application->id);
+    }
 
+    $speakingTest = SpeakingTest::firstOrCreate(
+        ['application_id' => $application->id],
+        ['status' => 'not_started']
+    );
+
+    if ($speakingTest->attempt_used) {
+        return back()->with('message', 'Speaking attempt already used.');
+    }
+
+    $speakingTest->update([
+        'status' => 'recording',
+        'started_at' => now(),
+        'expires_at' => now()->addMinutes(2),
+        'attempt_used' => true,
+    ]);
+
+    return back();
+}
 
 
 public function writing(Application $application)
@@ -33,16 +57,22 @@ public function writing(Application $application)
     $placementTest = PlacementTest::where('application_id', $application->id)
         ->firstOrFail();
 
+        $writingPrompt = PlacementQuestion::where('test_code', $placementTest->test_code)
+    ->where('section', 'writing')
+    ->where('status', 'active')
+    ->first();
+
     return Inertia::render('Apply/Writing', [
         'application' => $application,
         'placementTest' => $placementTest,
+        'writingPrompt' => $writingPrompt,
     ]);
 }
 
 public function storeWriting(Request $request, Application $application)
 {
     $validated = $request->validate([
-        'writing_answer' => 'required|string|min:150',
+        'writing_answer' => 'required|string',
     ]);
 
     $placementTest = PlacementTest::where('application_id', $application->id)
@@ -93,6 +123,70 @@ public function saveTestDrafts(Request $request, Application $application)
         'saved' => true,
     ]);
 }
+
+
+
+
+public function speaking(Application $application)
+{
+    if ($application->course_track !== 'cel') {
+        return redirect()->route('apply.student.review', $application->id);
+    }
+
+    $speakingTest = SpeakingTest::firstOrCreate(
+        ['application_id' => $application->id],
+        ['status' => 'not_started']
+    );
+
+    if (
+        $speakingTest->status === 'recording' &&
+        $speakingTest->expires_at &&
+        now()->greaterThan($speakingTest->expires_at)
+    ) {
+        $speakingTest->update([
+            'status' => 'expired',
+        ]);
+    }
+
+
+    $placementTest = PlacementTest::where('application_id', $application->id)
+    ->firstOrFail();
+
+$speakingPrompt = PlacementQuestion::where('test_code', $placementTest->test_code)
+    ->where('section', 'speaking')
+    ->where('status', 'active')
+    ->first();
+
+    return Inertia::render('Apply/Speaking', [
+        'application' => $application,
+        'speakingTest' => $speakingTest,
+       'prompt' => $speakingPrompt?->question_text ?? 'Discuss your plan for further education.',
+        'speakingDuration' => $speakingPrompt?->duration_minutes ?? 2,
+    ]);
+}
+
+public function storeSpeaking(Request $request, Application $application)
+{
+    $validated = $request->validate([
+        'audio_file' => 'required|file|mimes:webm,mp3,wav,ogg|max:10240',
+    ]);
+
+    $path = $request->file('audio_file')->store('speaking-tests', 'public');
+
+    SpeakingTest::updateOrCreate(
+    ['application_id' => $application->id],
+    [
+        'audio_path' => $path,
+        'status' => 'submitted',
+        'submitted_at' => now(),
+    ]
+);
+
+    return redirect()->route('apply.student.review', $application->id);
+}
+
+
+
 
 
 public function review(Application $application)
@@ -200,6 +294,10 @@ if ($placementTest->status === 'submitted') {
 
     return redirect()->route('apply.student.review', $application->id);
 }
+   
+
+
+
     public function test(Application $application)
 {
     $placementTest = PlacementTest::where('application_id', $application->id)
@@ -232,7 +330,8 @@ if ($placementTest->status === 'submitted') {
             'duration_minutes' => $durationMinutes,
         ]);
 
-        $questions = PlacementQuestion::where('test_code', $testCode)
+       $questions = PlacementQuestion::where('test_code', $testCode)
+            ->where('section', 'mcq')
             ->where('status', 'active')
             ->inRandomOrder()
             ->get();

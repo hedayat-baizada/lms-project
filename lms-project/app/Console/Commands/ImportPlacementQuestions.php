@@ -67,21 +67,26 @@ class ImportPlacementQuestions extends Command
         PlacementQuestion::where('test_code', $testCode)->delete();
 
         foreach ($questions as $question) {
-            PlacementQuestion::create([
-                'test_code' => $testCode,
-                'course_track' => $courseTrack,
-                'level_id' => null,
-                'question_number' => $question['question_number'] ?? null,
-                'question_text' => $question['question_text'],
-                'question_type' => $question['question_type'] ?? 'mcq',
-                'option_a' => $question['option_a'] ?? null,
-                'option_b' => $question['option_b'] ?? null,
-                'option_c' => $question['option_c'] ?? null,
-                'option_d' => $question['option_d'] ?? null,
-                'correct_answer' => $question['correct_answer'] ?? null,
-                'marks' => $question['marks'] ?? 1,
-                'status' => $question['status'] ?? 'active',
-            ]);
+            PlacementQuestion::updateOrCreate(
+                [
+                    'test_code' => $testCode,
+                    'question_number' => $question['question_number'],
+                ],
+                [
+                    'section' => $question['section'] ?? 'mcq',
+                    'question_text' => $question['question_text'],
+                    'question_type' => $question['question_type'],
+                    'option_a' => $question['option_a'] ?? null,
+                    'option_b' => $question['option_b'] ?? null,
+                    'option_c' => $question['option_c'] ?? null,
+                    'option_d' => $question['option_d'] ?? null,
+                    'correct_answer' => $question['correct_answer'] ?? null,
+                    'marks' => $question['marks'] ?? 1,
+                    'duration_minutes' => $question['duration_minutes'] ?? null,
+                    'word_limit' => $question['word_limit'] ?? null,
+                    'status' => $question['status'] ?? 'active',
+                ]
+            );
         }
 
         $count = count($questions);
