@@ -20,6 +20,23 @@ class ApplicationController extends Controller
 
 
 
+public function track(Request $request)
+{
+    $trackingCode = $request->query('tracking_code');
+
+    $application = null;
+
+    if ($trackingCode) {
+        $application = Application::with('documents')
+            ->where('tracking_code', $trackingCode)
+            ->first();
+    }
+
+    return Inertia::render('Apply/Track', [
+        'application' => $application,
+    ]);
+}
+
 
 
 public function startSpeaking(Application $application)

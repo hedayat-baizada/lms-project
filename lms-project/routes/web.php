@@ -117,10 +117,8 @@ Route::post('/apply/student/{application}/test/drafts', [ApplicationController::
     ->name('apply.student.speaking.start');
 
 
-Route::get('/track', function () {
-    return Inertia::render('Apply/Track');
-})->name('apply.track');
-
+Route::get('/track', [ApplicationController::class, 'track'])
+    ->name('apply.track');
 
 
 
