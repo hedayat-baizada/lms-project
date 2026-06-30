@@ -32,6 +32,7 @@ class PlacementTest extends Model
         'writing_answer',
         'writing_score',
         'speaking_prompt',
+        'placement_level',
     ];
 
     public function application()

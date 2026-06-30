@@ -9,14 +9,22 @@ type Props = {
         wrong: number;
         percentage: number;
     };
+    placementLevels: {
+        id: number;
+        program: string;
+        level_code: string;
+        display_name: string;
+    }[];
 };
 
-export default function ApplicationShow({ application, placementSummary }: Props) {
-        const scoreForm = useForm({
-        written_score: application.placement_test?.written_score ?? '',
-        speaking_score: application.placement_test?.speaking_score ?? '',
-        reviewer_notes: application.placement_test?.reviewer_notes ?? '',
-    });
+export default function ApplicationShow({ application, placementSummary, placementLevels = [], }: Props) {
+    
+    const scoreForm = useForm({
+    written_score: application.placement_test?.written_score ?? '',
+    speaking_score: application.placement_test?.speaking_score ?? '',
+    placement_level: application.placement_test?.placement_level ?? '',
+    reviewer_notes: application.placement_test?.reviewer_notes ?? '',
+});
 
     const decisionForm = useForm({
         notes: '',
@@ -332,6 +340,67 @@ export default function ApplicationShow({ application, placementSummary }: Props
             onChange={(value) => scoreForm.setData('speaking_score', value)}
         />
     </div>
+
+    <div>
+    <label className="mb-2 block text-sm font-medium">
+        Overall Placement
+    </label>
+
+  <div>
+    <label className="mb-2 block text-sm font-medium">
+        Overall Placement
+    </label>
+
+    <div className="grid gap-3 md:grid-cols-2">
+        {(placementLevels ?? []).map((level) => {
+            const selected =
+                scoreForm.data.placement_level === level.level_code;
+
+            return (
+                <label
+                    key={level.id}
+                    className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition ${
+                        selected
+                            ? 'border-blue-600 bg-blue-50 shadow-sm'
+                            : 'hover:border-gray-400'
+                    }`}
+                >
+                    <div className="flex items-center gap-3">
+                        <span
+                            className={`flex h-5 w-5 items-center justify-center rounded-full border ${
+                                selected
+                                    ? 'border-blue-600 bg-blue-600'
+                                    : 'border-gray-400 bg-white'
+                            }`}
+                        >
+                            {selected && (
+                                <span className="h-2 w-2 rounded-full bg-white" />
+                            )}
+                        </span>
+
+                        <span className="font-medium">
+                            {level.display_name}
+                        </span>
+                    </div>
+
+                    <input
+                        type="radio"
+                        name="placement_level"
+                        className="hidden"
+                        checked={selected}
+                        onChange={() =>
+                            scoreForm.setData(
+                                'placement_level',
+                                level.level_code
+                            )
+                        }
+                    />
+                </label>
+            );
+        })}
+    </div>
+</div>
+</div>
 
     <Textarea
         label="Reviewer Notes"

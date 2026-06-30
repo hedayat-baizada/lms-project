@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 
+use App\Models\PlacementLevel;
+
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use Inertia\Inertia;
@@ -242,6 +244,7 @@ public function index(Request $request)
         'written_score' => 'nullable|integer|min:0',
         'speaking_score' => 'nullable|integer|min:0',
         'reviewer_notes' => 'nullable|string',
+        'placement_level' => 'nullable|string|max:255',
     ]);
 
     if (! $application->placementTest) {
@@ -252,6 +255,7 @@ public function index(Request $request)
         'written_score' => request('written_score'),
         'speaking_score' => request('speaking_score'),
         'total_score' => (int) request('written_score') + (int) request('speaking_score'),
+        'placement_level' => request('placement_level'),
         'reviewer_notes' => request('reviewer_notes'),
     ]);
 
@@ -319,6 +323,17 @@ $percentage = $totalAnswers > 0
     ? round(($correctAnswers / $totalAnswers) * 100)
     : 0;
 
+
+    $program = $application->course_track === 'cel'
+    ? 'cel'
+    : 'prep_cel';
+
+
+
+$placementLevels = PlacementLevel::where('program', $program)
+    ->where('active', true)
+    ->orderBy('display_order')
+    ->get();
     
    return Inertia::render('Admin/Applications/Show', [
     'application' => [
@@ -336,6 +351,8 @@ $percentage = $totalAnswers > 0
         'wrong' => $wrongAnswers,
         'percentage' => $percentage,
     ],
+        'placementLevels' => $placementLevels,
+
 ]);
 
 
