@@ -1,5 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, useForm } from '@inertiajs/react';
+import ConfirmationModal from '@/components/ConfirmationModal';
+import { useState } from 'react';
 
 type Props = {
     application: any;
@@ -30,6 +32,14 @@ export default function ApplicationShow({ application, placementSummary, placeme
         notes: '',
         message: '',
     });
+
+    const [approveModalOpen, setApproveModalOpen] = useState(false);
+    const [rejectModalOpen, setRejectModalOpen] = useState(false);
+    const [correctionModalOpen, setCorrectionModalOpen] = useState(false);
+
+    const isApproved = application.status === 'approved';
+    const isRejected = application.status === 'rejected';
+    const isFinalDecision = isApproved || isRejected;
 
     function submitScore(e: React.FormEvent) {
         e.preventDefault();
@@ -301,174 +311,270 @@ export default function ApplicationShow({ application, placementSummary, placeme
                     </div>
                 </Section>
 
-            <Section title="Assessment Evaluation">
-                    <div className="grid gap-6 lg:grid-cols-3">
-    <MiniStat
-        label="MCQ Score"
-        value={`${placementSummary.percentage}%`}
-        color="blue"
-    />
-
-    <MiniStat
-        label="Correct Answers"
-        value={placementSummary.correct}
-        color="green"
-    />
-
-    <MiniStat
-        label="Wrong Answers"
-        value={placementSummary.wrong}
-        color="red"
-    />
-</div>
-
-<form onSubmit={submitScore} className="mt-6 space-y-5 rounded-2xl border bg-slate-50 p-6">
-    <h3 className="text-xl font-bold">Manual Evaluation</h3>
-
-    <div className="grid gap-5 md:grid-cols-2">
-        <Input
-            label="Writing / MCQ Score"
-            type="number"
-            value={scoreForm.data.written_score}
-            onChange={(value) => scoreForm.setData('written_score', value)}
-        />
-
-        <Input
-            label="Speaking Score"
-            type="number"
-            value={scoreForm.data.speaking_score}
-            onChange={(value) => scoreForm.setData('speaking_score', value)}
-        />
+           <Section title="Assessment Evaluation">
+    <div className="grid gap-6 lg:grid-cols-3">
+        <MiniStat label="MCQ Score" value={`${placementSummary.percentage}%`} color="blue" />
+        <MiniStat label="Correct Answers" value={placementSummary.correct} color="green" />
+        <MiniStat label="Wrong Answers" value={placementSummary.wrong} color="red" />
     </div>
 
-    <div>
-    <label className="mb-2 block text-sm font-medium">
-        Overall Placement
-    </label>
+    <form onSubmit={submitScore} className="mt-6 space-y-5 rounded-2xl border bg-slate-50 p-6">
+        <h3 className="text-xl font-bold">Manual Evaluation</h3>
 
-  <div>
-    <label className="mb-2 block text-sm font-medium">
-        Overall Placement
-    </label>
+        <div className="grid gap-5 md:grid-cols-2">
+            <Input
+                label="Writing / MCQ Score"
+                type="number"
+                value={scoreForm.data.written_score}
+                onChange={(value) => scoreForm.setData('written_score', value)}
+            />
 
-    <div className="grid gap-3 md:grid-cols-2">
-        {(placementLevels ?? []).map((level) => {
-            const selected =
-                scoreForm.data.placement_level === level.level_code;
+            <Input
+                label="Speaking Score"
+                type="number"
+                value={scoreForm.data.speaking_score}
+                onChange={(value) => scoreForm.setData('speaking_score', value)}
+            />
+        </div>
 
-            return (
-                <label
-                    key={level.id}
-                    className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition ${
-                        selected
-                            ? 'border-blue-600 bg-blue-50 shadow-sm'
-                            : 'hover:border-gray-400'
-                    }`}
-                >
-                    <div className="flex items-center gap-3">
-                        <span
-                            className={`flex h-5 w-5 items-center justify-center rounded-full border ${
+        <div>
+            <label className="mb-2 block text-sm font-medium">
+                Overall Placement
+            </label>
+
+            <div className="grid gap-3 md:grid-cols-2">
+                {(placementLevels ?? []).map((level) => {
+                    const selected = scoreForm.data.placement_level === level.level_code;
+
+                    return (
+                        <label
+                            key={level.id}
+                            className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition ${
                                 selected
-                                    ? 'border-blue-600 bg-blue-600'
-                                    : 'border-gray-400 bg-white'
+                                    ? 'border-blue-600 bg-blue-50 shadow-sm'
+                                    : 'hover:border-gray-400'
                             }`}
                         >
-                            {selected && (
-                                <span className="h-2 w-2 rounded-full bg-white" />
-                            )}
-                        </span>
+                            <div className="flex items-center gap-3">
+                                <span
+                                    className={`flex h-5 w-5 items-center justify-center rounded-full border ${
+                                        selected
+                                            ? 'border-blue-600 bg-blue-600'
+                                            : 'border-gray-400 bg-white'
+                                    }`}
+                                >
+                                    {selected && <span className="h-2 w-2 rounded-full bg-white" />}
+                                </span>
 
-                        <span className="font-medium">
-                            {level.display_name}
-                        </span>
-                    </div>
+                                <span className="font-medium">{level.display_name}</span>
+                            </div>
 
-                    <input
-                        type="radio"
-                        name="placement_level"
-                        className="hidden"
-                        checked={selected}
-                        onChange={() =>
-                            scoreForm.setData(
-                                'placement_level',
-                                level.level_code
-                            )
-                        }
-                    />
-                </label>
-            );
-        })}
-    </div>
-</div>
-</div>
-
-    <Textarea
-        label="Reviewer Notes"
-        value={scoreForm.data.reviewer_notes}
-        onChange={(value) => scoreForm.setData('reviewer_notes', value)}
-        placeholder="Write evaluation notes..."
-    />
-
-    <button
-        type="submit"
-        disabled={scoreForm.processing}
-        className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:bg-gray-400"
-    >
-        {scoreForm.processing ? 'Saving Evaluation...' : 'Save Evaluation'}
-    </button>
-</form>
-
-<div className="mt-6 rounded-2xl border bg-white p-6">
-    <h3 className="text-xl font-bold">Decision Actions</h3>
-
-    <div className="mt-5 grid gap-6 lg:grid-cols-2">
-        <div className="space-y-4 rounded-2xl border bg-red-50 p-5">
-            <Textarea
-                label="Rejection Notes"
-                value={decisionForm.data.notes}
-                onChange={(value) => decisionForm.setData('notes', value)}
-                placeholder="Write reason for rejection..."
-            />
-
-            <button
-                type="button"
-                disabled={decisionForm.processing}
-                onClick={() =>
-                    decisionForm.post(`/applications/${application.id}/reject`, {
-                        preserveScroll: true,
-                    })
-                }
-                className="w-full rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700 disabled:bg-gray-400"
-            >
-                Reject Application
-            </button>
-        </div>
-
-        <div className="space-y-4 rounded-2xl border bg-yellow-50 p-5">
-            <Textarea
-                label="Correction Message"
-                value={decisionForm.data.message}
-                onChange={(value) => decisionForm.setData('message', value)}
-                placeholder="Explain what the applicant must correct..."
-            />
-
-            <button
-                type="button"
-                disabled={decisionForm.processing}
-                onClick={() =>
-                    decisionForm.post(`/applications/${application.id}/request-correction`, {
-                        preserveScroll: true,
-                    })
-                }
-                className="w-full rounded-xl bg-yellow-500 px-5 py-3 font-semibold text-white hover:bg-yellow-600 disabled:bg-gray-400"
-            >
-                Request Correction
-            </button>
-        </div>
-    </div>
-</div>
-                </Section>
+                            <input
+                                type="radio"
+                                name="placement_level"
+                                className="hidden"
+                                checked={selected}
+                                onChange={() =>
+                                    scoreForm.setData('placement_level', level.level_code)
+                                }
+                            />
+                        </label>
+                    );
+                })}
             </div>
+        </div>
+
+        <Textarea
+            label="Reviewer Notes"
+            value={scoreForm.data.reviewer_notes}
+            onChange={(value) => scoreForm.setData('reviewer_notes', value)}
+            placeholder="Write evaluation notes..."
+        />
+
+        <button
+            type="submit"
+            disabled={scoreForm.processing || isFinalDecision}
+            className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:bg-gray-400"
+        >
+            {scoreForm.processing ? 'Saving Evaluation...' : 'Save Evaluation'}
+        </button>
+    </form>
+
+    {!isFinalDecision && (
+        <div className="mt-6 rounded-2xl border bg-white p-6">
+            <h3 className="text-xl font-bold">Decision Actions</h3>
+
+            <div className="mt-5 grid gap-6 lg:grid-cols-3">
+                <div className="rounded-2xl border bg-green-50 p-5">
+                    <h4 className="font-semibold text-green-900">Approve Application</h4>
+
+                    <p className="mt-2 text-sm text-green-700">
+                        This will approve the applicant and make them ready for student creation by the academic team.
+                    </p>
+
+                    <button
+                        type="button"
+                        disabled={decisionForm.processing}
+                        onClick={() => setApproveModalOpen(true)}
+                        className="mt-4 w-full rounded-xl bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700 disabled:bg-gray-400"
+                    >
+                        Approve Application
+                    </button>
+                </div>
+
+                <div className="space-y-4 rounded-2xl border bg-red-50 p-5">
+                    <Textarea
+                        label="Rejection Notes"
+                        value={decisionForm.data.notes}
+                        onChange={(value) => decisionForm.setData('notes', value)}
+                        placeholder="Write reason for rejection..."
+                    />
+
+                    <button
+                        type="button"
+                        disabled={decisionForm.processing}
+                       onClick={() => setRejectModalOpen(true)}
+                        className="w-full rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700 disabled:bg-gray-400"
+                    >
+                        Reject Application
+                    </button>
+                </div>
+
+                <div className="space-y-4 rounded-2xl border bg-yellow-50 p-5">
+                    <Textarea
+                        label="Correction Message"
+                        value={decisionForm.data.message}
+                        onChange={(value) => decisionForm.setData('message', value)}
+                        placeholder="Explain what the applicant must correct..."
+                    />
+
+                    <button
+                        type="button"
+                        disabled={decisionForm.processing}
+                        onClick={() => setCorrectionModalOpen(true)}
+                        className="w-full rounded-xl bg-yellow-500 px-5 py-3 font-semibold text-white hover:bg-yellow-600 disabled:bg-gray-400"
+                    >
+                        Request Correction
+                    </button>
+                </div>
+            </div>
+        </div>
+    )}
+
+    {isFinalDecision && (
+        <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6">
+            <h3 className="text-2xl font-bold text-green-800">
+                ✓ Final Admission Decision
+            </h3>
+
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+                <div>
+                    <p className="text-sm text-gray-500">Status</p>
+                    <p className="mt-1 font-semibold">{application.status}</p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-500">Placement Level</p>
+                    <p className="mt-1 font-semibold">
+                        {application.placement_test?.placement_level ?? '-'}
+                    </p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-500">Writing Score</p>
+                    <p className="mt-1 font-semibold">
+                        {application.placement_test?.written_score ?? '-'}
+                    </p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-500">Speaking Score</p>
+                    <p className="mt-1 font-semibold">
+                        {application.placement_test?.speaking_score ?? '-'}
+                    </p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-500">Reviewed At</p>
+                    <p className="mt-1 font-semibold">
+                        {application.reviewed_at
+                            ? new Date(application.reviewed_at).toLocaleString()
+                            : '-'}
+                    </p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-500">Next Step</p>
+                    <p className="mt-1 font-semibold text-green-700">
+                        Ready for Student Creation
+                    </p>
+                </div>
+            </div>
+        </div>
+    )}
+</Section>
+            </div>
+
+
+            <ConfirmationModal
+    open={approveModalOpen}
+    title="Approve Application?"
+    message={`Approve ${application.full_name} and mark the application as ready for student creation?`}
+    confirmText="Approve Application"
+    confirmColor="green"
+    loading={decisionForm.processing}
+    onCancel={() => setApproveModalOpen(false)}
+    onConfirm={() => {
+        decisionForm.post(`/applications/${application.id}/approve`, {
+            preserveScroll: true,
+            onSuccess: () => setApproveModalOpen(false),
+        });
+    }}
+/>
+
+
+
+
+<ConfirmationModal
+    open={rejectModalOpen}
+    title="Reject Application?"
+    message={`Are you sure you want to reject ${application.full_name}? This decision will be recorded in the review history.`}
+    confirmText="Reject Application"
+    confirmColor="red"
+    loading={decisionForm.processing}
+    onCancel={() => setRejectModalOpen(false)}
+    onConfirm={() => {
+        decisionForm.post(`/applications/${application.id}/reject`, {
+            preserveScroll: true,
+            onSuccess: () => setRejectModalOpen(false),
+        });
+    }}
+/>
+
+
+
+
+
+<ConfirmationModal
+    open={correctionModalOpen}
+    title="Send Correction Request?"
+    message={`The applicant will be notified and asked to update the requested information before the review continues.`}
+    confirmText="Send Request"
+    confirmColor="yellow"
+    loading={decisionForm.processing}
+    onCancel={() => setCorrectionModalOpen(false)}
+    onConfirm={() => {
+        decisionForm.post(
+            `/applications/${application.id}/request-correction`,
+            {
+                preserveScroll: true,
+                onSuccess: () => setCorrectionModalOpen(false),
+            }
+        );
+    }}
+/>
+
+
         </AppLayout>
     );
 }

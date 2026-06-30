@@ -16,6 +16,44 @@ class ApplicationController extends Controller
 {
 
 
+public function approve(Application $application)
+{
+    if (! $application->placementTest?->placement_level) {
+        return back()->with('error', 'Please select and save a placement level before approving.');
+    }
+
+    $oldStatus = $application->status;
+
+    $application->update([
+        'status' => 'approved',
+        'reviewer_notes' => $application->placementTest->reviewer_notes,
+        'reviewed_at' => now(),
+        'reviewed_by' => auth()->id(),
+    ]);
+
+    ReviewAction::create([
+        'application_id' => $application->id,
+        'reviewer_id' => auth()->id(),
+        'action' => 'approved',
+        'notes' => 'Application approved with placement level: ' . $application->placementTest->placement_level,
+    ]);
+
+    ApplicationStatusLog::create([
+        'application_id' => $application->id,
+        'old_status' => $oldStatus,
+        'new_status' => 'approved',
+        'changed_by' => auth()->id(),
+        'notes' => 'Approved with placement level: ' . $application->placementTest->placement_level,
+    ]);
+
+    return back()->with('success', 'Application approved successfully.');
+}
+
+
+
+
+
+
 public function speakingReview(Application $application)
 {
     $application->load([
@@ -114,7 +152,7 @@ public function placementTest(Application $application)
         'notes' => request('notes'),
     ]);
 
-    return back()->with('message', 'Application rejected.');
+    return back()->with('success', 'Application rejected.');
 }
 
 public function requestCorrection(Application $application)
@@ -154,7 +192,7 @@ public function requestCorrection(Application $application)
         'notes' => request('message'),
     ]);
 
-    return back()->with('message', 'Correction requested.');
+    return back()->with('success', 'Correction request sent successfully.');
 }
 
 
@@ -259,7 +297,7 @@ public function index(Request $request)
         'reviewer_notes' => request('reviewer_notes'),
     ]);
 
-    return back()->with('message', 'Scores saved successfully.');
+   return back()->with('success', 'Evaluation saved successfully.');
 }
    
 
@@ -305,6 +343,7 @@ public function submitFinal(Application $application)
         'correctionRequests',
         'reviewActions',
         'statusLogs',
+        'placementTest',
     ]);
 
     $answers = $application->placementTest?->answers ?? collect();

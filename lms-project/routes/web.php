@@ -39,6 +39,9 @@ Route::post('/applications/{application}/request-correction', [AdminApplicationC
 
     Route::get('/applications/{application}/speaking', [AdminApplicationController::class, 'speakingReview'])
     ->name('applications.speaking');
+
+    Route::post('/applications/{application}/approve', [AdminApplicationController::class, 'approve'])
+    ->name('applications.approve');
    
 
     // Route::get('dashboard', function () {
