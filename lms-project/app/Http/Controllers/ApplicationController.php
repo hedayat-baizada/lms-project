@@ -233,8 +233,8 @@ public function submitFinal(Application $application)
     ]);
 
     return redirect()
-        ->route('apply.track')
-        ->with('message', 'Your application has been submitted and is waiting for review.');
+        ->route('apply.student.submitted', $application->id)
+        ->with('success', 'Your application has been submitted successfully.');
 }
 
 
@@ -405,14 +405,58 @@ if ($placementTest->status === 'submitted') {
     public function storePersonalInfo(Request $request)
     {
         $validated = $request->validate([
-            'full_name' => 'required|string|max:255',
-            'father_name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:50',
-            'date_of_birth' => 'required|date',
-            'gender' => 'required|string|max:50',
-            'address' => 'required|string|max:1000',
-        ]);
+    'full_name' => [
+        'required',
+        'string',
+        'min:3',
+        'max:100',
+    ],
+
+    'father_name' => [
+        'required',
+        'string',
+        'min:3',
+        'max:100',
+    ],
+
+    'email' => [
+        'required',
+        'email',
+        'max:255',
+        'unique:applications,email',
+    ],
+
+    'phone' => [
+        'required',
+        'regex:/^[0-9+\-\s]{8,20}$/',
+    ],
+
+    'date_of_birth' => [
+        'required',
+        'date',
+        'before:today',
+    ],
+
+    'gender' => [
+        'required',
+        'in:male,female',
+    ],
+
+    'address' => [
+        'required',
+        'string',
+        'min:10',
+        'max:500',
+    ],
+],
+[
+    'email.unique' => 'This email address has already been used for an application.',
+
+    'phone.regex' => 'Please enter a valid phone number.',
+
+    'date_of_birth.before' => 'Please enter a valid date of birth.',
+]);
+
 
         $existingApplication = Application::where('email', $validated['email'])->first();
 
@@ -548,6 +592,17 @@ public function course(Application $application)
 
 public function storeCourse(Request $request, Application $application)
 {
+
+    $existingTest = PlacementTest::where('application_id', $application->id)
+    ->whereIn('status', ['in_progress', 'submitted'])
+    ->first();
+
+if ($existingTest) {
+    return redirect()->route('apply.student.instructions', $application->id)
+        ->with('error', 'Your placement test has already started. You cannot change your course selection now.');
+}
+
+
     $validated = $request->validate([
         'course_category' => 'required|string',
         'course_track' => 'nullable|string',
@@ -585,9 +640,31 @@ public function storeCourse(Request $request, Application $application)
     ]);
 
     if ($testRequired) {
-        return redirect()->route('apply.student.test', $application->id);
+        return redirect()->route('apply.student.instructions', $application->id);
     }
 
     return redirect()->route('apply.student.review', $application->id);
+}
+
+
+
+public function instructions(Application $application)
+{
+    $placementTest = PlacementTest::where('application_id', $application->id)
+        ->whereIn('status', ['in_progress', 'submitted'])
+        ->first();
+
+    return Inertia::render('Apply/Instructions', [
+        'application' => $application,
+        'placementTest' => $placementTest,
+    ]);
+}
+
+
+public function submitted(Application $application)
+{
+    return Inertia::render('Apply/Submitted', [
+        'application' => $application,
+    ]);
 }
 }

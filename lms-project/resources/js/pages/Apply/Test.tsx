@@ -85,6 +85,34 @@ export default function PlacementTestPage() {
         post(`/apply/student/${application.id}/test`);
     }
 
+
+
+
+
+
+    useEffect(() => {
+    const warningMessage =
+        'Your placement test is in progress. If you leave, the timer will continue running.';
+
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+        if (submitted) return;
+
+        e.preventDefault();
+        e.returnValue = warningMessage;
+
+        return warningMessage;
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+}, [submitted]);
+
+
+
+
     useEffect(() => {
         const expiryTime = new Date(placementTest.expires_at).getTime();
 

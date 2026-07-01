@@ -25,7 +25,7 @@ export default function WritingReview({ application, writingPrompt }: Props) {
                 <div className="rounded-3xl bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 p-8 text-white shadow-xl">
 
                     <Link
-                        href={`/applications/${application.id}`}
+                        href={`/applications/${application.id}#writing`}
                         className="text-sm text-blue-200 hover:underline"
                     >
                         ← Back to Application Review

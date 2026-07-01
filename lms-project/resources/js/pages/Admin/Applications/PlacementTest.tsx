@@ -13,7 +13,7 @@ export default function PlacementTestReview({ application }: Props) {
             <div className="space-y-8 p-6">
                 <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 p-8 text-white shadow-xl">
                     <Link
-                        href={`/applications/${application.id}`}
+                       href={`/applications/${application.id}#assessment`}
                         className="text-sm text-blue-200 hover:underline"
                     >
                         ← Back to Application Review

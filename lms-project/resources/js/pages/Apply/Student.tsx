@@ -40,42 +40,50 @@ export default function StudentApplication() {
                     <div>
                         <label className="block mb-1">Full Name</label>
                         <input
+                            required
+                            maxLength={100}
                             className="w-full border rounded p-2"
                             value={data.full_name}
                             onChange={(e) => setData('full_name', e.target.value)}
                         />
-                        {errors.full_name && <p className="text-red-600">{errors.full_name}</p>}
+                        {errors.full_name && <p className="mt-1 text-sm text-red-600">{errors.full_name}</p>}
                     </div>
 
                     <div>
                         <label className="block mb-1">Father Name</label>
                         <input
+                            required
+                            maxLength={100}
                             className="w-full border rounded p-2"
                             value={data.father_name}
                             onChange={(e) => setData('father_name', e.target.value)}
                         />
-                        {errors.father_name && <p className="text-red-600">{errors.father_name}</p>}
+                        {errors.father_name && <p className="mt-1 text-sm text-red-600">{errors.father_name}</p>}
                     </div>
 
                     <div>
                         <label className="block mb-1">Email</label>
                         <input
                             type="email"
+                            required
+                            autoComplete="email"
                             className="w-full border rounded p-2"
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                         />
-                        {errors.email && <p className="text-red-600">{errors.email}</p>}
+                        {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
                     </div>
 
                     <div>
                         <label className="block mb-1">Phone</label>
                         <input
+                            inputMode="tel"
+                            maxLength={20}
                             className="w-full border rounded p-2"
                             value={data.phone}
                             onChange={(e) => setData('phone', e.target.value)}
                         />
-                        {errors.phone && <p className="text-red-600">{errors.phone}</p>}
+                        {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
                     </div>
 
                     <div>
@@ -86,7 +94,7 @@ export default function StudentApplication() {
                             value={data.date_of_birth}
                             onChange={(e) => setData('date_of_birth', e.target.value)}
                         />
-                        {errors.date_of_birth && <p className="text-red-600">{errors.date_of_birth}</p>}
+                        {errors.date_of_birth && <p className="mt-1 text-sm text-red-600">{errors.date_of_birth}</p>}
                     </div>
 
                     <div>
@@ -100,17 +108,19 @@ export default function StudentApplication() {
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                         </select>
-                        {errors.gender && <p className="text-red-600">{errors.gender}</p>}
+                        {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender}</p>}
                     </div>
 
                     <div>
                         <label className="block mb-1">Address</label>
                         <textarea
+                            rows={4}
+                            maxLength={500}
                             className="w-full border rounded p-2"
                             value={data.address}
                             onChange={(e) => setData('address', e.target.value)}
                         />
-                        {errors.address && <p className="text-red-600">{errors.address}</p>}
+                        {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address}</p>}
                     </div>
 
                     <button

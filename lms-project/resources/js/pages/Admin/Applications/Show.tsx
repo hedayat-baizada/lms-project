@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, useForm } from '@inertiajs/react';
 import ConfirmationModal from '@/components/ConfirmationModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Props = {
     application: any;
@@ -21,6 +21,12 @@ type Props = {
 
 export default function ApplicationShow({ application, placementSummary, placementLevels = [], }: Props) {
     
+    
+    
+
+
+
+
     const scoreForm = useForm({
     written_score: application.placement_test?.written_score ?? '',
     speaking_score: application.placement_test?.speaking_score ?? '',
@@ -41,6 +47,23 @@ export default function ApplicationShow({ application, placementSummary, placeme
     const isRejected = application.status === 'rejected';
     const isFinalDecision = isApproved || isRejected;
 
+
+
+    useEffect(() => {
+    if (window.location.hash) {
+        const element = document.querySelector(window.location.hash);
+
+        if (element) {
+            element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+            });
+        }
+    }
+}, []);
+
+
+
     function submitScore(e: React.FormEvent) {
         e.preventDefault();
 
@@ -49,6 +72,10 @@ export default function ApplicationShow({ application, placementSummary, placeme
         });
     }
 
+
+
+
+    
     return (
         <AppLayout>
             <div className="space-y-8 p-6">
@@ -101,6 +128,8 @@ export default function ApplicationShow({ application, placementSummary, placeme
                         ]}
                     />
                 </Section>
+
+                
 
                 <Section title="Uploaded Documents">
                     {application.documents?.length === 0 && (
@@ -221,6 +250,7 @@ export default function ApplicationShow({ application, placementSummary, placeme
 
 
 {application.course_track === 'cel' && (
+    <div id="writing">
     <Section title="Writing Assessment">
         <InfoGrid
             items={[
@@ -249,6 +279,7 @@ export default function ApplicationShow({ application, placementSummary, placeme
             Review Writing →
         </Link>
     </Section>
+    </div>
 
 
 
@@ -257,6 +288,7 @@ export default function ApplicationShow({ application, placementSummary, placeme
 
 
 {application.course_track === 'cel' && (
+    <div id="speaking">
     <Section title="Speaking Assessment">
         <InfoGrid
             items={[
@@ -280,6 +312,7 @@ export default function ApplicationShow({ application, placementSummary, placeme
             Review Speaking →
         </Link>
     </Section>
+    </div>
 )}
                 <Section title="Review History">
                     <div className="grid gap-6 lg:grid-cols-2">
@@ -311,7 +344,8 @@ export default function ApplicationShow({ application, placementSummary, placeme
                     </div>
                 </Section>
 
-           <Section title="Assessment Evaluation">
+           <div id="assessment">
+    <Section title="Assessment Evaluation">
     <div className="grid gap-6 lg:grid-cols-3">
         <MiniStat label="MCQ Score" value={`${placementSummary.percentage}%`} color="blue" />
         <MiniStat label="Correct Answers" value={placementSummary.correct} color="green" />
@@ -433,8 +467,15 @@ export default function ApplicationShow({ application, placementSummary, placeme
                     <button
                         type="button"
                         disabled={decisionForm.processing}
-                       onClick={() => setRejectModalOpen(true)}
-                        className="w-full rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700 disabled:bg-gray-400"
+                       onClick={() => {
+                            if (!decisionForm.data.notes.trim()) {
+                                alert('Please write a rejection reason first.');
+                                return;
+                            }
+
+                            setRejectModalOpen(true);
+                        }}
+                                                className="w-full rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700 disabled:bg-gray-400"
                     >
                         Reject Application
                     </button>
@@ -451,8 +492,15 @@ export default function ApplicationShow({ application, placementSummary, placeme
                     <button
                         type="button"
                         disabled={decisionForm.processing}
-                        onClick={() => setCorrectionModalOpen(true)}
-                        className="w-full rounded-xl bg-yellow-500 px-5 py-3 font-semibold text-white hover:bg-yellow-600 disabled:bg-gray-400"
+                        onClick={() => {
+                        if (!decisionForm.data.message.trim()) {
+                            alert('Please write a correction message first.');
+                            return;
+                        }
+
+                        setCorrectionModalOpen(true);
+                    }}
+                                            className="w-full rounded-xl bg-yellow-500 px-5 py-3 font-semibold text-white hover:bg-yellow-600 disabled:bg-gray-400"
                     >
                         Request Correction
                     </button>
@@ -513,6 +561,7 @@ export default function ApplicationShow({ application, placementSummary, placeme
         </div>
     )}
 </Section>
+</div>
             </div>
 
 
@@ -547,6 +596,7 @@ export default function ApplicationShow({ application, placementSummary, placeme
         decisionForm.post(`/applications/${application.id}/reject`, {
             preserveScroll: true,
             onSuccess: () => setRejectModalOpen(false),
+            onError: () => setRejectModalOpen(false),
         });
     }}
 />
@@ -564,13 +614,11 @@ export default function ApplicationShow({ application, placementSummary, placeme
     loading={decisionForm.processing}
     onCancel={() => setCorrectionModalOpen(false)}
     onConfirm={() => {
-        decisionForm.post(
-            `/applications/${application.id}/request-correction`,
-            {
-                preserveScroll: true,
-                onSuccess: () => setCorrectionModalOpen(false),
-            }
-        );
+        decisionForm.post(`/applications/${application.id}/request-correction`, {
+            preserveScroll: true,
+            onSuccess: () => setCorrectionModalOpen(false),
+            onError: () => setCorrectionModalOpen(false),
+        });
     }}
 />
 

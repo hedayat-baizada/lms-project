@@ -100,8 +100,15 @@ Route::get('/apply/student/{application}/review', [ApplicationController::class,
 Route::post('/apply/student/{application}/review/submit', [ApplicationController::class, 'submitFinal'])
     ->name('apply.student.submit-final');
 
+    Route::get('/apply/student/{application}/instructions', [ApplicationController::class, 'instructions'])
+    ->name('apply.student.instructions');
+
 Route::post('/apply/student/{application}/test/draft', [ApplicationController::class, 'saveTestDraft'])
     ->name('apply.student.test.draft');
+
+
+    Route::get('/apply/student/{application}/submitted', [ApplicationController::class, 'submitted'])
+    ->name('apply.student.submitted');
 
 
 

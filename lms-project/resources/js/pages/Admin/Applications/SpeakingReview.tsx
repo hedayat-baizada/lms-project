@@ -17,7 +17,7 @@ export default function SpeakingReview({ application, speakingPrompt }: Props) {
             <div className="space-y-8 p-6">
                 <div className="rounded-3xl bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 p-8 text-white shadow-xl">
                     <Link
-                        href={`/applications/${application.id}`}
+                        href={`/applications/${application.id}#speaking`}
                         className="text-sm text-indigo-200 hover:underline"
                     >
                         ← Back to Application Review
