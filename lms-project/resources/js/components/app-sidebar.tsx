@@ -27,8 +27,13 @@ import {
     BarChart3,
     History,
     Settings,
+    ClipboardList,
+    Clock,
+    NotebookPen,
+    BellRing,
 } from 'lucide-react';
 import AppLogo from './app-logo';
+import Dashboard from '@/pages/Admin/Dashboard';
 
 const mainNavItems: NavItem[] = [
     {
@@ -120,24 +125,67 @@ const mainNavItems: NavItem[] = [
     },
 
     {
-        title: 'Teaching',
-        icon: Presentation,
+        title: 'Teacher',
+        icon: UserRound,
         children: [
             {
-                title: 'Teachers',
-                url: '/teachers',
-                icon: Presentation,
+                title: 'Dashboard',
+                url: '/teacherdashbord',
+                icon: LayoutGrid,
             },
             {
-                title: 'Volunteers',
-                url: '/volunteers',
-                icon: HandHelping,
+                title: 'Attendance',
+                
+                icon: ClipboardList,
+                children:[
+                    {
+                        title:'Attendance-Session',
+                        url:'/attendancesession',
+                        icon: ClipboardList,
+                    },
+                    {
+                        title:'Recored',
+                        url:'/attendancerecored',
+                        icon: ClipboardCheck,
+                    }
+
+                ],
             },
+              {
+                title: 'Assignments',
+                icon: UserRound,
+                // icon: NotebookPen,
+                children:[
+                    {
+                        title: 'classassignment',
+                        url:'/classassignment',
+                        icon: NotebookPen,
+                    },
+                    {
+                        title:'Statuses',
+                        url:'/assignmentstatues',
+                        icon: ClipboardCheck,
+                    }
+
+                ],
+            },
+           
             {
-                title: 'Programs',
-                url: '/programs',
+                title: 'My-Class',
+                url: '/myclass',
                 icon: BookOpen,
             },
+            {
+                title: 'Session',
+                url: '/session',
+                icon: Clock,
+            },
+          
+            {
+                title: 'Notifiactions',
+                url: '/notification',
+                icon: BellRing,
+            }
         ],
     },
 
