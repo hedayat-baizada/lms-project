@@ -293,11 +293,13 @@ export default function ApplicationShow({ application, placementSummary, placeme
         <InfoGrid
             items={[
                 [
-                    'Status',
-                    application.speaking_test?.audio_path
-                        ? 'Completed'
-                        : 'Not completed',
-                ],
+    'Status',
+    application.speaking_test?.status === 'skipped'
+        ? 'Skipped by applicant'
+        : application.speaking_test?.audio_path
+            ? 'Completed'
+            : 'Not completed',
+],
                 [
                     'Submitted',
                     application.speaking_test?.submitted_at ?? '-',

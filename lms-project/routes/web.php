@@ -110,6 +110,9 @@ Route::post('/apply/student/{application}/test/draft', [ApplicationController::c
     Route::get('/apply/student/{application}/submitted', [ApplicationController::class, 'submitted'])
     ->name('apply.student.submitted');
 
+    Route::post('/apply/student/{application}/speaking/skip', [ApplicationController::class, 'skipSpeaking'])
+    ->name('apply.student.speaking.skip');
+
 
 
 Route::post('/apply/student/{application}/test', [ApplicationController::class, 'storeTestAnswers'])

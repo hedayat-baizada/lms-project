@@ -126,6 +126,19 @@ export default function SpeakingTest({ application, speakingTest, prompt, speaki
         }
     }
 
+
+    async function skipSpeakingTest() {
+    if (!confirm('Are you sure you want to skip the speaking test?')) {
+        return;
+    }
+
+    try {
+        await axios.post(`/apply/student/${application.id}/speaking/skip`);
+        router.visit(`/apply/student/${application.id}/review`);
+    } catch {
+        setError('Unable to skip speaking test.');
+    }
+}
     function formatTime(seconds: number) {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
@@ -166,6 +179,8 @@ export default function SpeakingTest({ application, speakingTest, prompt, speaki
                             </p>
                         </div>
                     </div>
+
+                    
 
                     {error && (
                         <div className="mb-4 rounded-lg bg-red-50 p-3 text-red-600">
@@ -219,7 +234,31 @@ export default function SpeakingTest({ application, speakingTest, prompt, speaki
                             >
                                 Begin Speaking Test
                             </button>
+                        
+
+                            
                         )}
+
+                   
+
+{isRecording && (
+    <button
+        type="button"
+        onClick={finishRecording}
+        className="mt-4 rounded-xl bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700"
+    >
+        Stop and Submit Recording
+    </button>
+)}
+
+     <button
+    type="button"
+    onClick={skipSpeakingTest}
+    disabled={isRecording || isUploading || isSubmitted}
+    className="mt-4 rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:bg-gray-200"
+>
+    Skip Speaking Test
+</button>
 
                         {attemptUsed && !isRecording && !isUploading && !isSubmitted && (
                             <p className="mt-5 font-semibold text-gray-600">

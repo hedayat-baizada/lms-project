@@ -511,6 +511,20 @@ if ($placementTest->status === 'submitted') {
     }
 
 
+    public function skipSpeaking(Application $application)
+{
+    $speakingTest = SpeakingTest::updateOrCreate(
+        ['application_id' => $application->id],
+        [
+            'status' => 'skipped',
+            'attempt_used' => true,
+            'submitted_at' => now(),
+        ]
+    );
+
+    return redirect()->route('apply.student.review', $application->id);
+}
+
 
 
     public function document(Application $application)

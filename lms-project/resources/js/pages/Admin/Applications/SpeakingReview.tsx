@@ -62,6 +62,12 @@ export default function SpeakingReview({ application, speakingPrompt }: Props) {
                     </div>
                 </div>
 
+                {application.speaking_test?.status === 'skipped' && (
+    <div className="mt-6 rounded-2xl border border-yellow-200 bg-yellow-50 p-5 text-yellow-800">
+        This applicant skipped the speaking assessment.
+    </div>
+)}
+
                 <div className="rounded-3xl bg-white p-8 shadow">
                     <h2 className="text-2xl font-bold">
                         Applicant Recording
