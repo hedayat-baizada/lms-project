@@ -27,6 +27,9 @@ import {
     BarChart3,
     History,
     Settings,
+    CircleUser,
+    BookUser, 
+    
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
