@@ -133,60 +133,7 @@ const mainNavItems: NavItem[] = [
                 url: '/teacherdashbord',
                 icon: LayoutGrid,
             },
-            {
-                title: 'Attendance',
-                
-                icon: ClipboardList,
-                children:[
-                    {
-                        title:'Attendance-Session',
-                        url:'/attendancesession',
-                        icon: ClipboardList,
-                    },
-                    {
-                        title:'Recored',
-                        url:'/attendancerecored',
-                        icon: ClipboardCheck,
-                    }
-
-                ],
-            },
-              {
-                title: 'Assignments',
-                icon: UserRound,
-                // icon: NotebookPen,
-                children:[
-                    {
-                        title: 'classassignment',
-                        url:'/classassignment',
-                        icon: NotebookPen,
-                    },
-                    {
-                        title:'Statuses',
-                        url:'/assignmentstatues',
-                        icon: ClipboardCheck,
-                    }
-
-                ],
-            },
-           
-            {
-                title: 'My-Class',
-                url: '/myclass',
-                icon: BookOpen,
-            },
-            {
-                title: 'Session',
-                url: '/session',
-                icon: Clock,
-            },
-          
-            {
-                title: 'Notifiactions',
-                url: '/notification',
-                icon: BellRing,
-            }
-        ],
+        ]
     },
 
     {
