@@ -17,7 +17,8 @@ export interface NavGroup {
 export interface NavItem {
     title: string;
     url?: string;
-    icon?: LucideIcon;
+    icon?: any;
+    permission?: string;
     children?: NavItem[];
 }
 

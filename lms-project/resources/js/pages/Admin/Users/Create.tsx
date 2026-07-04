@@ -40,184 +40,233 @@ export default function Create({ roles }: Props) {
         <AppLayout>
             <Head title="Create User" />
 
-            <div className="p-6 max-w-3xl mx-auto">
+            <div className="p-6 max-w-7xl mx-auto">
                 <h1 className="text-2xl font-bold mb-6">
                     Create User
                 </h1>
 
                 <form
                     onSubmit={submit}
-                    className="space-y-4 bg-white p-6 rounded-lg border"
+                    className="rounded-3xl border bg-card shadow-sm p-8"
                 >
-                    {/* NAME */}
-                    <div>
-                        <label className="text-sm font-medium">
-                            Name
-                        </label>
-                        <input
-                            type="text"
-                            className="w-full border p-2 rounded mt-1"
-                            value={data.name}
-                            onChange={(e) =>
-                                setData('name', e.target.value)
-                            }
-                        />
-                        {errors.name && (
-                            <p className="text-red-500 text-sm">
-                                {errors.name}
-                            </p>
-                        )}
-                    </div>
+                    <div className="grid gap-8 xl:grid-cols-3">
 
-                    {/* EMAIL */}
-                    <div>
-                        <label className="text-sm font-medium">
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            className="w-full border p-2 rounded mt-1"
-                            value={data.email}
-                            onChange={(e) =>
-                                setData('email', e.target.value)
-                            }
-                        />
-                        {errors.email && (
-                            <p className="text-red-500 text-sm">
-                                {errors.email}
-                            </p>
-                        )}
-                    </div>
+                        {/* LEFT SIDE */}
+                        <div className="xl:col-span-2 space-y-6">
 
-                    {/* PHONE */}
-                    <div>
-                        <label className="text-sm font-medium">
-                            Phone
-                        </label>
-                        <input
-                            type="text"
-                            className="w-full border p-2 rounded mt-1"
-                            value={data.phone}
-                            onChange={(e) =>
-                                setData('phone', e.target.value)
-                            }
-                        />
-                    </div>
+                            {/* BASIC INFO */}
+                            <div className="rounded-2xl border p-6">
+                                <h2 className="mb-4 text-lg font-semibold">
+                                    Basic Information
+                                </h2>
 
-                    {/* ROLE */}
-                    {/* ROLES */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Roles
-                        </label>
+                                <div className="grid gap-4 md:grid-cols-2">
 
-                        <div className="grid grid-cols-2 gap-3 border rounded-lg p-4">
+                                    {/* NAME */}
+                                    <div>
+                                        <label className="text-sm font-medium">
+                                            Name
+                                        </label>
 
-                            {roles.map((role) => (
-                                <label
-                                    key={role.id}
-                                    className="flex items-center gap-2"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={data.roles.includes(role.name)}
-                                        onChange={(e) => {
-                                            if (e.target.checked) {
-                                                setData('roles', [
-                                                    ...data.roles,
-                                                    role.name,
-                                                ]);
-                                            } else {
-                                                setData(
-                                                    'roles',
-                                                    data.roles.filter(
-                                                        (r) => r !== role.name
-                                                    )
-                                                );
+                                        <input
+                                            type="text"
+                                            className="mt-1 w-full rounded-lg border p-3"
+                                            value={data.name}
+                                            onChange={(e) =>
+                                                setData('name', e.target.value)
                                             }
-                                        }}
-                                    />
+                                        />
+                                    </div>
 
-                                    <span>{role.name}</span>
-                                </label>
-                            ))}
+                                    {/* EMAIL */}
+                                    <div>
+                                        <label className="text-sm font-medium">
+                                            Email
+                                        </label>
+
+                                        <input
+                                            type="email"
+                                            className="mt-1 w-full rounded-lg border p-3"
+                                            value={data.email}
+                                            onChange={(e) =>
+                                                setData('email', e.target.value)
+                                            }
+                                        />
+                                    </div>
+
+                                    {/* PHONE */}
+                                    <div>
+                                        <label className="text-sm font-medium">
+                                            Phone
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            className="mt-1 w-full rounded-lg border p-3"
+                                            value={data.phone}
+                                            onChange={(e) =>
+                                                setData('phone', e.target.value)
+                                            }
+                                        />
+                                    </div>
+
+                                    {/* STATUS */}
+                                    <div className="flex items-end">
+                                        <label className="flex w-full items-center gap-3 rounded-lg border p-3">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.status}
+                                                onChange={(e) =>
+                                                    setData('status', e.target.checked)
+                                                }
+                                            />
+                                            Active User
+                                        </label>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            {/* ROLES */}
+                            <div className="rounded-2xl border p-6">
+                                <h2 className="mb-4 text-lg font-semibold">
+                                    Roles
+                                </h2>
+
+                                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+
+                                    {roles.map((role) => (
+                                        <label
+                                            key={role.id}
+                                            className="
+                            flex items-center gap-3
+                            rounded-xl border p-3
+                            hover:bg-muted/50
+                            cursor-pointer
+                        "
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={data.roles.includes(role.name)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setData('roles', [
+                                                            ...data.roles,
+                                                            role.name,
+                                                        ]);
+                                                    } else {
+                                                        setData(
+                                                            'roles',
+                                                            data.roles.filter(
+                                                                (r) => r !== role.name
+                                                            )
+                                                        );
+                                                    }
+                                                }}
+                                            />
+
+                                            {role.name}
+                                        </label>
+                                    ))}
+
+                                </div>
+                            </div>
 
                         </div>
 
-                        {errors.roles && (
-                            <p className="text-red-500 text-sm mt-1">
-                                {errors.roles}
-                            </p>
-                        )}
-                    </div>
-                    {/* STATUS */}
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={data.status}
-                            onChange={(e) =>
-                                setData('status', e.target.checked)
-                            }
-                        />
-                        Active User
-                    </label>
+                        {/* RIGHT SIDE */}
+                        <div>
 
-                    {/* PASSWORD */}
-                    <div>
-                        <label className="text-sm font-medium">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            className="w-full border p-2 rounded mt-1"
-                            value={data.password}
-                            onChange={(e) =>
-                                setData('password', e.target.value)
-                            }
-                        />
-                        {errors.password && (
-                            <p className="text-red-500 text-sm">
-                                {errors.password}
-                            </p>
-                        )}
-                    </div>
+                            <div className="rounded-2xl border p-6 sticky top-6">
 
-                    {/* CONFIRM PASSWORD */}
-                    <div>
-                        <label className="text-sm font-medium">
-                            Confirm Password
-                        </label>
-                        <input
-                            type="password"
-                            className="w-full border p-2 rounded mt-1"
-                            value={data.password_confirmation}
-                            onChange={(e) =>
-                                setData(
-                                    'password_confirmation',
-                                    e.target.value
-                                )
-                            }
-                        />
-                    </div>
+                                <h2 className="mb-4 text-lg font-semibold">
+                                    Security
+                                </h2>
 
-                    {/* BUTTON */}
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    >
-                        {processing ? 'Creating...' : 'Create User'}
-                    </button>
+                                <div className="space-y-4">
 
-                    {/* BACK BUTTON */}
-                    <Link
-                        href={route('users.index')}
-                        className="bg-gray-600 text-white px-4 py-2 rounded"
-                    >
-                        Back
-                    </Link>
+                                    <div>
+                                        <label className="text-sm font-medium">
+                                            Password
+                                        </label>
+
+                                        <input
+                                            type="password"
+                                            className="mt-1 w-full rounded-lg border p-3"
+                                            value={data.password}
+                                            onChange={(e) =>
+                                                setData('password', e.target.value)
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-sm font-medium">
+                                            Confirm Password
+                                        </label>
+
+                                        <input
+                                            type="password"
+                                            className="mt-1 w-full rounded-lg border p-3"
+                                            value={data.password_confirmation}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'password_confirmation',
+                                                    e.target.value
+                                                )
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="pt-4 space-y-3">
+
+                                        <button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="
+                            w-full
+                            rounded-xl
+                            bg-blue-600
+                            px-4
+                            py-3
+                            text-white
+                            font-medium
+                        "
+                                        >
+                                            {processing
+                                                ? 'Creating...'
+                                                : 'Create User'}
+                                        </button>
+
+                                        <Link
+                                            href={route('users.index')}
+                                            className="
+                            block
+                            w-full
+                            rounded-xl
+                            border
+                            px-4
+                            py-3
+                            text-center
+                        "
+                                        >
+                                            Back
+                                        </Link>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div> {/* End grid */}
+
                 </form>
+
             </div>
+
         </AppLayout>
     );
 }

@@ -34,37 +34,38 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
-
-
     public function share(Request $request): array
-{
-    [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+    {
+        [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
-    return array_merge(parent::share($request), [
-        'name' => config('app.name'),
+        return array_merge(parent::share($request), [
+            'name' => config('app.name'),
 
-        'quote' => [
-            'message' => trim($message),
-            'author' => trim($author),
-        ],
+            'quote' => [
+                'message' => trim($message),
+                'author' => trim($author),
+            ],
 
-        'auth' => [
-            'user' => $request->user(),
+            'auth' => [
+                'user' => fn () => $request->user(),
 
-            // Uncomment after installing Spatie Permission
-            
-            'permissions' => $request->user()
-                ? $request->user()
-                    ->getAllPermissions()
-                    ->pluck('name')
-                    ->toArray()
-                : [],
-            
-        ],
-        'flash' => [
-            'message' => fn () => $request->session()->get('message'),
-            'success' => fn () => $request->session()->get('success'),
-            'error' => fn () => $request->session()->get('error'),
-        ],
-    ]);
-}}
+                'roles' => fn () => $request->user()
+                    ? $request->user()->getRoleNames()->toArray()
+                    : [],
+
+                'permissions' => fn () => $request->user()
+                    ? $request->user()
+                        ->getAllPermissions()
+                        ->pluck('name')
+                        ->toArray()
+                    : [],
+            ],
+
+            'flash' => [
+                'message' => fn () => $request->session()->get('message'),
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
+        ]);
+    }
+}
