@@ -24,7 +24,7 @@ class PermissionController extends Controller implements HasMiddleware
     public function index()
     {
         return Inertia::render('Admin/Permissions/Index', [
-            'permissions' => Permission::latest()->get(),
+            'permissions' => Permission::orderBy('id', 'desc')->get(),
         ]);
     }
 

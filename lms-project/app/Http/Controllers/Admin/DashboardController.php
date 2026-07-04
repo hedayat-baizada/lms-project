@@ -5,31 +5,28 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Inertia\Inertia;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+
         return Inertia::render('Admin/Dashboard', [
+            'roles' => $user->getRoleNames(),
 
             'stats' => [
                 'users' => User::count(),
-                'activeUsers' => User::where('status', true)->count(),
-                'roles' => Role::count(),
-                'permissions' => Permission::count(),
+
+                // replace with real models later
+                'students' => 250,
+                'teachers' => 18,
+                'volunteers' => 22,
+                'applications' => 40,
+                'courses' => 15,
+                'programs' => 6,
+                'attendance' => 94,
             ],
-
-            'recentUsers' => User::latest()
-                ->take(5)
-                ->get([
-                    'id',
-                    'name',
-                    'email',
-                    'created_at',
-                ]),
-
         ]);
     }
 }

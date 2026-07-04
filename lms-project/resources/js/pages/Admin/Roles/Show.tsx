@@ -22,112 +22,182 @@ export default function Show({ role }: Props) {
         <AppLayout>
             <Head title={`Role - ${role.name}`} />
 
-            <div className="p-6 max-w-6xl mx-auto">
+            <div className="mx-auto max-w-7xl p-6 space-y-6">
 
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h1 className="text-3xl font-bold">
+                {/* HERO HEADER */}
+                <div className="rounded-3xl border bg-card p-6 shadow-sm">
+
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight">
+                                {role.name}
+                            </h1>
+
+                            <p className="text-muted-foreground mt-1">
+                                View role information and assigned permissions.
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3">
+
+                            <Link
+                                href={route('roles.edit', role.id)}
+                                className="
+                                    rounded-xl
+                                    bg-yellow-500
+                                    px-5
+                                    py-2.5
+                                    text-sm
+                                    font-medium
+                                    text-white
+                                    transition
+                                    hover:bg-yellow-600
+                                "
+                            >
+                                Edit Role
+                            </Link>
+
+                            <Link
+                                href={route('roles.index')}
+                                className="
+                                    rounded-xl
+                                    border
+                                    px-5
+                                    py-2.5
+                                    text-sm
+                                    font-medium
+                                    transition
+                                    hover:bg-muted
+                                "
+                            >
+                                Back
+                            </Link>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {/* STATS */}
+                <div className="grid gap-4 md:grid-cols-3">
+
+                    <div className="rounded-2xl border bg-card p-5 shadow-sm">
+                        <p className="text-sm text-muted-foreground">
+                            Role Name
+                        </p>
+
+                        <p className="mt-2 text-xl font-bold">
                             {role.name}
-                        </h1>
-
-                        <p className="text-gray-500">
-                            Role Details & Permissions
                         </p>
                     </div>
 
-                    <div className="flex gap-2">
-                        <Link
-                            href={route('roles.edit', role.id)}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
-                        >
-                            Edit Role
-                        </Link>
+                    <div className="rounded-2xl border bg-card p-5 shadow-sm">
+                        <p className="text-sm text-muted-foreground">
+                            Total Permissions
+                        </p>
 
-                        <Link
-                            href={route('roles.index')}
-                            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded"
-                        >
-                            Back
-                        </Link>
+                        <p className="mt-2 text-xl font-bold text-blue-600">
+                            {role.permissions.length}
+                        </p>
                     </div>
-                </div>
 
-                {/* Role Summary Card */}
-                <div className="bg-white rounded-lg border p-6 mb-6">
+                    <div className="rounded-2xl border bg-card p-5 shadow-sm">
+                        <p className="text-sm text-muted-foreground">
+                            Status
+                        </p>
 
-                    <h2 className="text-lg font-semibold mb-4">
-                        Role Information
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                        <div>
-                            <p className="text-gray-500 text-sm">
-                                Role Name
-                            </p>
-
-                            <p className="font-semibold">
-                                {role.name}
-                            </p>
-                        </div>
-
-                        <div>
-                            <p className="text-gray-500 text-sm">
-                                Total Permissions
-                            </p>
-
-                            <p className="font-semibold text-blue-600">
-                                {role.permissions.length}
-                            </p>
-                        </div>
-
-                        <div>
-                            <p className="text-gray-500 text-sm">
-                                Status
-                            </p>
-
-                            <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm">
-                                Active
-                            </span>
-                        </div>
-
-                    </div>
-                </div>
-
-                {/* Permissions Card */}
-                <div className="bg-white rounded-lg border p-6">
-
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-semibold">
-                            Assigned Permissions
-                        </h2>
-
-                        <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
-                            {role.permissions.length} Permissions
+                        <span
+                            className="
+                                mt-2 inline-flex
+                                rounded-full
+                                bg-green-100
+                                px-3
+                                py-1
+                                text-sm
+                                font-medium
+                                text-green-700
+                            "
+                        >
+                            Active
                         </span>
                     </div>
 
-                    {role.permissions.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                </div>
 
-                            {role.permissions.map((permission) => (
-                                <div
-                                    key={permission.id}
-                                    className="border rounded-lg px-3 py-2 bg-gray-50"
-                                >
-                                    <span className="text-sm">
-                                        ✓ {permission.name}
-                                    </span>
-                                </div>
-                            ))}
+                {/* PERMISSIONS */}
+                <div className="rounded-3xl border bg-card shadow-sm">
 
+                    <div className="flex items-center justify-between border-b px-6 py-4">
+
+                        <div>
+                            <h2 className="font-semibold text-lg">
+                                Assigned Permissions
+                            </h2>
+
+                            <p className="text-sm text-muted-foreground">
+                                Permissions available for this role
+                            </p>
                         </div>
-                    ) : (
-                        <div className="text-center py-8 text-gray-500">
-                            No permissions assigned to this role.
-                        </div>
-                    )}
+
+                        <span
+                            className="
+                                rounded-full
+                                bg-blue-100
+                                px-3
+                                py-1
+                                text-sm
+                                font-medium
+                                text-blue-700
+                            "
+                        >
+                            {role.permissions.length} Permissions
+                        </span>
+
+                    </div>
+
+                    <div className="p-6">
+
+                        {role.permissions.length > 0 ? (
+
+                            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+
+                                {role.permissions.map((permission) => (
+                                    <div
+                                        key={permission.id}
+                                        className="
+                                            rounded-xl
+                                            border
+                                            bg-muted/30
+                                            px-4
+                                            py-3
+                                            transition
+                                            hover:border-primary
+                                            hover:shadow-sm
+                                        "
+                                    >
+                                        <span className="text-sm font-medium">
+                                            ✓ {permission.name}
+                                        </span>
+                                    </div>
+                                ))}
+
+                            </div>
+
+                        ) : (
+
+                            <div className="py-12 text-center">
+
+                                <p className="text-muted-foreground">
+                                    No permissions assigned to this role.
+                                </p>
+
+                            </div>
+
+                        )}
+
+                    </div>
 
                 </div>
 

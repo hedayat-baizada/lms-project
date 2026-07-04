@@ -107,11 +107,62 @@ class PermissionSeeder extends Seeder
             'volunteers.edit',
             'volunteers.delete',
 
+
+             // Teacher Attendance
+            'teacher-attendance.view',
+            'teacher-attendance.create',
+            'teacher-attendance.edit',
+            'teacher-attendance.delete',
+
+            // Teacher Assignments
+            'teacher-assignments.view',
+            'teacher-assignments.create',
+            'teacher-assignments.edit',
+            'teacher-assignments.delete',
+
+            // Volunteer Roles
+            'volunteer-roles.view',
+            'volunteer-roles.create',
+            'volunteer-roles.edit',
+            'volunteer-roles.delete',
+
+            // Volunteer Attendance
+            'volunteer-attendance.view',
+            'volunteer-attendance.create',
+            'volunteer-attendance.edit',
+            'volunteer-attendance.delete',
+
+            // Volunteer Assignments
+            'volunteer-assignments.view',
+            'volunteer-assignments.create',
+            'volunteer-assignments.edit',
+            'volunteer-assignments.delete',
+
             // Programs
             'programs.view',
             'programs.create',
             'programs.edit',
             'programs.delete',
+
+            
+
+            // Lesson Plans
+            'lesson-plans.view',
+            'lesson-plans.create',
+            'lesson-plans.edit',
+            'lesson-plans.delete',
+
+            // Class Schedules
+            'class-schedules.view',
+            'class-schedules.create',
+            'class-schedules.edit',
+            'class-schedules.delete',
+
+            // Assessments
+            'assessments.view',
+            'assessments.create',
+            'assessments.edit',
+            'assessments.delete',
 
             // Announcements
             'announcements.view',
@@ -119,9 +170,18 @@ class PermissionSeeder extends Seeder
             'announcements.edit',
             'announcements.delete',
 
-            // Reports
+            
+           // Reports
             'reports.view',
             'reports.export',
+
+            'reports.students.view',
+            'reports.attendance.view',
+            'reports.academic.view',
+            'reports.teachers.view',
+            'reports.volunteers.view',
+            'reports.admissions.view',
+            'reports.results.view',
 
             // Audit Logs
             'audit-logs.view',
@@ -152,53 +212,148 @@ class PermissionSeeder extends Seeder
         $student = Role::firstOrCreate(['name' => 'Student']);
 
 
+        // Super Admin gets everything
+        $superAdmin->syncPermissions(Permission::all());
+
         // Admin gets everything
         $admin->syncPermissions(Permission::all());
 
-        // Teacher
-        $teacher->syncPermissions([
+
+          // Admission Officer
+        $admissionOfficer->syncPermissions([
+        'dashboard.view',
+
+        // Admissions
+        'applications.view',
+        'applications.create',
+        'applications.edit',
+        'applications.approve',
+        'applications.reject',
+
+        'students.view',
+
+        'guardians.view',
+
+        'interviews.view',
+        'interviews.conduct',
+
+        'placement-tests.view',
+        'placement-tests.evaluate',
+
+        // Volunteers
+        'volunteers.view',
+        'volunteer-roles.view',
+        'volunteer-attendance.view',
+        'volunteer-assignments.view',
+
+        'announcements.view',
+    ]);
+
+
+     // Volunteer
+      $volunteer->syncPermissions([
+        'dashboard.view',
+
+        'students.view',
+
+        'courses.view',
+        'class-groups.view',
+        'class-schedules.view',
+
+        'attendance.view',
+        'attendance.mark',
+
+        'lesson-plans.view',
+
+        'assessments.view',
+
+        'announcements.view',
+    ]);
+        // Course Manager
+        $courseManager->syncPermissions([
             'dashboard.view',
-            'students.view',
+
+            'programs.view',
+            'programs.create',
+            'programs.edit',
+            'programs.delete',
+
+            'courses.view',
+            'courses.create',
+            'courses.edit',
+            'courses.delete',
+
+            'class-groups.view',
+            'class-groups.create',
+            'class-groups.edit',
+            'class-groups.delete',
+
             'attendance.view',
             'attendance.mark',
-            'courses.view',
-            'class-groups.view',
+
             'result-cards.view',
             'result-cards.generate',
+
             'announcements.view',
         ]);
 
+        // Teacher
+        $teacher->syncPermissions([
+        'dashboard.view',
+
+        'students.view',
+
+        'attendance.view',
+        'attendance.mark',
+
+        'courses.view',
+        'class-groups.view',
+
+        'lesson-plans.view',
+        'assessments.view',
+
+        'result-cards.view',
+
+        'announcements.view',
+    ]);
+
+
+     // Report Manager
+       $reportManager->syncPermissions([
+        'dashboard.view',
+
+        'reports.view',
+        'reports.export',
+
+        'reports.students.view',
+        'reports.attendance.view',
+        'reports.academic.view',
+        'reports.teachers.view',
+        'reports.volunteers.view',
+        'reports.admissions.view',
+        'reports.results.view',
+    ]);
         // Student
-        $student->syncPermissions([
-            'dashboard.view',
-            'courses.view',
-            'attendance.view',
-            'result-cards.view',
-            'announcements.view',
-        ]);
+       $student->syncPermissions([
+        'dashboard.view',
 
-        // Volunteer
-        $volunteer->syncPermissions([
-            'dashboard.view',
-            'students.view',
-            'attendance.view',
-            'courses.view',
-        ]);
+        'courses.view',
+        'class-schedules.view',
 
-        // Admission Officer
-        $admissionOfficer->syncPermissions([
-            'dashboard.view',
-            'applications.view',
-            'applications.create',
-            'applications.edit',
-            'applications.approve',
-            'applications.reject',
-            'students.view',
-            'interviews.view',
-            'interviews.conduct',
-            'placement-tests.view',
-            'placement-tests.evaluate',
-        ]);
+        'attendance.view',
+
+        'result-cards.view',
+
+        'assessments.view',
+
+        'announcements.view',
+    ]);
+
+       
+        
+
+        
+       
     }
 }
     
