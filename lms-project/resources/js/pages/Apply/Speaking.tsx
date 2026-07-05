@@ -172,7 +172,7 @@ export default function SpeakingTest({ application, speakingTest, prompt, speaki
                         <div className="mt-4 space-y-1 text-sm text-gray-700">
                             <p>⚠️ You have one attempt only.</p>
                             <p>⚠️ Recording starts immediately after clicking Begin.</p>
-                            <p>⚠️ Recording cannot be stopped, paused, or restarted.</p>
+                            <p>⚠️ You may stop and submit early, but you cannot restart or re-record.</p>
                             <p>⚠️ When the timer reaches 0:00, your answer uploads automatically.</p>
                             <p>
                                 ⚠️ Recording will automatically stop after {speakingDuration} minutes and upload your answer.
@@ -226,39 +226,37 @@ export default function SpeakingTest({ application, speakingTest, prompt, speaki
                             </p>
                         )}
 
-                        {!attemptUsed && !isRecording && !isUploading && (
-                            <button
-                                type="button"
-                                onClick={beginSpeakingTest}
-                                className="mt-6 rounded-xl bg-indigo-600 px-8 py-3 font-semibold text-white hover:bg-indigo-700"
-                            >
-                                Begin Speaking Test
-                            </button>
-                        
+                        <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+    {!attemptUsed && !isRecording && !isUploading && !isSubmitted && (
+        <button
+            type="button"
+            onClick={beginSpeakingTest}
+            className="rounded-xl bg-indigo-600 px-8 py-3 font-semibold text-white hover:bg-indigo-700"
+        >
+            Begin Speaking Test
+        </button>
+    )}
 
-                            
-                        )}
+    {isRecording && (
+        <button
+            type="button"
+            onClick={finishRecording}
+            className="rounded-xl bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700"
+        >
+            Stop and Submit Recording
+        </button>
+    )}
 
-                   
-
-{isRecording && (
-    <button
-        type="button"
-        onClick={finishRecording}
-        className="mt-4 rounded-xl bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700"
-    >
-        Stop and Submit Recording
-    </button>
-)}
-
-     <button
-    type="button"
-    onClick={skipSpeakingTest}
-    disabled={isRecording || isUploading || isSubmitted}
-    className="mt-4 rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:bg-gray-200"
->
-    Skip Speaking Test
-</button>
+    {!attemptUsed && !isRecording && !isUploading && !isSubmitted && (
+        <button
+            type="button"
+            onClick={skipSpeakingTest}
+            className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-50"
+        >
+            Skip Speaking Test
+        </button>
+    )}
+</div>
 
                         {attemptUsed && !isRecording && !isUploading && !isSubmitted && (
                             <p className="mt-5 font-semibold text-gray-600">

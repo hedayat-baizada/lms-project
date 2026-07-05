@@ -16,6 +16,24 @@ class ApplicationController extends Controller
 {
 
 
+
+
+public function history(Application $application)
+{
+    $application->load([
+        'statusLogs',
+        'correctionRequests',
+        'reviewActions',
+    ]);
+
+    return Inertia::render('Admin/Applications/History', [
+        'application' => $application,
+    ]);
+}
+
+
+
+
 public function approve(Application $application)
 {
     if (! $application->placementTest?->placement_level) {
@@ -340,6 +358,7 @@ public function submitFinal(Application $application)
         'guardianInfo',
         'placementTest.testQuestions.placementQuestion',
         'placementTest.answers.question',
+        'speakingTest',
         'correctionRequests',
         'reviewActions',
         'statusLogs',

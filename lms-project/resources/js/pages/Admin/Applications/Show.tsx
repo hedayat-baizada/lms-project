@@ -290,61 +290,98 @@ export default function ApplicationShow({ application, placementSummary, placeme
 {application.course_track === 'cel' && (
     <div id="speaking">
     <Section title="Speaking Assessment">
-        <InfoGrid
-            items={[
-                [
-    'Status',
-    application.speaking_test?.status === 'skipped'
-        ? 'Skipped by applicant'
-        : application.speaking_test?.audio_path
-            ? 'Completed'
-            : 'Not completed',
-],
-                [
-                    'Submitted',
-                    application.speaking_test?.submitted_at ?? '-',
-                ],
-            ]}
-        />
+    <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-xl bg-slate-50 p-4">
+            <p className="text-sm font-medium text-gray-500">Status</p>
 
-        <Link
-            href={`/applications/${application.id}/speaking`}
-            className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
-        >
-            Review Speaking →
-        </Link>
-    </Section>
+            <span
+                className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
+                    application.speaking_test?.status === 'skipped'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : application.speaking_test?.audio_path
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                }`}
+            >
+                {application.speaking_test?.status === 'skipped'
+                    ? 'Skipped by applicant'
+                    : application.speaking_test?.audio_path
+                      ? 'Completed'
+                      : 'Not completed'}
+            </span>
+        </div>
+
+        <div className="rounded-xl bg-slate-50 p-4">
+            <p className="text-sm font-medium text-gray-500">Submitted</p>
+            <p className="mt-1 font-semibold text-slate-900">
+                {application.speaking_test?.submitted_at ?? '-'}
+            </p>
+        </div>
+    </div>
+
+    <Link
+        href={`/applications/${application.id}/speaking`}
+        className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+    >
+        Review Speaking →
+    </Link>
+</Section>
     </div>
 )}
-                <Section title="Review History">
-                    <div className="grid gap-6 lg:grid-cols-2">
-                        <HistoryList
-                            title="Correction Requests"
-                            empty="No correction requests."
-                            items={application.correction_requests}
-                            render={(request: any) => (
-                                <>
-                                    <p><strong>Status:</strong> {request.status}</p>
-                                    <p><strong>Message:</strong> {request.message}</p>
-                                    <p className="mt-1 text-sm text-gray-500">{request.created_at}</p>
-                                </>
-                            )}
-                        />
+  <Section title="Review Timeline">
+    <div className="space-y-4">
+        {application.status_logs?.length === 0 && (
+            <p className="text-gray-500">No timeline updates yet.</p>
+        )}
 
-                        <HistoryList
-                            title="Reviewer Actions"
-                            empty="No reviewer actions yet."
-                            items={application.review_actions}
-                            render={(action: any) => (
-                                <>
-                                    <p><strong>Action:</strong> {action.action}</p>
-                                    <p><strong>Notes:</strong> {action.notes ?? '-'}</p>
-                                    <p className="mt-1 text-sm text-gray-500">{action.created_at}</p>
-                                </>
-                            )}
-                        />
+        {[...(application.status_logs ?? [])]
+            .slice(-5)
+            .reverse()
+            .map((log: any) => (
+                <div
+                    key={log.id}
+                    className={`rounded-2xl border p-5 ${
+                        log.new_status === 'need_correction'
+                            ? 'border-orange-200 bg-orange-50'
+                            : log.new_status === 'correction_submitted'
+                              ? 'border-blue-200 bg-blue-50'
+                              : log.new_status === 'approved'
+                                ? 'border-green-200 bg-green-50'
+                                : log.new_status === 'rejected'
+                                  ? 'border-red-200 bg-red-50'
+                                  : 'bg-slate-50'
+                    }`}
+                >
+                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                        <h3 className="font-bold">
+                            {log.new_status.replaceAll('_', ' ')}
+                        </h3>
+
+                        <p className="text-sm text-gray-500">
+                            {new Date(log.created_at).toLocaleString()}
+                        </p>
                     </div>
-                </Section>
+
+                    <p className="mt-3 text-sm text-gray-700">
+                        {log.notes ?? 'No notes.'}
+                    </p>
+
+                    <p className="mt-2 text-xs text-gray-500">
+                        {log.old_status ?? '-'} → {log.new_status}
+                    </p>
+                </div>
+            ))}
+    </div>
+
+    <div className="mt-6 flex justify-end">
+        <Link
+            href={`/applications/${application.id}/history`}
+            className="rounded-xl bg-slate-800 px-5 py-3 font-semibold text-white hover:bg-slate-900"
+        >
+            View Complete History →
+        </Link>
+    </div>
+</Section>
 
            <div id="assessment">
     <Section title="Assessment Evaluation">

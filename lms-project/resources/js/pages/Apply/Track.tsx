@@ -1,5 +1,6 @@
 import { useForm, usePage } from '@inertiajs/react';
 import { router} from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 
 type Props = {
     application: any | null;
@@ -38,8 +39,11 @@ export default function TrackApplication() {
             case 'rejected':
                 return 'bg-red-100 text-red-800';
 
-            case 'correction_requested':
-                return 'bg-orange-100 text-orange-800';
+            case 'need_correction':
+    return 'bg-orange-100 text-orange-800';
+
+case 'correction_submitted':
+    return 'bg-blue-100 text-blue-800';
 
             default:
                 return 'bg-gray-100 text-gray-700';
@@ -253,9 +257,14 @@ export default function TrackApplication() {
 
                         </div>
 
+
+
                         {/* Correction */}
 
                         <div className="rounded-2xl bg-white p-6 shadow">
+
+         
+                            
 
                             <h3 className="mb-4 text-xl font-semibold">
                                 Reviewer Updates
@@ -277,7 +286,40 @@ export default function TrackApplication() {
                                 <p className="text-gray-500">
                                     No correction requests.
                                 </p>
+
+
+
                             )}
+
+                            
+                                               {application.status === 'need_correction' && (
+    <Link
+        href={`/apply/student/${application.id}/correction`}
+        className="mt-4 inline-flex rounded-xl bg-orange-600 px-5 py-3 font-semibold text-white hover:bg-orange-700"
+    >
+        Submit Correction
+    </Link>
+)}
+
+                            {application.status === 'correction_submitted' && (
+    <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
+    <h3 className="font-semibold text-blue-900">
+        Correction Submitted Successfully
+    </h3>
+
+    <p className="mt-2 text-blue-700">
+        Thank you. Your requested correction has been received and your
+        application has been returned to our Admissions Team for another
+        review.
+    </p>
+
+    <p className="mt-3 text-blue-700">
+        We will notify you by email once another decision has been made.
+        You can also continue to monitor your application using this
+        tracking page.
+    </p>
+</div>
+)}
 
                         </div>
 

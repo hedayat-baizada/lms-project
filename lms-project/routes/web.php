@@ -42,6 +42,20 @@ Route::post('/applications/{application}/request-correction', [AdminApplicationC
 
     Route::post('/applications/{application}/approve', [AdminApplicationController::class, 'approve'])
     ->name('applications.approve');
+
+
+
+
+    Route::get('/apply/student/{application}/correction', [ApplicationController::class, 'correction'])
+    ->name('apply.student.correction');
+
+Route::post('/apply/student/{application}/correction', [ApplicationController::class, 'storeCorrection'])
+    ->name('apply.student.correction.store');
+
+
+
+    Route::get('/applications/{application}/history', [AdminApplicationController::class, 'history'])
+    ->name('applications.history');
    
 
     // Route::get('dashboard', function () {

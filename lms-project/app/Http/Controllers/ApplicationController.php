@@ -19,6 +19,83 @@ class ApplicationController extends Controller
 {
 
 
+public function correction(Application $application)
+{
+    $application->load(['correctionRequests']);
+
+    if ($application->status !== 'need_correction') {
+        return redirect()->route('apply.track', [
+            'tracking_code' => $application->tracking_code,
+        ]);
+    }
+
+    return Inertia::render('Apply/Correction', [
+        'application' => $application,
+        'latestCorrectionRequest' => $application->correctionRequests()
+            ->latest()
+            ->first(),
+    ]);
+}
+
+public function storeCorrection(Request $request, Application $application)
+{
+    if ($application->status !== 'need_correction') {
+        return redirect()->route('apply.track', [
+            'tracking_code' => $application->tracking_code,
+        ]);
+    }
+
+    $validated = $request->validate([
+        'correction_message' => 'required|string|max:2000',
+        'correction_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+    ]);
+
+    $filePath = null;
+
+    if ($request->hasFile('correction_file')) {
+        $filePath = $request->file('correction_file')
+            ->store('application_corrections', 'public');
+    }
+
+    // \App\Models\ReviewAction::create([
+    //     'application_id' => $application->id,
+    //     'reviewer_id' => null,
+    //     'action' => 'applicant_correction_submitted',
+    //     'notes' => $validated['correction_message'],
+    // ]);
+
+    if ($filePath) {
+        \App\Models\ApplicationDocument::create([
+            'application_id' => $application->id,
+            'document_owner_type' => 'applicant',
+            'document_type' => 'correction',
+            'document_number' => null,
+            'file_path' => $filePath,
+            'status' => 'submitted',
+        ]);
+    }
+
+   $oldStatus = $application->status;
+
+$application->update([
+    'status' => 'correction_submitted',
+]);
+
+\App\Models\ApplicationStatusLog::create([
+    'application_id' => $application->id,
+    'old_status' => $oldStatus,
+    'new_status' => 'correction_submitted',
+    'changed_by' => null,
+    'notes' => 'Applicant submitted a correction: ' . $validated['correction_message'],
+]);
+
+return redirect()
+    ->route('apply.track', [
+        'tracking_code' => $application->tracking_code,
+    ])
+    ->with('success', 'Your correction has been submitted successfully. Your application is now waiting for another review.');
+}
+
 
 public function track(Request $request)
 {
