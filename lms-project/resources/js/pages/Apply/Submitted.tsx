@@ -1,15 +1,24 @@
 import { Link } from '@inertiajs/react';
-
+import { useState } from 'react';
 type Props = {
     application: any;
 };
 
 export default function Submitted({ application }: Props) {
-    async function copyTrackingCode() {
-        await navigator.clipboard.writeText(application.tracking_code);
 
-        alert('Tracking code copied successfully.');
-    }
+    const [copied, setCopied] = useState(false);
+
+
+   async function copyTrackingCode() {
+    await navigator.clipboard.writeText(application.tracking_code);
+
+    setCopied(true);
+
+    setTimeout(() => {
+        setCopied(false);
+    }, 2000);
+}
+
 
     return (
         <div className="min-h-screen bg-slate-100 px-4 py-10">
@@ -51,6 +60,12 @@ export default function Submitted({ application }: Props) {
                     >
                         Copy Tracking Code
                     </button>
+
+                    {copied && (
+                        <p className="mt-3 text-center text-sm font-semibold text-green-600">
+                            Tracking code copied!
+                        </p>
+                    )}
 
                     <p className="mt-4 text-center text-sm text-red-600">
                         Please save this tracking code in a safe place. You will need it whenever

@@ -130,6 +130,134 @@ case 'correction_submitted':
                             </div>
                         </div>
 
+
+                        {application.status === 'rejected' && application.reviewer_notes && (
+    <div className="rounded-2xl border border-red-200 bg-red-50 p-6 shadow">
+        <h3 className="text-xl font-bold text-red-900">
+            Application Decision
+        </h3>
+
+        <p className="mt-3 text-red-800">
+            Unfortunately, your application could not be approved for the following reason:
+        </p>
+
+        <div className="mt-4 rounded-xl border border-red-200 bg-white p-4">
+            <p className="font-medium text-red-700">
+                {application.reviewer_notes}
+            </p>
+        </div>
+
+        <p className="mt-5 text-sm text-red-700">
+            If you believe this decision was made in error or you need further clarification,
+            please contact the Admissions Office for assistance.
+        </p>
+    </div>
+)}
+
+
+
+                                                {/* Correction */}
+
+                        <div className="rounded-2xl bg-white p-6 shadow">
+
+         
+                            
+
+                            <h3 className="mb-4 text-xl font-semibold">
+                                Reviewer Updates
+                            </h3>
+
+                            {application.correction_requests?.length > 0 ? (
+                                <div className="space-y-3">
+                                    {application.correction_requests.map((request: any) => (
+                                        <div key={request.id} className="rounded-xl bg-orange-50 p-4 text-orange-700">
+                                            <p className="font-semibold">Correction Request</p>
+                                            <p className="mt-1">{request.message}</p>
+                                            <p className="mt-2 text-xs text-orange-500">
+                                                {new Date(request.created_at).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-gray-500">
+                                    No correction requests have been issued for this application.
+                                </p>
+
+
+
+                            )}
+
+                            
+                                               {application.status === 'need_correction' && (
+    <Link
+        href={`/apply/student/${application.id}/correction`}
+        className="mt-4 inline-flex rounded-xl bg-orange-600 px-5 py-3 font-semibold text-white hover:bg-orange-700"
+    >
+        Submit Correction
+    </Link>
+)}
+
+                            {application.status === 'correction_submitted' && (
+    <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
+    <h3 className="font-semibold text-blue-900">
+        Correction Submitted Successfully
+    </h3>
+
+    <p className="mt-2 text-blue-700">
+        Thank you. Your requested correction has been received and your
+        application has been returned to our Admissions Team for another
+        review.
+    </p>
+
+    <p className="mt-3 text-blue-700">
+        We will notify you by email once another decision has been made.
+        You can also continue to monitor your application using this
+        tracking page.
+    </p>
+</div>
+)}
+
+                        </div>
+
+
+                        {application.status === 'approved' && (
+    <StatusMessage
+        color="green"
+        title="Application Approved"
+        message="Congratulations. Your application has been approved. You will receive an email with your student account information and next steps."
+    />
+)}
+
+
+
+{application.status === 'need_correction' && (
+    <StatusMessage
+        color="orange"
+        title="Correction Required"
+        message="Your application needs correction. Please review the message below and submit the requested update."
+    />
+)}
+
+{application.status === 'correction_submitted' && (
+    <StatusMessage
+        color="blue"
+        title="Correction Submitted"
+        message="Your correction has been submitted successfully. Your application is now waiting for another review."
+    />
+)}
+
+{application.status === 'waiting_review' && (
+    <StatusMessage
+        color="yellow"
+        title="Waiting for Review"
+        message="Your application has been submitted and is waiting for review by the admissions team."
+    />
+)}
+
+
+
+
                         {/* Progress */}
 
                         <div className="rounded-2xl bg-white p-6 shadow">
@@ -259,69 +387,7 @@ case 'correction_submitted':
 
 
 
-                        {/* Correction */}
 
-                        <div className="rounded-2xl bg-white p-6 shadow">
-
-         
-                            
-
-                            <h3 className="mb-4 text-xl font-semibold">
-                                Reviewer Updates
-                            </h3>
-
-                            {application.correction_requests?.length > 0 ? (
-                                <div className="space-y-3">
-                                    {application.correction_requests.map((request: any) => (
-                                        <div key={request.id} className="rounded-xl bg-orange-50 p-4 text-orange-700">
-                                            <p className="font-semibold">Correction Request</p>
-                                            <p className="mt-1">{request.message}</p>
-                                            <p className="mt-2 text-xs text-orange-500">
-                                                {new Date(request.created_at).toLocaleString()}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-gray-500">
-                                    No correction requests.
-                                </p>
-
-
-
-                            )}
-
-                            
-                                               {application.status === 'need_correction' && (
-    <Link
-        href={`/apply/student/${application.id}/correction`}
-        className="mt-4 inline-flex rounded-xl bg-orange-600 px-5 py-3 font-semibold text-white hover:bg-orange-700"
-    >
-        Submit Correction
-    </Link>
-)}
-
-                            {application.status === 'correction_submitted' && (
-    <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
-    <h3 className="font-semibold text-blue-900">
-        Correction Submitted Successfully
-    </h3>
-
-    <p className="mt-2 text-blue-700">
-        Thank you. Your requested correction has been received and your
-        application has been returned to our Admissions Team for another
-        review.
-    </p>
-
-    <p className="mt-3 text-blue-700">
-        We will notify you by email once another decision has been made.
-        You can also continue to monitor your application using this
-        tracking page.
-    </p>
-</div>
-)}
-
-                        </div>
 
                     </div>
                 )}
@@ -375,6 +441,32 @@ function Info({
                 {value}
             </span>
 
+        </div>
+    );
+}
+
+
+function StatusMessage({
+    color,
+    title,
+    message,
+}: {
+    color: 'green' | 'red' | 'orange' | 'blue' | 'yellow';
+    title: string;
+    message: string;
+}) {
+    const colors = {
+        green: 'border-green-200 bg-green-50 text-green-800',
+        red: 'border-red-200 bg-red-50 text-red-800',
+        orange: 'border-orange-200 bg-orange-50 text-orange-800',
+        blue: 'border-blue-200 bg-blue-50 text-blue-800',
+        yellow: 'border-yellow-200 bg-yellow-50 text-yellow-800',
+    };
+
+    return (
+        <div className={`rounded-2xl border p-6 shadow ${colors[color]}`}>
+            <h3 className="text-lg font-bold">{title}</h3>
+            <p className="mt-2">{message}</p>
         </div>
     );
 }

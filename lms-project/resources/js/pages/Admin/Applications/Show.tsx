@@ -43,6 +43,8 @@ export default function ApplicationShow({ application, placementSummary, placeme
     const [rejectModalOpen, setRejectModalOpen] = useState(false);
     const [correctionModalOpen, setCorrectionModalOpen] = useState(false);
 
+    const [rejectError, setRejectError] = useState('');
+
     const isApproved = application.status === 'approved';
     const isRejected = application.status === 'rejected';
     const isFinalDecision = isApproved || isRejected;
@@ -473,45 +475,72 @@ export default function ApplicationShow({ application, placementSummary, placeme
         </button>
     </form>
 
-    {!isFinalDecision && (
         <div className="mt-6 rounded-2xl border bg-white p-6">
             <h3 className="text-xl font-bold">Decision Actions</h3>
 
             <div className="mt-5 grid gap-6 lg:grid-cols-3">
-                <div className="rounded-2xl border bg-green-50 p-5">
-                    <h4 className="font-semibold text-green-900">Approve Application</h4>
+                {!isApproved && (
+                    <div className="rounded-2xl border bg-green-50 p-5">
+                        <h4 className="font-semibold text-green-900">
+                            {isRejected ? 'Approve Instead' : 'Approve Application'}
+                        </h4>
 
-                    <p className="mt-2 text-sm text-green-700">
-                        This will approve the applicant and make them ready for student creation by the academic team.
-                    </p>
+                        <p className="mt-2 text-sm text-green-700">
+                            {isRejected
+                                ? 'This will change the final decision from rejected to approved.'
+                                : 'This will approve the applicant and make them ready for student creation by the academic team.'}
+                        </p>
 
-                    <button
-                        type="button"
-                        disabled={decisionForm.processing}
-                        onClick={() => setApproveModalOpen(true)}
-                        className="mt-4 w-full rounded-xl bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700 disabled:bg-gray-400"
-                    >
-                        Approve Application
-                    </button>
-                </div>
+                        <button
+                            type="button"
+                            disabled={decisionForm.processing}
+                            onClick={() => setApproveModalOpen(true)}
+                            className="mt-4 w-full rounded-xl bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700 disabled:bg-gray-400"
+                        >
+                            {isRejected ? 'Approve Instead' : 'Approve Application'}
+                        </button>
+                    </div>
+                )}
 
+
+                {!isRejected && (
                 <div className="space-y-4 rounded-2xl border bg-red-50 p-5">
+
+                <h4 className="font-semibold text-red-900">
+                    {isApproved ? 'Reject Instead' : 'Reject Application'}
+                </h4>
+
+                <p className="mt-2 text-sm text-red-700">
+                    {isApproved
+                        ? 'This will change the final decision from approved to rejected.'
+                        : 'Reject this application and record the reason below.'}
+                </p>
+
+
                     <Textarea
                         label="Rejection Notes"
                         value={decisionForm.data.notes}
-                        onChange={(value) => decisionForm.setData('notes', value)}
+                        onChange={(value) => {
+                        decisionForm.setData('notes', value);
+                        setRejectError('');
+                    }}
                         placeholder="Write reason for rejection..."
                     />
+
+                    {rejectError && (
+                    <p className="text-sm font-medium text-red-600">
+                        {rejectError}
+                    </p>
+                )}
 
                     <button
                         type="button"
                         disabled={decisionForm.processing}
                        onClick={() => {
                             if (!decisionForm.data.notes.trim()) {
-                                alert('Please write a rejection reason first.');
-                                return;
-                            }
-
+                            setRejectError('A rejection reason is required before you can reject this application.');
+                            return;
+                        }
                             setRejectModalOpen(true);
                         }}
                                                 className="w-full rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700 disabled:bg-gray-400"
@@ -519,6 +548,7 @@ export default function ApplicationShow({ application, placementSummary, placeme
                         Reject Application
                     </button>
                 </div>
+                )}
 
                 <div className="space-y-4 rounded-2xl border bg-yellow-50 p-5">
                     <Textarea
@@ -546,7 +576,7 @@ export default function ApplicationShow({ application, placementSummary, placeme
                 </div>
             </div>
         </div>
-    )}
+    
 
     {isFinalDecision && (
         <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6">
@@ -607,9 +637,12 @@ export default function ApplicationShow({ application, placementSummary, placeme
             <ConfirmationModal
     open={approveModalOpen}
     title="Approve Application?"
-    message={`Approve ${application.full_name} and mark the application as ready for student creation?`}
-    confirmText="Approve Application"
-    confirmColor="green"
+   message={
+    isRejected
+        ? `Change ${application.full_name}'s final decision from rejected to approved? This change will be saved in the application history.`
+        : `Approve ${application.full_name} and mark the application as ready for student creation?`
+}
+confirmText={isRejected ? 'Approve Instead' : 'Approve Application'}    confirmColor="green"
     loading={decisionForm.processing}
     onCancel={() => setApproveModalOpen(false)}
     onConfirm={() => {
@@ -625,9 +658,13 @@ export default function ApplicationShow({ application, placementSummary, placeme
 
 <ConfirmationModal
     open={rejectModalOpen}
-    title="Reject Application?"
-    message={`Are you sure you want to reject ${application.full_name}? This decision will be recorded in the review history.`}
-    confirmText="Reject Application"
+    title={isApproved ? 'Reject Approved Applicant?' : 'Reject Application?'}
+message={
+    isApproved
+        ? `Change ${application.full_name}'s final decision from approved to rejected? This change will be saved in the application history.`
+        : `Are you sure you want to reject ${application.full_name}? This decision will be recorded in the application history.`
+}
+confirmText={isApproved ? 'Reject Instead' : 'Reject Application'}
     confirmColor="red"
     loading={decisionForm.processing}
     onCancel={() => setRejectModalOpen(false)}
