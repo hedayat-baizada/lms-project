@@ -634,7 +634,10 @@ export default function ApplicationShow({ application, placementSummary, placeme
     onConfirm={() => {
         decisionForm.post(`/applications/${application.id}/reject`, {
             preserveScroll: true,
-            onSuccess: () => setRejectModalOpen(false),
+            onSuccess: () => {
+            setRejectModalOpen(false);
+            decisionForm.reset('notes');
+        },
             onError: () => setRejectModalOpen(false),
         });
     }}
@@ -655,7 +658,10 @@ export default function ApplicationShow({ application, placementSummary, placeme
     onConfirm={() => {
         decisionForm.post(`/applications/${application.id}/request-correction`, {
             preserveScroll: true,
-            onSuccess: () => setCorrectionModalOpen(false),
+            onSuccess: () => {
+                setCorrectionModalOpen(false);
+                decisionForm.reset('message');
+            },
             onError: () => setCorrectionModalOpen(false),
         });
     }}

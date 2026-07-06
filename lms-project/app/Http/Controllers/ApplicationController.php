@@ -172,14 +172,11 @@ public function writing(Application $application)
 public function storeWriting(Request $request, Application $application)
 {
     $validated = $request->validate([
-        'writing_answer' => 'required|string',
+        'writing_answer' => 'nullable|string|max:5000',
     ]);
 
-    $placementTest = PlacementTest::where('application_id', $application->id)
-        ->firstOrFail();
-
-    $placementTest->update([
-        'writing_answer' => $validated['writing_answer'],
+    $application->placementTest->update([
+        'writing_answer' => $validated['writing_answer'] ?? '',
     ]);
 
     return redirect()->route('apply.student.speaking', $application->id);

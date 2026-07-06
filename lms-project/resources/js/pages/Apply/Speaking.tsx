@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { router } from '@inertiajs/react';
 import { useRef, useState } from 'react';
+import ConfirmationModal from '@/components/ConfirmationModal';
 
 type Props = {
     application: any;
@@ -23,6 +24,8 @@ export default function SpeakingTest({ application, speakingTest, prompt, speaki
     const [attemptUsed, setAttemptUsed] = useState(Boolean(speakingTest.attempt_used));
     const [secondsLeft, setSecondsLeft] = useState(totalSeconds);
     const [error, setError] = useState<string | null>(null);
+    const [skipModalOpen, setSkipModalOpen] = useState(false);
+
 
     const isRecording = status === 'recording';
     const isUploading = status === 'uploading';
@@ -128,10 +131,6 @@ export default function SpeakingTest({ application, speakingTest, prompt, speaki
 
 
     async function skipSpeakingTest() {
-    if (!confirm('Are you sure you want to skip the speaking test?')) {
-        return;
-    }
-
     try {
         await axios.post(`/apply/student/${application.id}/speaking/skip`);
         router.visit(`/apply/student/${application.id}/review`);
@@ -139,6 +138,8 @@ export default function SpeakingTest({ application, speakingTest, prompt, speaki
         setError('Unable to skip speaking test.');
     }
 }
+
+
     function formatTime(seconds: number) {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
@@ -250,7 +251,7 @@ export default function SpeakingTest({ application, speakingTest, prompt, speaki
     {!attemptUsed && !isRecording && !isUploading && !isSubmitted && (
         <button
             type="button"
-            onClick={skipSpeakingTest}
+            onClick={() => setSkipModalOpen(true)}
             className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-50"
         >
             Skip Speaking Test
@@ -266,6 +267,20 @@ export default function SpeakingTest({ application, speakingTest, prompt, speaki
                     </div>
                 </div>
             </div>
+
+            <ConfirmationModal
+    open={skipModalOpen}
+    title="Skip Speaking Test?"
+    message="If you skip the speaking assessment, no recording will be submitted and this may affect your placement evaluation. Are you sure you want to continue?"
+    confirmText="Skip Speaking"
+    confirmColor="yellow"
+    loading={false}
+    onCancel={() => setSkipModalOpen(false)}
+    onConfirm={() => {
+        setSkipModalOpen(false);
+        skipSpeakingTest();
+    }}
+/>
         </div>
     );
 }
