@@ -133,24 +133,51 @@ case 'correction_submitted':
 
                         {application.status === 'rejected' && application.reviewer_notes && (
     <div className="rounded-2xl border border-red-200 bg-red-50 p-6 shadow">
-        <h3 className="text-xl font-bold text-red-900">
-            Application Decision
-        </h3>
+        <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-2xl">
+                ❌
+            </div>
 
-        <p className="mt-3 text-red-800">
-            Unfortunately, your application could not be approved for the following reason:
-        </p>
+            <div>
+                <h3 className="text-xl font-bold text-red-900">
+                    Application Decision
+                </h3>
 
-        <div className="mt-4 rounded-xl border border-red-200 bg-white p-4">
-            <p className="font-medium text-red-700">
+                <p className="text-sm text-gray-600">
+                    Unfortunately, your application could not be approved.
+                </p>
+            </div>
+        </div>
+
+        <div className="mt-6 rounded-xl border border-gray-200 bg-white p-5">
+            <h4 className="font-semibold text-gray-800">
+                Reason for Rejection
+            </h4>
+
+            <p className="mt-3 text-gray-700">
                 {application.reviewer_notes}
             </p>
         </div>
 
-        <p className="mt-5 text-sm text-red-700">
-            If you believe this decision was made in error or you need further clarification,
-            please contact the Admissions Office for assistance.
-        </p>
+        <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-5">
+            <h4 className="font-semibold text-blue-900">
+                Need Help?
+            </h4>
+
+            <p className="mt-2 text-blue-800">
+                If you have any questions regarding this decision, please contact our Admissions Office.
+            </p>
+
+            <div className="mt-4 space-y-1 text-sm text-blue-900">
+                <p>
+                    <strong>WhatsApp:</strong> +92 XXX XXX XXXX
+                </p>
+
+                <p>
+                    <strong>Email:</strong> admissions@example.com
+                </p>
+            </div>
+        </div>
     </div>
 )}
 
@@ -221,14 +248,13 @@ case 'correction_submitted':
                         </div>
 
 
-                        {application.status === 'approved' && (
+        {application.status === 'approved' && (
     <StatusMessage
         color="green"
         title="Application Approved"
-        message="Congratulations. Your application has been approved. You will receive an email with your student account information and next steps."
+        message="Congratulations. Your application has been approved by the Admissions Team. The Academic Department will now prepare your student account, assign your class, and contact you with your login information and next steps."
     />
 )}
-
 
 
 {application.status === 'need_correction' && (
