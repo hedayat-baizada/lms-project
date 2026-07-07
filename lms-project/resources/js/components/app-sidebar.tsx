@@ -28,6 +28,8 @@ import {
     History,
     Settings,
     UserCheck,
+    CircleUser,
+    BookUser,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -305,13 +307,13 @@ const mainNavItems: NavItem[] = [
                 title: 'Audit Logs',
                 url: '/audit-logs',
                 icon: History,
-                permission: 'audit-logs',
+                permission: 'audit-logs.view',
             },
             {
                 title: 'Settings',
                 url: '/settings',
                 icon: Settings,
-                permission: 'settings',
+                permission: 'settings.view',
             },
         ],
     },
