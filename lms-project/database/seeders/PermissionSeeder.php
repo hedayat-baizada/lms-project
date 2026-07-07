@@ -42,6 +42,8 @@ class PermissionSeeder extends Seeder
             'applications.delete',
             'applications.approve',
             'applications.reject',
+            'approved-applicants.view',
+            
 
             // Students
             'students.view',
@@ -230,6 +232,9 @@ class PermissionSeeder extends Seeder
         'applications.approve',
         'applications.reject',
 
+          // Approved Students
+        'approved-applicants.view',
+
         'students.view',
 
         'guardians.view',
@@ -272,6 +277,9 @@ class PermissionSeeder extends Seeder
         // Course Manager
         $courseManager->syncPermissions([
             'dashboard.view',
+
+              // Approved Students
+             'approved-applicants.view',
 
             'programs.view',
             'programs.create',
