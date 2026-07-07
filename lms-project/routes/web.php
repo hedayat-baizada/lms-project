@@ -56,6 +56,15 @@ Route::post('/apply/student/{application}/correction', [ApplicationController::c
 
     Route::get('/applications/{application}/history', [AdminApplicationController::class, 'history'])
     ->name('applications.history');
+
+
+
+
+    Route::get('/approved-applicants', [AdminApplicationController::class, 'approvedApplicants'])
+    ->name('approved-applicants.index');
+
+Route::get('/approved-applicants/{application}', [AdminApplicationController::class, 'showApprovedApplicant'])
+    ->name('approved-applicants.show');
    
 
     // Route::get('dashboard', function () {

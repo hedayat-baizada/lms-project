@@ -195,74 +195,69 @@ export default function PlacementTestPage() {
                 )}
 
                 <form onSubmit={submit} className="space-y-6">
-                    {questions.map((question) => (
-                        <div
-                            key={question.test_question_id}
-                            className="rounded-2xl border bg-white p-6 shadow-sm"
+    {questions.map((question) => (
+        <div
+            key={question.test_question_id}
+            className="rounded-2xl border bg-white p-6 shadow-sm"
+        >
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+                {question.display_order}. {question.question_text}
+            </h2>
+
+            {question.question_type === 'mcq' ? (
+                <div className="mt-4 space-y-3">
+                    {[
+                        ['a', question.option_a],
+                        ['b', question.option_b],
+                        ['c', question.option_c],
+                        ['d', question.option_d],
+                    ].map(([value, label]) => (
+                        <label
+                            key={value}
+                            className="flex cursor-pointer items-center gap-3 rounded-xl border p-4 hover:bg-blue-50"
                         >
-                            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-                                {question.display_order}. {question.question_text}
-                            </h2>
+                            <input
+                                type="radio"
+                                name={`question_${question.test_question_id}`}
+                                value={value ?? ''}
+                                checked={
+                                    data.answers[question.test_question_id] === value
+                                }
+                                onChange={() =>
+                                    setAnswer(question.test_question_id, value ?? '')
+                                }
+                            />
 
-                            {question.question_type === 'mcq' && (
-                                <div className="space-y-3">
-                                    {(['a', 'b', 'c', 'd'] as const).map((option) => (
-                                        <label
-                                            key={option}
-                                            className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
-                                                data.answers[question.test_question_id] === option
-                                                    ? 'border-blue-600 bg-blue-50'
-                                                    : 'hover:bg-gray-50'
-                                            }`}
-                                        >
-                                            <input
-                                                type="radio"
-                                                name={`question_${question.test_question_id}`}
-                                                value={option}
-                                                checked={
-                                                    data.answers[question.test_question_id] === option
-                                                }
-                                                onChange={(e) =>
-                                                    setAnswer(
-                                                        question.test_question_id,
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="mt-1"
-                                            />
-
-                                            <span>
-                                                <strong>{option.toUpperCase()}.</strong>{' '}
-                                                {question[`option_${option}` as keyof Question]}
-                                            </span>
-                                        </label>
-                                    ))}
-                                </div>
-                            )}
-
-                            {question.question_type === 'text' && (
-                                <textarea
-                                    className="w-full rounded-xl border p-3"
-                                    rows={3}
-                                    value={data.answers[question.test_question_id] ?? ''}
-                                    onChange={(e) =>
-                                        setAnswer(question.test_question_id, e.target.value)
-                                    }
-                                />
-                            )}
-                        </div>
+                            <span>{label}</span>
+                        </label>
                     ))}
+                </div>
+            ) : (
+                <div className="mt-4">
+                    <textarea
+                        rows={4}
+                        className="w-full rounded-xl border p-4"
+                        value={data.answers[question.test_question_id] ?? ''}
+                        onChange={(e) =>
+                            setAnswer(question.test_question_id, e.target.value)
+                        }
+                        placeholder="Write your answer here..."
+                    />
+                </div>
+            )}
+        </div>
+    ))}
 
-                    <div className="sticky bottom-4 rounded-2xl border bg-white p-4 shadow-lg">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:bg-gray-400"
-                        >
-                            {processing ? 'Submitting...' : 'Submit Test'}
-                        </button>
-                    </div>
-                </form>
+    <div className="sticky bottom-4 rounded-2xl border bg-white p-4 shadow-lg">
+        <button
+            type="submit"
+            disabled={processing}
+            className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:bg-gray-400"
+        >
+            {processing ? 'Submitting...' : 'Submit Test'}
+        </button>
+    </div>
+</form>
             </div>
         </div>
     );

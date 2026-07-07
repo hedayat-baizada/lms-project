@@ -73,6 +73,7 @@ class ImportPlacementQuestions extends Command
                     'question_number' => $question['question_number'],
                 ],
                 [
+                    'course_track' => $courseTrack,
                     'section' => $question['section'] ?? 'mcq',
                     'question_text' => $question['question_text'],
                     'question_type' => $question['question_type'],

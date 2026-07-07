@@ -13,7 +13,7 @@ export default function PlacementTestReview({ application }: Props) {
             <div className="space-y-8 p-6">
                 <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 p-8 text-white shadow-xl">
                     <Link
-                       href={`/applications/${application.id}#assessment`}
+                        href={`/applications/${application.id}#assessment`}
                         className="text-sm text-blue-200 hover:underline"
                     >
                         ← Back to Application Review
@@ -29,7 +29,9 @@ export default function PlacementTestReview({ application }: Props) {
                 </div>
 
                 <div className="rounded-3xl border bg-white p-6 shadow-sm">
-                    <h2 className="mb-5 text-2xl font-bold">Questions & Answers</h2>
+                    <h2 className="mb-5 text-2xl font-bold">
+                        Questions & Answers
+                    </h2>
 
                     {answers.length === 0 && (
                         <p className="text-gray-500">No answers found.</p>
@@ -40,14 +42,30 @@ export default function PlacementTestReview({ application }: Props) {
                             const question = answer.question;
                             const selected = answer.answer_text;
                             const correct = question?.correct_answer;
+                            const isCorrect = Number(answer.score) === 1;
 
                             return (
-                                <div key={answer.id} className="rounded-2xl border bg-slate-50 p-5">
-                                    <p className="text-sm font-semibold text-blue-600">
-                                        Question {index + 1}
-                                    </p>
+                                <div
+                                    key={answer.id}
+                                    className="rounded-2xl border bg-slate-50 p-5"
+                                >
+                                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                                        <p className="text-sm font-semibold text-blue-600">
+                                            Question {index + 1}
+                                        </p>
 
-                                    <h3 className="mt-2 font-semibold text-slate-900">
+                                        <span
+                                            className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                                                isCorrect
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'
+                                            }`}
+                                        >
+                                            {isCorrect ? 'Correct' : 'Incorrect'}
+                                        </span>
+                                    </div>
+
+                                    <h3 className="mt-3 font-semibold text-slate-900">
                                         {question?.question_text ?? `Question ID: ${answer.question_id}`}
                                     </h3>
 
@@ -59,13 +77,13 @@ export default function PlacementTestReview({ application }: Props) {
                                                 if (!optionText) return null;
 
                                                 const isSelected = selected === option;
-                                                const isCorrect = correct === option;
+                                                const optionIsCorrect = correct === option;
 
                                                 return (
                                                     <div
                                                         key={option}
                                                         className={`rounded-xl border p-3 ${
-                                                            isCorrect
+                                                            optionIsCorrect
                                                                 ? 'border-green-500 bg-green-50'
                                                                 : isSelected
                                                                   ? 'border-red-500 bg-red-50'
@@ -83,7 +101,7 @@ export default function PlacementTestReview({ application }: Props) {
                                                                 </span>
                                                             )}
 
-                                                            {isCorrect && (
+                                                            {optionIsCorrect && (
                                                                 <span className="font-semibold text-green-700">
                                                                     Correct answer
                                                                 </span>
@@ -95,28 +113,54 @@ export default function PlacementTestReview({ application }: Props) {
                                         </div>
                                     )}
 
+                                    {question?.question_type !== 'mcq' && (
+                                        <div className="mt-4 grid gap-4 md:grid-cols-2">
+                                            <div className="rounded-xl border bg-white p-4">
+                                                <p className="text-sm font-semibold text-gray-500">
+                                                    Applicant Answer
+                                                </p>
+
+                                                <p className="mt-2 whitespace-pre-wrap text-slate-800">
+                                                    {selected || '-'}
+                                                </p>
+                                            </div>
+
+                                            <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+                                                <p className="text-sm font-semibold text-green-700">
+                                                    Correct Answer
+                                                </p>
+
+                                                <p className="mt-2 whitespace-pre-wrap text-green-900">
+                                                    {correct || '-'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="mt-4 rounded-xl bg-white p-3 text-sm">
                                         <p>
                                             <strong>Applicant Answer:</strong>{' '}
-                                            {selected ? selected.toUpperCase() : '-'}
+                                            {question?.question_type === 'mcq'
+                                                ? selected?.toUpperCase() ?? '-'
+                                                : selected || '-'}
                                         </p>
 
                                         <p>
                                             <strong>Correct Answer:</strong>{' '}
-                                            {correct ? correct.toUpperCase() : 'Manual review'}
+                                            {question?.question_type === 'mcq'
+                                                ? correct?.toUpperCase() ?? '-'
+                                                : correct || '-'}
                                         </p>
 
-                                        {correct && selected && (
-                                            <p
-                                                className={
-                                                    selected === correct
-                                                        ? 'mt-1 font-semibold text-green-700'
-                                                        : 'mt-1 font-semibold text-red-700'
-                                                }
-                                            >
-                                                {selected === correct ? 'Correct' : 'Incorrect'}
-                                            </p>
-                                        )}
+                                        <p
+                                            className={
+                                                isCorrect
+                                                    ? 'mt-1 font-semibold text-green-700'
+                                                    : 'mt-1 font-semibold text-red-700'
+                                            }
+                                        >
+                                            {isCorrect ? 'Correct' : 'Incorrect'}
+                                        </p>
                                     </div>
                                 </div>
                             );
@@ -125,7 +169,7 @@ export default function PlacementTestReview({ application }: Props) {
                 </div>
 
                 <Link
-                    href={`/applications/${application.id}`}
+                    href={`/applications/${application.id}#assessment`}
                     className="inline-flex rounded-xl bg-slate-800 px-5 py-3 font-semibold text-white hover:bg-slate-900"
                 >
                     ← Back to Application Review

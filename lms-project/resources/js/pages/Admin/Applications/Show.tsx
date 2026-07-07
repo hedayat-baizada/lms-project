@@ -6,11 +6,11 @@ import { useEffect, useState } from 'react';
 type Props = {
     application: any;
     placementSummary: {
-        total: number;
-        correct: number;
-        wrong: number;
-        percentage: number;
-    };
+    total: number;
+    correct: number;
+    wrong: number;
+    score: number;
+};
     placementLevels: {
         id: number;
         program: string;
@@ -223,19 +223,9 @@ export default function ApplicationShow({ application, placementSummary, placeme
                 </p>
 
                 <p className="mt-2 text-sm text-gray-600">
-                    {placementSummary.percentage >= 90 &&
-                        'Excellent performance.'}
-
-                    {placementSummary.percentage >= 70 &&
-                        placementSummary.percentage < 90 &&
-                        'Good performance.'}
-
-                    {placementSummary.percentage >= 50 &&
-                        placementSummary.percentage < 70 &&
-                        'Fair performance. Reviewer should inspect answers.'}
-
-                    {placementSummary.percentage < 50 &&
-                        'Needs improvement. Reviewer should carefully inspect answers.'}
+                    The applicant scored {placementSummary.score} out of {placementSummary.total}
+                    questions. Use this score together with writing, speaking, and reviewer judgment
+                    to assign the final placement level.
                 </p>
             </div>
 
@@ -388,7 +378,11 @@ export default function ApplicationShow({ application, placementSummary, placeme
            <div id="assessment">
     <Section title="Assessment Evaluation">
     <div className="grid gap-6 lg:grid-cols-3">
-        <MiniStat label="MCQ Score" value={`${placementSummary.percentage}%`} color="blue" />
+        <MiniStat
+    label="Placement Score"
+    value={`${placementSummary.score} / ${placementSummary.total}`}
+    color="blue"
+/>
         <MiniStat label="Correct Answers" value={placementSummary.correct} color="green" />
         <MiniStat label="Wrong Answers" value={placementSummary.wrong} color="red" />
     </div>

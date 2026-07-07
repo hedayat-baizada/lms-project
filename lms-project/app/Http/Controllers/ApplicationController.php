@@ -348,41 +348,59 @@ public function submitFinal(Application $application)
 
 
 
-    public function storeTestAnswers(Request $request, Application $application)
+   public function storeTestAnswers(Request $request, Application $application)
 {
- $validated = $request->validate([
-    'answers' => 'nullable|array',
-]);
+    $validated = $request->validate([
+        'answers' => 'nullable|array',
+    ]);
 
-$answers = $validated['answers'] ?? [];
+    $answers = $validated['answers'] ?? [];
 
-$placementTest = PlacementTest::where('application_id', $application->id)
-    ->firstOrFail();
+    $placementTest = PlacementTest::where('application_id', $application->id)
+        ->firstOrFail();
 
-if ($placementTest->status === 'submitted') {
-    if ($application->course_track === 'cel') {
-        return redirect()->route('apply.student.writing', $application->id);
+    if ($placementTest->status === 'submitted') {
+        if ($application->course_track === 'cel') {
+            return redirect()->route('apply.student.writing', $application->id);
+        }
+
+        return redirect()->route('apply.student.review', $application->id);
     }
 
-    return redirect()->route('apply.student.review', $application->id);
-}
-
     foreach ($answers as $testQuestionId => $answerText) {
+        $testQuestion = PlacementTestQuestion::with('placementQuestion')
+            ->findOrFail($testQuestionId);
+
+        $question = $testQuestion->placementQuestion;
+
+        $isCorrect = false;
+
+        if ($question->question_type === 'mcq') {
+            $isCorrect = strtolower(trim($answerText)) === strtolower(trim($question->correct_answer));
+        } else {
+            $isCorrect = $this->normalizeAnswer($answerText) === $this->normalizeAnswer($question->correct_answer);
+        }
+
         PlacementAnswer::updateOrCreate(
             [
                 'placement_test_id' => $placementTest->id,
                 'placement_test_question_id' => $testQuestionId,
             ],
             [
-                'question_id' => PlacementTestQuestion::findOrFail($testQuestionId)->placement_question_id,
+                'question_id' => $question->id,
                 'answer_text' => $answerText,
+                'score' => $isCorrect ? 1 : 0,
             ]
         );
     }
 
+    $totalScore = PlacementAnswer::where('placement_test_id', $placementTest->id)
+        ->sum('score');
+
     $placementTest->update([
         'status' => 'submitted',
         'submitted_at' => now(),
+        'total_score' => $totalScore,
     ]);
 
     if ($application->course_track === 'cel') {
@@ -391,7 +409,18 @@ if ($placementTest->status === 'submitted') {
 
     return redirect()->route('apply.student.review', $application->id);
 }
-   
+
+
+private function normalizeAnswer(?string $answer): string
+{
+    $answer = strtolower($answer ?? '');
+
+    $answer = preg_replace('/[^\p{L}\p{N}\s]/u', '', $answer);
+
+    $answer = preg_replace('/\s+/', ' ', $answer);
+
+    return trim($answer);
+}
 
 
 
@@ -428,7 +457,7 @@ if ($placementTest->status === 'submitted') {
         ]);
 
        $questions = PlacementQuestion::where('test_code', $testCode)
-            ->where('section', 'mcq')
+            ->whereIn('section', ['mcq', 'short_answer'])
             ->where('status', 'active')
             ->inRandomOrder()
             ->get();

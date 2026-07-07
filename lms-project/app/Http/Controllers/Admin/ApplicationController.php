@@ -18,6 +18,44 @@ class ApplicationController extends Controller
 
 
 
+public function approvedApplicants()
+{
+    $applications = Application::with('placementTest')
+        ->where('status', 'approved')
+        ->latest('reviewed_at')
+        ->get();
+
+    return Inertia::render('Admin/ApprovedApplicants/Index', [
+        'applications' => $applications,
+    ]);
+}
+
+public function showApprovedApplicant(Application $application)
+{
+    abort_unless($application->status === 'approved', 404);
+
+    $application->load([
+        'documents',
+        'guardianInfo',
+        'placementTest',
+        'speakingTest',
+    ]);
+
+    return Inertia::render('Admin/ApprovedApplicants/Show', [
+        'application' => [
+            ...$application->toArray(),
+            'documents' => $application->documents->map(function ($document) {
+                return [
+                    ...$document->toArray(),
+                    'file_url' => asset('storage/' . $document->file_path),
+                ];
+            }),
+        ],
+    ]);
+}
+
+
+
 public function history(Application $application)
 {
     $application->load([
@@ -365,21 +403,7 @@ public function submitFinal(Application $application)
         'placementTest',
     ]);
 
-    $answers = $application->placementTest?->answers ?? collect();
-
-$totalAnswers = $answers->count();
-
-$correctAnswers = $answers
-    ->filter(function ($answer) {
-        return $answer->answer_text === $answer->question?->correct_answer;
-    })
-    ->count();
-
-$wrongAnswers = $totalAnswers - $correctAnswers;
-
-$percentage = $totalAnswers > 0
-    ? round(($correctAnswers / $totalAnswers) * 100)
-    : 0;
+   
 
 
     $program = $application->course_track === 'cel'
@@ -392,6 +416,27 @@ $placementLevels = PlacementLevel::where('program', $program)
     ->where('active', true)
     ->orderBy('display_order')
     ->get();
+
+    $placementTest = $application->placementTest;
+
+$totalQuestions = $placementTest
+    ? $placementTest->testQuestions()->count()
+    : 0;
+
+$answers = $placementTest
+    ? $placementTest->answers
+    : collect();
+
+$correct = $answers->where('score', 1)->count();
+
+$wrong = max($totalQuestions - $correct, 0);
+
+$placementSummary = [
+    'total' => $totalQuestions,
+    'correct' => $correct,
+    'wrong' => $wrong,
+    'score' => $correct,
+];
     
    return Inertia::render('Admin/Applications/Show', [
     'application' => [
@@ -403,12 +448,7 @@ $placementLevels = PlacementLevel::where('program', $program)
             ];
         }),
     ],
-    'placementSummary' => [
-        'total' => $totalAnswers,
-        'correct' => $correctAnswers,
-        'wrong' => $wrongAnswers,
-        'percentage' => $percentage,
-    ],
+    'placementSummary' => $placementSummary,
         'placementLevels' => $placementLevels,
 
 ]);
