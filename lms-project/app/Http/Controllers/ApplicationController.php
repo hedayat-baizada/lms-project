@@ -457,18 +457,38 @@ private function normalizeAnswer(?string $answer): string
         ]);
 
        $questions = PlacementQuestion::where('test_code', $testCode)
-            ->whereIn('section', ['mcq', 'short_answer'])
-            ->where('status', 'active')
-            ->inRandomOrder()
-            ->get();
+    ->whereIn('section', ['mcq', 'short_answer'])
+    ->where('status', 'active')
+    ->get();
 
-        foreach ($questions as $index => $question) {
+$displayOrder = 1;
+
+if ($application->course_track === 'cel') {
+    $questions
+        ->groupBy('passage_number')
+        ->shuffle()
+        ->each(function ($group) use ($placementTest, &$displayOrder) {
+            $group
+                ->sortBy('blank_number')
+                ->each(function ($question) use ($placementTest, &$displayOrder) {
+                    PlacementTestQuestion::create([
+                        'placement_test_id' => $placementTest->id,
+                        'placement_question_id' => $question->id,
+                        'display_order' => $displayOrder++,
+                    ]);
+                });
+        });
+} else {
+    $questions
+        ->shuffle()
+        ->each(function ($question) use ($placementTest, &$displayOrder) {
             PlacementTestQuestion::create([
                 'placement_test_id' => $placementTest->id,
                 'placement_question_id' => $question->id,
-                'display_order' => $index + 1,
+                'display_order' => $displayOrder++,
             ]);
-        }
+        });
+}
     }
 
     $placementTest->load('testQuestions.placementQuestion');
@@ -488,6 +508,9 @@ private function normalizeAnswer(?string $answer): string
         'display_order' => $testQuestion->display_order,
         'question_text' => $testQuestion->placementQuestion->question_text,
         'question_type' => $testQuestion->placementQuestion->question_type,
+        'passage_number' => $testQuestion->placementQuestion->passage_number,
+        'blank_number' => $testQuestion->placementQuestion->blank_number,
+        'passage_text' => $testQuestion->placementQuestion->passage_text,
         'option_a' => $testQuestion->placementQuestion->option_a,
         'option_b' => $testQuestion->placementQuestion->option_b,
         'option_c' => $testQuestion->placementQuestion->option_c,

@@ -211,8 +211,8 @@ export default function ApplicationShow({ application, placementSummary, placeme
                 />
 
                 <MiniStat
-                    label="Score"
-                    value={`${placementSummary.percentage}%`}
+                    label="Placement Score"
+                    value={`${placementSummary.score} / ${placementSummary.total}`}
                     color="amber"
                 />
             </div>

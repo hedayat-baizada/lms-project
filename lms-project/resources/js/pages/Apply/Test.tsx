@@ -8,6 +8,9 @@ type Question = {
     display_order: number;
     question_text: string;
     question_type: string;
+    passage_number: number | null;
+    blank_number: number | null;
+    passage_text: string | null;
     option_a: string | null;
     option_b: string | null;
     option_c: string | null;
@@ -195,58 +198,143 @@ export default function PlacementTestPage() {
                 )}
 
                 <form onSubmit={submit} className="space-y-6">
-    {questions.map((question) => (
-        <div
-            key={question.test_question_id}
-            className="rounded-2xl border bg-white p-6 shadow-sm"
-        >
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-                {question.display_order}. {question.question_text}
-            </h2>
+    {Object.values(
+        questions.reduce((groups: Record<string, Question[]>, question) => {
+            const key = question.passage_number
+                ? `passage_${question.passage_number}`
+                : `question_${question.test_question_id}`;
 
-            {question.question_type === 'mcq' ? (
-                <div className="mt-4 space-y-3">
-                    {[
-                        ['a', question.option_a],
-                        ['b', question.option_b],
-                        ['c', question.option_c],
-                        ['d', question.option_d],
-                    ].map(([value, label]) => (
-                        <label
-                            key={value}
-                            className="flex cursor-pointer items-center gap-3 rounded-xl border p-4 hover:bg-blue-50"
-                        >
-                            <input
-                                type="radio"
-                                name={`question_${question.test_question_id}`}
-                                value={value ?? ''}
-                                checked={
-                                    data.answers[question.test_question_id] === value
-                                }
-                                onChange={() =>
-                                    setAnswer(question.test_question_id, value ?? '')
-                                }
-                            />
+            if (!groups[key]) {
+                groups[key] = [];
+            }
 
-                            <span>{label}</span>
-                        </label>
-                    ))}
+            groups[key].push(question);
+
+            return groups;
+        }, {})
+    ).map((group) => {
+        const firstQuestion = group[0];
+        const isPassageGroup = firstQuestion.passage_number !== null;
+
+        if (isPassageGroup) {
+            return (
+                <div
+                    key={`passage_${firstQuestion.passage_number}`}
+                    className="rounded-2xl border bg-white p-6 shadow-sm"
+                >
+                    <p className="text-sm font-semibold text-blue-600">
+                        Passage {firstQuestion.passage_number}
+                    </p>
+
+                    <div className="mt-4 rounded-xl bg-slate-50 p-5 leading-8 text-slate-800">
+                        {firstQuestion.passage_text}
+                    </div>
+
+                    <div className="mt-6 space-y-5">
+                        {group
+                            .sort((a, b) => (a.blank_number ?? 0) - (b.blank_number ?? 0))
+                            .map((question) => (
+                                <div
+                                    key={question.test_question_id}
+                                    className="rounded-xl border bg-slate-50 p-4"
+                                >
+                                    <h3 className="font-semibold text-slate-900">
+                                        Blank {question.blank_number}
+                                    </h3>
+
+                                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                                        {[
+                                            ['a', question.option_a],
+                                            ['b', question.option_b],
+                                            ['c', question.option_c],
+                                            ['d', question.option_d],
+                                        ].map(([value, label]) => (
+                                            <label
+                                                key={value}
+                                                className="flex cursor-pointer items-center gap-3 rounded-xl border bg-white p-4 hover:bg-blue-50"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name={`question_${question.test_question_id}`}
+                                                    value={value ?? ''}
+                                                    checked={
+                                                        data.answers[question.test_question_id] === value
+                                                    }
+                                                    onChange={() =>
+                                                        setAnswer(question.test_question_id, value ?? '')
+                                                    }
+                                                />
+
+                                                <span>
+                                                    {value?.toUpperCase()}. {label}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                    </div>
                 </div>
-            ) : (
-                <div className="mt-4">
-                    <textarea
-                        rows={4}
-                        className="w-full rounded-xl border p-4"
-                        value={data.answers[question.test_question_id] ?? ''}
-                        onChange={(e) =>
-                            setAnswer(question.test_question_id, e.target.value)
-                        }
-                        placeholder="Write your answer here..."
-                    />
-                </div>
-            )}
-        </div>
-    ))}
+            );
+        }
+
+        const question = firstQuestion;
+
+        return (
+            <div
+                key={question.test_question_id}
+                className="rounded-2xl border bg-white p-6 shadow-sm"
+            >
+                <h2 className="mb-4 text-lg font-semibold text-gray-900">
+                    {question.display_order}. {question.question_text}
+                </h2>
+
+                {question.question_type === 'mcq' ? (
+                    <div className="mt-4 space-y-3">
+                        {[
+                            ['a', question.option_a],
+                            ['b', question.option_b],
+                            ['c', question.option_c],
+                            ['d', question.option_d],
+                        ].map(([value, label]) => (
+                            <label
+                                key={value}
+                                className="flex cursor-pointer items-center gap-3 rounded-xl border p-4 hover:bg-blue-50"
+                            >
+                                <input
+                                    type="radio"
+                                    name={`question_${question.test_question_id}`}
+                                    value={value ?? ''}
+                                    checked={
+                                        data.answers[question.test_question_id] === value
+                                    }
+                                    onChange={() =>
+                                        setAnswer(question.test_question_id, value ?? '')
+                                    }
+                                />
+
+                                <span>
+                                    {value?.toUpperCase()}. {label}
+                                </span>
+                            </label>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="mt-4">
+                        <textarea
+                            rows={4}
+                            className="w-full rounded-xl border p-4"
+                            value={data.answers[question.test_question_id] ?? ''}
+                            onChange={(e) =>
+                                setAnswer(question.test_question_id, e.target.value)
+                            }
+                            placeholder="Write your answer here..."
+                        />
+                    </div>
+                )}
+            </div>
+        );
+    })}
 
     <div className="sticky bottom-4 rounded-2xl border bg-white p-4 shadow-lg">
         <button
