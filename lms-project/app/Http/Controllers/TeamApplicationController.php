@@ -1,0 +1,226 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\TeamApplication;
+use App\Models\TeamApplicationDocument;
+use App\Models\TeamStatusLog;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class TeamApplicationController extends Controller
+{
+
+
+public function create()
+{
+    $type = request('type');
+    $subject = request('subject');
+
+    abort_unless(
+        in_array($type, [
+            'volunteer_teacher',
+            'volunteer_manager',
+            'volunteer_support',
+            'professional_staff',
+        ]),
+        404
+    );
+
+    if ($type === 'volunteer_teacher') {
+        abort_unless(in_array($subject, ['english', 'computer']), 404);
+    }
+
+    return Inertia::render('Apply/Team/TeamApplicationForm', [
+        'type' => $type,
+        'subject' => $subject,
+    ]);
+}
+
+public function store(Request $request)
+{
+    $type = $request->input('application_type');
+    $subject = $request->input('teacher_subject');
+
+    abort_unless(
+        in_array($type, [
+            'volunteer_teacher',
+            'volunteer_manager',
+            'volunteer_support',
+            'professional_staff',
+        ]),
+        404
+    );
+
+    if ($type === 'volunteer_teacher') {
+        abort_unless(in_array($subject, ['english', 'computer']), 404);
+    }
+
+    $validated = $request->validate([
+        'application_type' => 'required|string',
+        'teacher_subject' => 'nullable|string',
+
+        'full_name' => 'required|string|min:3|max:100',
+        'email' => 'required|email|max:255',
+        'whatsapp_number' => 'required|string|max:30',
+        'mobile_number' => 'nullable|string|max:30',
+        'date_of_birth' => 'nullable|date|before:today',
+        'gender' => 'nullable|string|max:20',
+        'address' => 'required|string|max:500',
+        'permanent_address' => 'nullable|string|max:500',
+
+        'education_level' => 'required|string|max:2000',
+        'university_school' => 'nullable|string|max:255',
+        'date_of_graduation' => 'nullable|date',
+
+        'language_qualification' => 'nullable|string|max:2000',
+        'qualification_completion_date' => 'nullable|date',
+        'teaching_experience_years' => 'nullable|numeric|min:0|max:80',
+
+        'computer_qualification' => 'nullable|string|max:2000',
+        'computer_skills' => 'nullable|string|max:1000',
+
+        'experience' => 'nullable|string|max:2000',
+        'skills' => 'nullable|string|max:1000',
+        'motivation' => 'required|string|min:150|max:5000',
+        'availability' => 'required|string|max:255',
+        'preferred_mode' => 'required|in:online,physical,both',
+
+        'photo' => 'nullable|image|max:2048',
+        'cv' => 'required|file|mimes:pdf,doc,docx|max:5120',
+    ]);
+
+    $application = TeamApplication::create([
+        ...$validated,
+        'tracking_code' => $this->generateTrackingCode(),
+        'application_type' => $type,
+        'teacher_subject' => $type === 'volunteer_teacher' ? $subject : null,
+        'phone' => $validated['whatsapp_number'],
+        'status' => 'waiting_review',
+        'submitted_at' => now(),
+    ]);
+
+    if ($request->hasFile('photo')) {
+        $path = $request->file('photo')->store('team-applications/photos', 'public');
+
+        TeamApplicationDocument::create([
+            'team_application_id' => $application->id,
+            'document_type' => 'photo',
+            'file_path' => $path,
+        ]);
+    }
+
+    if ($request->hasFile('cv')) {
+        $path = $request->file('cv')->store('team-applications/cv', 'public');
+
+        TeamApplicationDocument::create([
+            'team_application_id' => $application->id,
+            'document_type' => 'cv',
+            'file_path' => $path,
+        ]);
+    }
+
+    TeamStatusLog::create([
+        'team_application_id' => $application->id,
+        'old_status' => null,
+        'new_status' => 'waiting_review',
+        'changed_by' => null,
+        'notes' => 'Team application submitted.',
+    ]);
+
+    return redirect()->route('apply.team.submitted', $application->id);
+}
+
+    public function storeTeacher(Request $request, string $subject)
+    {
+        abort_unless(in_array($subject, ['english', 'computer']), 404);
+
+        $validated = $request->validate([
+            'full_name' => 'required|string|min:3|max:100',
+            'email' => 'required|email|max:255',
+            'whatsapp_number' => 'required|string|max:30',
+            'mobile_number' => 'nullable|string|max:30',
+            'date_of_birth' => 'nullable|date|before:today',
+            'gender' => 'nullable|string|max:20',
+            'address' => 'required|string|max:500',
+            'permanent_address' => 'nullable|string|max:500',
+
+            'education_level' => 'required|string|max:255',
+            'university_school' => 'nullable|string|max:255',
+            'date_of_graduation' => 'nullable|date',
+
+            'language_qualification' => 'nullable|string|max:255',
+            'qualification_completion_date' => 'nullable|date',
+            'teaching_experience_years' => 'nullable|numeric|min:0|max:80',
+
+            'computer_qualification' => 'nullable|string|max:255',
+            'computer_skills' => 'nullable|string|max:1000',
+
+            'experience' => 'nullable|string|max:2000',
+            'skills' => 'nullable|string|max:1000',
+            'motivation' => 'required|string|min:150|max:5000',
+            'availability' => 'required|string|max:255',
+            'preferred_mode' => 'required|in:online,physical,both',
+
+            'photo' => 'nullable|image|max:2048',
+            'cv' => 'required|file|mimes:pdf,doc,docx|max:5120',
+        ]);
+
+        $application = TeamApplication::create([
+            ...$validated,
+            'tracking_code' => $this->generateTrackingCode(),
+            'application_type' => 'volunteer_teacher',
+            'teacher_subject' => $subject,
+            'phone' => $validated['whatsapp_number'],
+            'status' => 'waiting_review',
+            'submitted_at' => now(),
+        ]);
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('team-applications/photos', 'public');
+
+            TeamApplicationDocument::create([
+                'team_application_id' => $application->id,
+                'document_type' => 'photo',
+                'file_path' => $path,
+            ]);
+        }
+
+        if ($request->hasFile('cv')) {
+            $path = $request->file('cv')->store('team-applications/cv', 'public');
+
+            TeamApplicationDocument::create([
+                'team_application_id' => $application->id,
+                'document_type' => 'cv',
+                'file_path' => $path,
+            ]);
+        }
+
+        TeamStatusLog::create([
+    'team_application_id' => $application->id,
+    'old_status' => null,
+    'new_status' => 'waiting_review',
+    'changed_by' => null,
+    'notes' => 'Team application submitted.',
+]);
+
+        return redirect()
+    ->route('apply.team.submitted', $application->id);
+    }
+
+    private function generateTrackingCode(): string
+    {
+        do {
+            $code = 'TEAM-' . now()->format('Y') . '-' . strtoupper(str()->random(6));
+        } while (TeamApplication::where('tracking_code', $code)->exists());
+
+        return $code;
+    }
+
+    public function submitted(TeamApplication $teamApplication)
+{
+    return Inertia::render('Apply/Team/Submitted', [
+        'application' => $teamApplication,
+    ]);
+}
+}

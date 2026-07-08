@@ -5,6 +5,9 @@ use App\Http\Controllers\Admin\ApplicationController as AdminApplicationControll
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\TeamApplicationController;
+use App\Http\Controllers\TeamApplicationReviewController;
+
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -70,6 +73,50 @@ Route::get('/approved-applicants/{application}', [AdminApplicationController::cl
     Route::get('/apply/team', function () {
     return Inertia::render('Apply/Team/ChooseRole');
 })->name('apply.team');
+
+
+
+
+
+
+Route::get('/apply/team/teacher/{subject}', [TeamApplicationController::class, 'teacher'])
+    ->name('apply.team.teacher');
+
+Route::post('/apply/team/teacher/{subject}', [TeamApplicationController::class, 'storeTeacher'])
+    ->name('apply.team.teacher.store');
+
+
+    Route::get('/apply/team/{teamApplication}/submitted', [TeamApplicationController::class, 'submitted'])
+    ->name('apply.team.submitted');
+
+    Route::get('/apply/team/form', [TeamApplicationController::class, 'create'])
+    ->name('apply.team.form');
+
+Route::post('/apply/team/form', [TeamApplicationController::class, 'store'])
+    ->name('apply.team.store');
+
+
+
+
+Route::prefix('team-applications')->group(function () {
+
+    Route::get('/', [TeamApplicationReviewController::class, 'index'])
+        ->name('team-applications.index');
+
+    Route::get('/{teamApplication}', [TeamApplicationReviewController::class, 'show'])
+        ->name('team-applications.show');
+
+});
+
+
+Route::post('/{teamApplication}/approve', [TeamApplicationReviewController::class, 'approve'])
+    ->name('team-applications.approve');
+
+Route::post('/{teamApplication}/reject', [TeamApplicationReviewController::class, 'reject'])
+    ->name('team-applications.reject');
+
+Route::post('/{teamApplication}/request-correction', [TeamApplicationReviewController::class, 'requestCorrection'])
+    ->name('team-applications.request-correction');
    
 
     // Route::get('dashboard', function () {

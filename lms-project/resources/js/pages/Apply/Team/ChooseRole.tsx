@@ -62,12 +62,16 @@ export default function ChooseRole() {
                             </option>
                         </select>
 
-                        <button
-                            disabled={!teacherTrack}
-                            className="mt-6 w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white disabled:bg-gray-400"
-                        >
-                            Continue
-                        </button>
+                       <Link
+                        href={`/apply/team/form?type=volunteer_teacher&subject=${teacherTrack}`}
+                        className={`mt-6 block w-full rounded-xl py-3 text-center font-semibold text-white ${
+                            teacherTrack
+                                ? 'bg-emerald-600 hover:bg-emerald-700'
+                                : 'pointer-events-none bg-gray-400'
+                        }`}
+                    >
+                        Continue
+                    </Link>
 
                     </div>
 
@@ -84,11 +88,12 @@ export default function ChooseRole() {
                             communication and academy operations.
                         </p>
 
-                        <button
-                            className="mt-10 w-full rounded-xl bg-blue-600 py-3 font-semibold text-white"
-                        >
-                            Continue
-                        </button>
+                       <Link
+                        href="/apply/team/form?type=volunteer_manager"
+                        className="mt-10 block w-full rounded-xl bg-blue-600 py-3 text-center font-semibold text-white hover:bg-blue-700"
+                    >
+                        Continue
+                    </Link>
 
                     </div>
 
@@ -105,11 +110,12 @@ export default function ChooseRole() {
                             documentation, events and application processing.
                         </p>
 
-                        <button
-                            className="mt-10 w-full rounded-xl bg-purple-600 py-3 font-semibold text-white"
-                        >
-                            Continue
-                        </button>
+                       <Link
+                        href="/apply/team/form?type=volunteer_support"
+                        className="mt-10 block w-full rounded-xl bg-purple-600 py-3 text-center font-semibold text-white hover:bg-purple-700"
+                    >
+                        Continue
+                    </Link>
 
                     </div>
 
@@ -126,11 +132,12 @@ export default function ChooseRole() {
                             vacancies are available.
                         </p>
 
-                        <button
-                            className="mt-10 w-full rounded-xl bg-orange-600 py-3 font-semibold text-white"
-                        >
-                            Continue
-                        </button>
+                    <Link
+                        href="/apply/team/form?type=professional_staff"
+                        className="mt-10 block w-full rounded-xl bg-orange-600 py-3 text-center font-semibold text-white hover:bg-orange-700"
+                    >
+                        Continue
+                    </Link>
 
                     </div>
 
