@@ -281,6 +281,9 @@ class PermissionSeeder extends Seeder
         // $courseManager->syncPermissions([
         //     'dashboard.view',
 
+
+        // /////////////////
+
              
         //      'approved-applicants.view',
         //     'approved-applicants.edit',
