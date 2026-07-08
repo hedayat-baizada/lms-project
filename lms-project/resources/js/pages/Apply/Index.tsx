@@ -50,14 +50,14 @@ export default function ApplyIndex() {
                                 color="yellow"
                             />
 
-                            <DisabledCard
-                                title="Register as Teacher"
-                                description="Teacher registration will be available later."
-                            />
-
-                            <DisabledCard
-                                title="Register as Volunteer"
-                                description="Volunteer registration will be available later."
+                            
+                            
+                
+                            <ActionCard
+                                href="/apply/team"
+                                title="Apply to Join the Academy Team"
+                                description="Volunteer teacher, coordinator, support staff, or professional staff application."
+                                color="green"
                             />
 
                             <DisabledCard
@@ -92,11 +92,12 @@ function ActionCard({
     href: string;
     title: string;
     description: string;
-    color: 'blue' | 'yellow';
+    color: 'blue' | 'yellow' | 'green';
 }) {
     const colors = {
         blue: 'border-blue-200 hover:border-blue-500 hover:bg-blue-50',
         yellow: 'border-yellow-200 hover:border-yellow-500 hover:bg-yellow-50',
+        green: 'border-green-200 hover:border-green-500 hover:bg-green-50'
     };
 
     return (

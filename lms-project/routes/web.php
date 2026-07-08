@@ -65,6 +65,11 @@ Route::post('/apply/student/{application}/correction', [ApplicationController::c
 
 Route::get('/approved-applicants/{application}', [AdminApplicationController::class, 'showApprovedApplicant'])
     ->name('approved-applicants.show');
+
+
+    Route::get('/apply/team', function () {
+    return Inertia::render('Apply/Team/ChooseRole');
+})->name('apply.team');
    
 
     // Route::get('dashboard', function () {
