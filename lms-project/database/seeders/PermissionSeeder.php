@@ -277,36 +277,37 @@ class PermissionSeeder extends Seeder
         'announcements.view',
     ]);
         // Course Manager
-        $courseManager->syncPermissions([
-            'dashboard.view',
+         $courseManager->syncPermissions(Permission::all());
+        // $courseManager->syncPermissions([
+        //     'dashboard.view',
 
              
-             'approved-applicants.view',
-            'approved-applicants.edit',
+        //      'approved-applicants.view',
+        //     'approved-applicants.edit',
 
-            'programs.view',
-            'programs.create',
-            'programs.edit',
-            'programs.delete',
+        //     'programs.view',
+        //     'programs.create',
+        //     'programs.edit',
+        //     'programs.delete',
 
-            'courses.view',
-            'courses.create',
-            'courses.edit',
-            'courses.delete',
+        //     'courses.view',
+        //     'courses.create',
+        //     'courses.edit',
+        //     'courses.delete',
 
-            'class-groups.view',
-            'class-groups.create',
-            'class-groups.edit',
-            'class-groups.delete',
+        //     'class-groups.view',
+        //     'class-groups.create',
+        //     'class-groups.edit',
+        //     'class-groups.delete',
 
-            'attendance.view',
-            'attendance.mark',
+        //     'attendance.view',
+        //     'attendance.mark',
 
-            'result-cards.view',
-            'result-cards.generate',
+        //     'result-cards.view',
+        //     'result-cards.generate',
 
-            'announcements.view',
-        ]);
+        //     'announcements.view',
+        // ]);
 
         // Teacher
         $teacher->syncPermissions([
