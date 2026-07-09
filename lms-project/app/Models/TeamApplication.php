@@ -89,4 +89,15 @@ class TeamApplication extends Model
     {
         return $this->belongsTo(User::class, 'reviewed_by');
     }
+
+
+    public function approvedByUser()
+{
+    return $this->belongsTo(User::class, 'approved_by');
+}
+
+public function rejectedByUser()
+{
+    return $this->belongsTo(User::class, 'rejected_by');
+}
 }

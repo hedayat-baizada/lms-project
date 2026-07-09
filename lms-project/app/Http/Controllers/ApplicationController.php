@@ -6,6 +6,7 @@ use App\Models\PlacementTest;
 use App\Models\PlacementTestQuestion;
 use App\Models\SpeakingTest;
 
+use App\Models\TeamApplication;
 use App\Models\PlacementAnswer;
 
 use App\Models\Application;
@@ -102,24 +103,44 @@ public function track(Request $request)
     $trackingCode = $request->query('tracking_code');
 
     $application = null;
+    $applicationType = null;
 
     if ($trackingCode) {
-       $application = Application::with([
-        'documents',
-        'correctionRequests',
-        'reviewActions',
-        'statusLogs',
-    ])
-    ->where('tracking_code', $trackingCode)
-    ->first();
+        $application = Application::with([
+            'documents',
+            'correctionRequests',
+            'reviewActions',
+            'statusLogs',
+        ])
+            ->where('tracking_code', $trackingCode)
+            ->first();
+
+        if ($application) {
+            $applicationType = 'student';
+        }
+
+        if (! $application) {
+            $application = TeamApplication::with([
+                'documents',
+                'correctionRequests',
+                'reviewActions',
+                'statusLogs',
+            ])
+                ->where('tracking_code', $trackingCode)
+                ->first();
+
+            if ($application) {
+                $applicationType = 'team';
+            }
+        }
     }
 
     return Inertia::render('Apply/Track', [
-    'application' => $application,
-    'trackingCode' => $trackingCode,
-]);
+        'application' => $application,
+        'applicationType' => $applicationType,
+        'trackingCode' => $trackingCode,
+    ]);
 }
-
 
 
 public function startSpeaking(Application $application)

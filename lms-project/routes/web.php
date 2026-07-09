@@ -106,17 +106,23 @@ Route::prefix('team-applications')->group(function () {
     Route::get('/{teamApplication}', [TeamApplicationReviewController::class, 'show'])
         ->name('team-applications.show');
 
+            Route::post('/{teamApplication}/approve', [TeamApplicationReviewController::class, 'approve'])
+        ->name('team-applications.approve');
+
+    Route::post('/{teamApplication}/reject', [TeamApplicationReviewController::class, 'reject'])
+        ->name('team-applications.reject');
+
+    Route::post('/{teamApplication}/request-correction', [TeamApplicationReviewController::class, 'requestCorrection'])
+        ->name('team-applications.request-correction');
+
 });
 
 
-Route::post('/{teamApplication}/approve', [TeamApplicationReviewController::class, 'approve'])
-    ->name('team-applications.approve');
+Route::get('/approved-teachers', [TeamApplicationReviewController::class, 'approvedTeachers'])
+    ->name('approved-teachers.index');
 
-Route::post('/{teamApplication}/reject', [TeamApplicationReviewController::class, 'reject'])
-    ->name('team-applications.reject');
 
-Route::post('/{teamApplication}/request-correction', [TeamApplicationReviewController::class, 'requestCorrection'])
-    ->name('team-applications.request-correction');
+
    
 
     // Route::get('dashboard', function () {
@@ -216,6 +222,15 @@ Route::post('/apply/student/{application}/test/drafts', [ApplicationController::
 
 Route::get('/track', [ApplicationController::class, 'track'])
     ->name('apply.track');
+
+
+
+
+    Route::get('/apply/team/{teamApplication}/correction', [TeamApplicationController::class, 'correction'])
+    ->name('apply.team.correction');
+
+Route::post('/apply/team/{teamApplication}/correction', [TeamApplicationController::class, 'storeCorrection'])
+    ->name('apply.team.correction.store');
 
 
 

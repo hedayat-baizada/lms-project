@@ -12,6 +12,76 @@ class TeamApplicationController extends Controller
 {
 
 
+public function correction(TeamApplication $teamApplication)
+{
+    abort_unless(
+        in_array($teamApplication->status, ['need_correction', 'correction_submitted']),
+        404
+    );
+
+    $teamApplication->load('correctionRequests');
+
+    return Inertia::render('Apply/Team/Correction', [
+        'application' => $teamApplication,
+        'latestCorrectionRequest' => $teamApplication->correctionRequests()
+            ->latest()
+            ->first(),
+    ]);
+}
+
+public function storeCorrection(Request $request, TeamApplication $teamApplication)
+{
+    abort_unless($teamApplication->status === 'need_correction', 404);
+
+    $validated = $request->validate([
+        'correction_note' => 'required|string|min:5|max:3000',
+        'photo' => 'nullable|image|max:2048',
+        'cv' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+    ]);
+
+    if ($request->hasFile('photo')) {
+        $path = $request->file('photo')->store('team-applications/photos', 'public');
+
+        TeamApplicationDocument::create([
+            'team_application_id' => $teamApplication->id,
+            'document_type' => 'photo_correction',
+            'file_path' => $path,
+        ]);
+    }
+
+    if ($request->hasFile('cv')) {
+        $path = $request->file('cv')->store('team-applications/cv', 'public');
+
+        TeamApplicationDocument::create([
+            'team_application_id' => $teamApplication->id,
+            'document_type' => 'cv_correction',
+            'file_path' => $path,
+        ]);
+    }
+
+    $oldStatus = $teamApplication->status;
+
+    $teamApplication->update([
+        'status' => 'correction_submitted',
+    ]);
+
+    TeamStatusLog::create([
+        'team_application_id' => $teamApplication->id,
+        'old_status' => $oldStatus,
+        'new_status' => 'correction_submitted',
+        'changed_by' => null,
+        'notes' => 'Applicant submitted a correction: ' . $validated['correction_note'],
+    ]);
+
+    $teamApplication->correctionRequests()
+        ->where('status', 'open')
+        ->update(['status' => 'resolved']);
+
+    return redirect()
+        ->route('apply.team.submitted', $teamApplication->id)
+        ->with('message', 'Your correction has been submitted successfully.');
+}
+
 public function create()
 {
     $type = request('type');

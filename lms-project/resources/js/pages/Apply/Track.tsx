@@ -4,12 +4,16 @@ import { Link } from '@inertiajs/react';
 
 type Props = {
     application: any | null;
+    applicationType: 'student' | 'team' | null;
     trackingCode: string | null;
 };
 
 export default function TrackApplication() {
-   const { application, trackingCode } = usePage<Props>().props;
-
+const {
+    application,
+    applicationType,
+    trackingCode,
+} = usePage<Props>().props;
     const form = useForm({
     tracking_code: trackingCode ?? '',
 });
@@ -218,7 +222,11 @@ case 'correction_submitted':
                             
                                                {application.status === 'need_correction' && (
     <Link
-        href={`/apply/student/${application.id}/correction`}
+    href={
+        applicationType === 'student'
+            ? `/apply/student/${application.id}/correction`
+            : `/apply/team/${application.id}/correction`
+    }
         className="mt-4 inline-flex rounded-xl bg-orange-600 px-5 py-3 font-semibold text-white hover:bg-orange-700"
     >
         Submit Correction
@@ -294,51 +302,39 @@ case 'correction_submitted':
 
                             <div className="space-y-4">
 
-                                <ProgressItem
-                                    done
-                                    title="Personal Information"
-                                />
+    {applicationType === 'student' ? (
+        <>
+            <ProgressItem done title="Personal Information" />
+            <ProgressItem done title="Course Selection" />
+            <ProgressItem done title="Documents Uploaded" />
+            <ProgressItem done title="Placement Test" />
 
-                                <ProgressItem
-                                    done
-                                    title="Course Selection"
-                                />
+            {application.course_track === 'cel' && (
+                <>
+                    <ProgressItem done title="Writing Test" />
+                    <ProgressItem done title="Speaking Test" />
+                </>
+            )}
 
-                                <ProgressItem
-                                    done
-                                    title="Documents Uploaded"
-                                />
+            <ProgressItem done title="Application Submitted" />
+            <ProgressItem
+                done={application.status !== 'waiting_review'}
+                title="Reviewer Decision"
+            />
+        </>
+    ) : (
+        <>
+            <ProgressItem done title="Application Form" />
+            <ProgressItem done title="Documents Uploaded" />
+            <ProgressItem done title="Application Submitted" />
+            <ProgressItem
+                done={application.status !== 'waiting_review'}
+                title="Reviewer Decision"
+            />
+        </>
+    )}
 
-                                <ProgressItem
-                                    done
-                                    title="Placement Test"
-                                />
-
-                                {application.course_track === 'cel' && (
-                                    <>
-                                        <ProgressItem
-                                            done
-                                            title="Writing Test"
-                                        />
-
-                                        <ProgressItem
-                                            done
-                                            title="Speaking Test"
-                                        />
-                                    </>
-                                )}
-
-                                <ProgressItem
-                                    done
-                                    title="Application Submitted"
-                                />
-
-                                <ProgressItem
-                                    done={application.status !== 'waiting_review'}
-                                    title="Reviewer Decision"
-                                />
-
-                            </div>
+</div>
 
                         </div>
 
@@ -363,10 +359,17 @@ case 'correction_submitted':
                                         value={application.phone}
                                     />
 
-                                    <Info
-                                        label="Course"
-                                        value={`${application.course_category} / ${application.course_track}`}
-                                    />
+                                    {applicationType === 'student' ? (
+    <Info
+        label="Course"
+        value={`${application.course_category} / ${application.course_track}`}
+    />
+) : (
+    <Info
+        label="Role"
+        value={application.application_type}
+    />
+)}
 
                                     <Info
                                         label="Submitted"

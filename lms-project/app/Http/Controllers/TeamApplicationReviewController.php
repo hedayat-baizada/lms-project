@@ -29,6 +29,8 @@ class TeamApplicationReviewController extends Controller
         'correctionRequests',
         'reviewActions.reviewer',
         'statusLogs.changer',
+        'approvedByUser',
+        'rejectedByUser',
     ]);
 
     return Inertia::render('Admin/TeamApplications/Show', [
@@ -44,6 +46,18 @@ class TeamApplicationReviewController extends Controller
     ]);
 }
 
+
+public function approvedTeachers()
+{
+    $teachers = TeamApplication::where('application_type', 'volunteer_teacher')
+        ->where('status', 'approved')
+        ->latest('approved_at')
+        ->get();
+
+    return Inertia::render('Admin/TeamApplications/ApprovedTeachers', [
+        'teachers' => $teachers,
+    ]);
+}
 
 public function approve(Request $request, TeamApplication $teamApplication)
 {
@@ -117,40 +131,34 @@ public function reject(Request $request, TeamApplication $teamApplication)
 }
 
 
-
-public function reject(Request $request, TeamApplication $teamApplication)
+public function requestCorrection(Request $request, TeamApplication $teamApplication)
 {
     $request->validate([
-        'notes' => 'required|string|min:10',
+        'message' => 'required|string|min:10',
     ]);
 
     $oldStatus = $teamApplication->status;
 
-    $teamApplication->update([
-        'status' => 'rejected',
-        'reviewer_notes' => $request->notes,
-        'rejected_at' => now(),
-        'rejected_by' => auth()->id(),
-        'approved_at' => null,
-        'approved_by' => null,
-        'reviewed_at' => now(),
-        'reviewed_by' => auth()->id(),
-    ]);
-
-    TeamReviewAction::create([
+    TeamCorrectionRequest::create([
         'team_application_id' => $teamApplication->id,
         'reviewer_id' => auth()->id(),
-        'action' => 'rejected',
-        'notes' => $request->notes,
+        'message' => $request->message,
+        'status' => 'open',
+    ]);
+
+    $teamApplication->update([
+        'status' => 'need_correction',
     ]);
 
     TeamStatusLog::create([
         'team_application_id' => $teamApplication->id,
         'old_status' => $oldStatus,
-        'new_status' => 'rejected',
+        'new_status' => 'need_correction',
         'changed_by' => auth()->id(),
-        'notes' => $request->notes,
+        'notes' => $request->message,
     ]);
 
-    return back()->with('success', 'Application rejected.');
+    return back()->with('success', 'Correction requested.');
+}
+
 }
