@@ -27,9 +27,9 @@ import {
     BarChart3,
     History,
     Settings,
+    UserCheck,
     CircleUser,
-    BookUser, 
-    
+    BookUser,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -100,6 +100,14 @@ const mainNavItems: NavItem[] = [
                 icon: FileCheck,
                 permission: 'placement-tests.view',
             },
+            {
+                title: 'Approved Applicants',
+                url: '/approved-applicants',
+                icon: UserCheck,
+                permission: 'approved-applicants.view',
+            },
+
+
         ],
     },
 
@@ -137,6 +145,12 @@ const mainNavItems: NavItem[] = [
                 url: '/result-cards',
                 icon: Award,
                 permission: 'result-cards.view',
+            },
+            {
+                title: 'Approved Applicants',
+                url: '/approved-applicants',
+                icon: UserCheck,
+                permission: 'approved-applicants.view',
             },
         ],
     },
@@ -293,13 +307,13 @@ const mainNavItems: NavItem[] = [
                 title: 'Audit Logs',
                 url: '/audit-logs',
                 icon: History,
-                permission: 'audit-logs',
+                permission: 'audit-logs.view',
             },
             {
                 title: 'Settings',
                 url: '/settings',
                 icon: Settings,
-                permission: 'settings',
+                permission: 'settings.view',
             },
         ],
     },

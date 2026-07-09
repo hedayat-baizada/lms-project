@@ -42,6 +42,9 @@ class PermissionSeeder extends Seeder
             'applications.delete',
             'applications.approve',
             'applications.reject',
+            'approved-applicants.view',
+            'approved-applicants.edit',
+            
 
             // Students
             'students.view',
@@ -230,6 +233,10 @@ class PermissionSeeder extends Seeder
         'applications.approve',
         'applications.reject',
 
+         
+       'approved-applicants.view',
+        'approved-applicants.edit',
+
         'students.view',
 
         'guardians.view',
@@ -270,32 +277,40 @@ class PermissionSeeder extends Seeder
         'announcements.view',
     ]);
         // Course Manager
-        $courseManager->syncPermissions([
-            'dashboard.view',
+         $courseManager->syncPermissions(Permission::all());
+        // $courseManager->syncPermissions([
+        //     'dashboard.view',
 
-            'programs.view',
-            'programs.create',
-            'programs.edit',
-            'programs.delete',
 
-            'courses.view',
-            'courses.create',
-            'courses.edit',
-            'courses.delete',
+        // /////////////////
 
-            'class-groups.view',
-            'class-groups.create',
-            'class-groups.edit',
-            'class-groups.delete',
+             
+        //      'approved-applicants.view',
+        //     'approved-applicants.edit',
 
-            'attendance.view',
-            'attendance.mark',
+        //     'programs.view',
+        //     'programs.create',
+        //     'programs.edit',
+        //     'programs.delete',
 
-            'result-cards.view',
-            'result-cards.generate',
+        //     'courses.view',
+        //     'courses.create',
+        //     'courses.edit',
+        //     'courses.delete',
 
-            'announcements.view',
-        ]);
+        //     'class-groups.view',
+        //     'class-groups.create',
+        //     'class-groups.edit',
+        //     'class-groups.delete',
+
+        //     'attendance.view',
+        //     'attendance.mark',
+
+        //     'result-cards.view',
+        //     'result-cards.generate',
+
+        //     'announcements.view',
+        // ]);
 
         // Teacher
         $teacher->syncPermissions([
