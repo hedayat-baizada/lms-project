@@ -106,6 +106,12 @@ const mainNavItems: NavItem[] = [
                 icon: UserCheck,
                 permission: 'approved-applicants.view',
             },
+            {
+                title: 'Approved Teachers',
+                url: '/approved-teachers',
+                icon: GraduationCap,
+                permission: 'team-application.view',
+            },
 
 
         ],
