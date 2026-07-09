@@ -12,6 +12,40 @@ use App\Models\TeamCorrectionRequest;
 
 class TeamApplicationReviewController extends Controller
 {
+
+
+
+
+public function correctionReview(TeamApplication $teamApplication)
+{
+    $teamApplication->load([
+        'documents',
+        'correctionRequests',
+        'statusLogs',
+    ]);
+
+    return Inertia::render('Admin/TeamApplications/CorrectionReview', [
+        'application' => [
+            ...$teamApplication->toArray(),
+            'documents' => $teamApplication->documents->map(function ($document) {
+                return [
+                    ...$document->toArray(),
+                    'file_url' => asset('storage/' . $document->file_path),
+                ];
+            }),
+        ],
+        'latestCorrectionRequest' => $teamApplication->correctionRequests()
+            ->latest()
+            ->first(),
+        'latestCorrectionLog' => $teamApplication->statusLogs()
+            ->where('new_status', 'correction_submitted')
+            ->latest()
+            ->first(),
+    ]);
+}
+
+
+
     public function index()
     {
         $applications = TeamApplication::latest()

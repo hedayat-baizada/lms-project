@@ -78,8 +78,10 @@ public function storeCorrection(Request $request, TeamApplication $teamApplicati
         ->update(['status' => 'resolved']);
 
     return redirect()
-        ->route('apply.team.submitted', $teamApplication->id)
-        ->with('message', 'Your correction has been submitted successfully.');
+    ->route('apply.track', [
+        'tracking_code' => $teamApplication->tracking_code,
+    ])
+    ->with('message', 'Your correction has been submitted successfully.');
 }
 
 public function create()
@@ -127,38 +129,55 @@ public function store(Request $request)
     }
 
     $validated = $request->validate([
-        'application_type' => 'required|string',
-        'teacher_subject' => 'nullable|string',
+    'application_type' => 'required|in:volunteer_teacher,volunteer_manager,volunteer_support,professional_staff',
+    'teacher_subject' => 'nullable|in:english,computer',
 
-        'full_name' => 'required|string|min:3|max:100',
-        'email' => 'required|email|max:255',
-        'whatsapp_number' => 'required|string|max:30',
-        'mobile_number' => 'nullable|string|max:30',
-        'date_of_birth' => 'nullable|date|before:today',
-        'gender' => 'nullable|string|max:20',
-        'address' => 'required|string|max:500',
-        'permanent_address' => 'nullable|string|max:500',
+    'full_name' => 'required|string|min:3|max:100',
+    'email' => 'required|email|max:255',
+    'whatsapp_number' => 'required|string|max:30',
+    'mobile_number' => 'nullable|string|max:30',
+    'date_of_birth' => 'nullable|date|before:today',
+    'gender' => 'required|string|in:male,female',
+    'address' => 'required|string|max:500',
+    'permanent_address' => 'nullable|string|max:500',
 
-        'education_level' => 'required|string|max:2000',
-        'university_school' => 'nullable|string|max:255',
-        'date_of_graduation' => 'nullable|date',
+    'education_level' => 'required|string|max:2000',
+    'university_school' => 'nullable|string|max:255',
+    'date_of_graduation' => 'nullable|date',
 
-        'language_qualification' => 'nullable|string|max:2000',
-        'qualification_completion_date' => 'nullable|date',
-        'teaching_experience_years' => 'nullable|numeric|min:0|max:80',
+    'language_qualification' => 'required_if:teacher_subject,english|nullable|string|max:2000',
+    'qualification_completion_date' => 'nullable|date',
+    'teaching_experience_years' => 'nullable|numeric|min:0|max:80',
 
-        'computer_qualification' => 'nullable|string|max:2000',
-        'computer_skills' => 'nullable|string|max:1000',
+    'computer_qualification' => 'required_if:teacher_subject,computer|nullable|string|max:2000',
+    'computer_skills' => 'required_if:teacher_subject,computer|nullable|string|max:1000',
 
-        'experience' => 'nullable|string|max:2000',
-        'skills' => 'nullable|string|max:1000',
-        'motivation' => 'required|string|min:150|max:5000',
-        'availability' => 'required|string|max:255',
-        'preferred_mode' => 'required|in:online,physical,both',
+    'field_of_study' => 'required_if:application_type,professional_staff|nullable|string|max:255',
 
-        'photo' => 'nullable|image|max:2048',
-        'cv' => 'required|file|mimes:pdf,doc,docx|max:5120',
-    ]);
+    'experience' => [
+        'nullable',
+        'string',
+        'max:2000',
+        'required_if:application_type,volunteer_manager',
+        'required_if:application_type,volunteer_support',
+        'required_if:application_type,professional_staff',
+    ],
+
+    'skills' => [
+        'nullable',
+        'string',
+        'max:1000',
+        'required_if:application_type,volunteer_manager',
+        'required_if:application_type,volunteer_support',
+    ],
+
+    'motivation' => 'required|string|min:150|max:5000',
+    'availability' => 'required|string|max:255',
+    'preferred_mode' => 'required|in:online,physical,both',
+
+   'photo' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+    'cv' => 'required|file|mimes:pdf,doc,docx|max:5120',
+]);
 
     $application = TeamApplication::create([
         ...$validated,

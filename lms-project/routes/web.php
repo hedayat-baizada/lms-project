@@ -97,6 +97,10 @@ Route::post('/apply/team/form', [TeamApplicationController::class, 'store'])
 
 
 
+    Route::get('/team-applications/{teamApplication}/correction-review', [TeamApplicationReviewController::class, 'correctionReview'])
+    ->name('team-applications.correction-review');
+
+
 
 Route::prefix('team-applications')->group(function () {
 

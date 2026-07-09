@@ -213,7 +213,7 @@ export default function TeamApplicationsIndex({ applications }: Props) {
                                                     href={`/team-applications/${application.id}`}
                                                     className="rounded-xl bg-slate-800 px-4 py-2 font-semibold text-white hover:bg-slate-900"
                                                 >
-                                                    Review Application
+                                                    Review
                                                 </Link>
                                             </td>
                                         </tr>

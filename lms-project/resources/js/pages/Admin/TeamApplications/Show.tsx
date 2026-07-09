@@ -164,76 +164,118 @@ const canRequestCorrection =
                 </Section>
 
                 <Section title="Uploaded Documents">
-                    {application.documents?.length === 0 && (
-                        <p className="text-gray-500">No documents uploaded.</p>
+    {application.documents?.length === 0 && (
+        <p className="text-gray-500">No documents uploaded.</p>
+    )}
+
+    <div className="grid gap-4 md:grid-cols-2">
+        {application.documents?.map((document: any) => {
+            const isImage = document.file_url?.match(/\.(jpg|jpeg|png|webp)$/i);
+
+            return (
+                <div
+                    key={document.id}
+                    className="rounded-2xl border bg-slate-50 p-5"
+                >
+                    <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl shadow-sm">
+                            {isImage ? '🖼️' : '📄'}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                            <p className="font-bold text-slate-900">
+                                {documentLabel(document.document_type)}
+                            </p>
+
+                            <p className="mt-1 text-sm text-gray-500">
+                                Status: {document.status}
+                            </p>
+
+                            <p className="mt-1 truncate text-sm text-gray-500">
+                                {document.file_path?.split('/').pop() ?? 'Uploaded file'}
+                            </p>
+
+                            {document.file_url && (
+                                <a
+                                    href={document.file_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-3 inline-flex rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900"
+                                >
+                                    Open Document
+                                </a>
+                            )}
+                        </div>
+                    </div>
+
+                    {isImage && (
+                        <img
+                            src={document.file_url}
+                            alt="Uploaded document"
+                            className="mt-4 max-h-64 w-full rounded-xl border bg-white object-contain"
+                        />
                     )}
+                </div>
+            );
+        })}
+    </div>
+</Section>
 
-                    <div className="grid gap-5 md:grid-cols-2">
-                        {application.documents?.map((document: any) => (
-                            <div
-                                key={document.id}
-                                className="rounded-2xl border bg-slate-50 p-5"
-                            >
-                                <p className="font-bold text-slate-900">
-                                    {document.document_type.toUpperCase()}
-                                </p>
+                <Section title="Review Timeline">
+    <div className="space-y-4">
+        {application.status_logs?.length === 0 && (
+            <p className="text-gray-500">No timeline updates yet.</p>
+        )}
 
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Status: {document.status}
-                                </p>
+        {[...(application.status_logs ?? [])]
+            .slice()
+            .reverse()
+            .map((log: any) => (
+                <div
+                    key={log.id}
+                    className={`rounded-2xl border p-5 ${
+                        log.new_status === 'need_correction'
+                            ? 'border-orange-200 bg-orange-50'
+                            : log.new_status === 'correction_submitted'
+                              ? 'border-blue-200 bg-blue-50'
+                              : log.new_status === 'approved'
+                                ? 'border-green-200 bg-green-50'
+                                : log.new_status === 'rejected'
+                                  ? 'border-red-200 bg-red-50'
+                                  : 'border-slate-200 bg-slate-50'
+                    }`}
+                >
+                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                        <h3 className="font-bold">
+                            {timelineTitle(log.new_status)}
+                        </h3>
 
-                                {document.file_url && (
-                                    <div className="mt-4">
-                                        <a
-                                            href={document.file_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="font-medium text-blue-600 hover:underline"
-                                        >
-                                            Open Document
-                                        </a>
-
-                                        {document.file_url.match(/\.(jpg|jpeg|png|webp)$/i) && (
-                                            <img
-                                                src={document.file_url}
-                                                alt="Uploaded document"
-                                                className="mt-4 max-h-72 rounded-xl border bg-white object-contain"
-                                            />
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                        <p className="text-sm text-gray-500">
+                            {new Date(log.created_at).toLocaleString()}
+                        </p>
                     </div>
-                </Section>
 
-                <Section title="Review History">
-                    <div className="space-y-4">
-                        {application.status_logs?.length === 0 && (
-                            <p className="text-gray-500">No review history yet.</p>
-                        )}
+                    <p className="mt-3 whitespace-pre-wrap text-sm text-gray-700">
+                        {cleanTimelineNotes(log.notes)}
+                    </p>
 
-                        {application.status_logs?.map((log: any) => (
-                            <div
-                                key={log.id}
-                                className="rounded-2xl border bg-slate-50 p-4"
-                            >
-                                <p className="font-semibold">
-                                    {log.old_status ?? '-'} → {log.new_status}
-                                </p>
+                    <p className="mt-2 text-xs text-gray-500">
+                        {log.old_status ?? '-'} → {log.new_status}
+                    </p>
+                </div>
+            ))}
+            {application.status === 'correction_submitted' && (
+    <Link
+        href={`/team-applications/${application.id}/correction-review`}
+        className="mb-6 inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+    >
+        Review Submitted Correction
+    </Link>
+)}
+    </div>
 
-                                <p className="mt-1 text-sm text-gray-600">
-                                    {log.notes ?? 'No notes.'}
-                                </p>
-
-                                <p className="mt-2 text-xs text-gray-400">
-                                    {new Date(log.created_at).toLocaleString()}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </Section>
-
+    
+</Section>
                <Section title="Reviewer Decision">
     {isApproved && (
         <DecisionNotice
@@ -263,6 +305,8 @@ const canRequestCorrection =
             date={application.updated_at}
         />
     )}
+
+    
 
     {canMakeDecision && (
         <div className="grid gap-6 lg:grid-cols-3">
@@ -536,4 +580,52 @@ function ConfirmModal({
             </div>
         </div>
     );
+}
+
+
+function timelineTitle(status: string) {
+    switch (status) {
+        case 'waiting_review':
+            return 'Application Submitted';
+        case 'need_correction':
+            return 'Correction Requested';
+        case 'correction_submitted':
+            return 'Applicant Submitted Correction';
+        case 'approved':
+            return 'Application Approved';
+        case 'rejected':
+            return 'Application Rejected';
+        default:
+            return status.replaceAll('_', ' ');
+    }
+}
+
+function cleanTimelineNotes(notes: string | null) {
+    if (!notes) {
+        return 'No notes.';
+    }
+
+    return notes.replace('Applicant submitted a correction: ', '');
+}
+
+
+
+
+
+
+function documentLabel(type: string) {
+    switch (type) {
+        case 'photo':
+            return 'Photo';
+        case 'cv':
+            return 'Curriculum Vitae / CV';
+        case 'photo_correction':
+            return 'Corrected Photo';
+        case 'cv_correction':
+            return 'Corrected CV';
+        case 'certificate':
+            return 'Certificate';
+        default:
+            return type.replaceAll('_', ' ');
+    }
 }

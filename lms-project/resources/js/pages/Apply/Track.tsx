@@ -233,7 +233,7 @@ case 'correction_submitted':
     </Link>
 )}
 
-                            {application.status === 'correction_submitted' && (
+                            {/* {application.status === 'correction_submitted' && (
     <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
     <h3 className="font-semibold text-blue-900">
         Correction Submitted Successfully
@@ -251,7 +251,7 @@ case 'correction_submitted':
         tracking page.
     </p>
 </div>
-)}
+)} */}
 
                         </div>
 
