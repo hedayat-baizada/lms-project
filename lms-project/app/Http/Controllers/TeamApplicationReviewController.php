@@ -83,16 +83,26 @@ public function correctionReview(TeamApplication $teamApplication)
 
 public function approvedTeachers()
 {
-    $teachers = TeamApplication::where('application_type', 'volunteer_teacher')
-        ->where('status', 'approved')
+    $teachers = TeamApplication::where('status', 'approved')
+        ->where(function ($query) {
+            $query
+                ->where('application_type', 'volunteer_teacher')
+                ->orWhere(function ($professionalQuery) {
+                    $professionalQuery
+                        ->where('application_type', 'professional_staff')
+                        ->where('professional_role', 'teacher');
+                });
+        })
         ->latest('approved_at')
         ->get();
 
-    return Inertia::render('Admin/TeamApplications/ApprovedTeachers', [
-        'teachers' => $teachers,
-    ]);
+    return Inertia::render(
+        'Admin/TeamApplications/ApprovedTeachers',
+        [
+            'teachers' => $teachers,
+        ]
+    );
 }
-
 public function approve(Request $request, TeamApplication $teamApplication)
 {
     $oldStatus = $teamApplication->status;

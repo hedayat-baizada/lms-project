@@ -31,28 +31,67 @@ const types = [
         label: 'Professional Staff',
         color: 'bg-orange-600',
     },
+    {
+    key: 'professional_teacher',
+    label: 'Professional Teachers',
+    color: 'bg-cyan-700',
+    },
 ];
 
 export default function TeamApplicationsIndex({ applications }: Props) {
     const params = new URLSearchParams(window.location.search);
     const selectedType = params.get('type') ?? 'all';
 
-    const filteredApplications =
-        selectedType === 'all'
-            ? applications
-            : applications.filter(
-                  (application) => application.application_type === selectedType
-              );
+    const filteredApplications = applications.filter((application) => {
+    if (selectedType === 'all') {
+        return true;
+    }
+
+    if (selectedType === 'professional_teacher') {
+        return (
+            application.application_type === 'professional_staff' &&
+            application.professional_role === 'teacher'
+        );
+    }
+
+    if (selectedType === 'professional_staff') {
+        return (
+            application.application_type === 'professional_staff' &&
+            application.professional_role === 'staff'
+        );
+    }
+
+    return application.application_type === selectedType;
+});
 
     function countByType(type: string) {
-        if (type === 'all') {
-            return applications.length;
-        }
+    if (type === 'all') {
+        return applications.length;
+    }
 
+    if (type === 'professional_teacher') {
         return applications.filter(
-            (application) => application.application_type === type
+            (application) =>
+                application.application_type ===
+                    'professional_staff' &&
+                application.professional_role === 'teacher'
         ).length;
     }
+
+    if (type === 'professional_staff') {
+        return applications.filter(
+            (application) =>
+                application.application_type ===
+                    'professional_staff' &&
+                application.professional_role === 'staff'
+        ).length;
+    }
+
+    return applications.filter(
+        (application) =>
+            application.application_type === type
+    ).length;
+}
 
     function filter(type: string) {
         if (type === 'all') {
@@ -64,18 +103,46 @@ export default function TeamApplicationsIndex({ applications }: Props) {
     }
 
     function formatType(application: any) {
-        if (application.application_type === 'volunteer_teacher') {
-            return `Volunteer ${
-                application.teacher_subject === 'english'
-                    ? 'English'
-                    : 'Computer'
-            } Teacher`;
-        }
-
-        return application.application_type
-            .replaceAll('_', ' ')
-            .replace(/\b\w/g, (char: string) => char.toUpperCase());
+    if (application.application_type === 'volunteer_teacher') {
+        return `Volunteer ${
+            application.teacher_subject === 'english'
+                ? 'English'
+                : 'Computer'
+        } Teacher`;
     }
+
+    if (
+        application.application_type === 'professional_staff' &&
+        application.professional_role === 'teacher'
+    ) {
+        return `Professional ${
+            application.teacher_subject === 'english'
+                ? 'English'
+                : 'Computer'
+        } Teacher`;
+    }
+
+    if (
+        application.application_type === 'professional_staff' &&
+        application.professional_role === 'staff'
+    ) {
+        return 'Professional Staff';
+    }
+
+    if (application.application_type === 'volunteer_manager') {
+        return 'Volunteer Manager / Coordinator';
+    }
+
+    if (application.application_type === 'volunteer_support') {
+        return 'Volunteer Support Staff';
+    }
+
+    return application.application_type
+        .replaceAll('_', ' ')
+        .replace(/\b\w/g, (character: string) =>
+            character.toUpperCase()
+        );
+}
 
     function statusBadge(status: string) {
         switch (status) {

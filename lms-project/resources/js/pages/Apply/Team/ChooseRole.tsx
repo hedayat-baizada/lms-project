@@ -4,6 +4,9 @@ import { useState } from 'react';
 export default function ChooseRole() {
     const [teacherTrack, setTeacherTrack] = useState('');
 
+    const [professionalRole, setProfessionalRole] = useState('');
+    const [professionalSubject, setProfessionalSubject] = useState('');
+
     return (
         <div className="min-h-screen bg-slate-100 py-12">
             <div className="mx-auto max-w-6xl px-6">
@@ -122,24 +125,55 @@ export default function ChooseRole() {
                     {/* Professional */}
 
                     <div className="rounded-3xl bg-white p-8 shadow">
+    <h2 className="text-2xl font-bold">
+        Professional Teacher / Staff
+    </h2>
 
-                        <h2 className="text-2xl font-bold">
-                            Professional Teacher / Staff
-                        </h2>
+    <p className="mt-3 text-slate-600">
+        Apply for a formal teaching or staff position when vacancies are available.
+    </p>
 
-                        <p className="mt-3 text-slate-600">
-                            Apply for a formal teaching or staff position when
-                            vacancies are available.
-                        </p>
+    <select
+        value={professionalRole}
+        onChange={(e) => {
+            setProfessionalRole(e.target.value);
+            setProfessionalSubject('');
+        }}
+        className="mt-6 w-full rounded-xl border p-3"
+    >
+        <option value="">Select application category</option>
+        <option value="teacher">Professional Teacher</option>
+        <option value="staff">Professional Staff</option>
+    </select>
 
-                    <Link
-                        href="/apply/team/form?type=professional_staff"
-                        className="mt-10 block w-full rounded-xl bg-orange-600 py-3 text-center font-semibold text-white hover:bg-orange-700"
-                    >
-                        Continue
-                    </Link>
+    {professionalRole === 'teacher' && (
+        <select
+            value={professionalSubject}
+            onChange={(e) => setProfessionalSubject(e.target.value)}
+            className="mt-4 w-full rounded-xl border p-3"
+        >
+            <option value="">Select teaching subject</option>
+            <option value="english">English Teacher</option>
+            <option value="computer">Computer Teacher</option>
+        </select>
+    )}
 
-                    </div>
+    <Link
+        href={
+            professionalRole === 'staff'
+                ? '/apply/team/form?type=professional_staff&professional_role=staff'
+                : `/apply/team/form?type=professional_staff&professional_role=teacher&subject=${professionalSubject}`
+        }
+        className={`mt-6 block w-full rounded-xl py-3 text-center font-semibold text-white ${
+            professionalRole === 'staff' ||
+            (professionalRole === 'teacher' && professionalSubject)
+                ? 'bg-orange-600 hover:bg-orange-700'
+                : 'pointer-events-none bg-gray-400'
+        }`}
+    >
+        Continue
+    </Link>
+</div>
 
                 </div>
             </div>

@@ -8,6 +8,7 @@ type Props = {
         tracking_code: string;
         application_type: string;
         teacher_subject: string | null;
+        professional_role: 'teacher' | 'staff' | null;
     };
 };
 
@@ -24,19 +25,47 @@ export default function Submitted({ application }: Props) {
         }, 2000);
     }
 
-    function formatRole() {
-        if (application.application_type === 'volunteer_teacher') {
-            return `Volunteer ${
-                application.teacher_subject === 'english'
-                    ? 'English'
-                    : 'Computer'
-            } Teacher`;
-        }
-
-        return application.application_type
-            .replaceAll('_', ' ')
-            .replace(/\b\w/g, (c) => c.toUpperCase());
+ function formatRole() {
+    if (application.application_type === 'volunteer_teacher') {
+        return `Volunteer ${
+            application.teacher_subject === 'english'
+                ? 'English'
+                : 'Computer'
+        } Teacher`;
     }
+
+    if (
+        application.application_type === 'professional_staff' &&
+        application.professional_role === 'teacher'
+    ) {
+        return `Professional ${
+            application.teacher_subject === 'english'
+                ? 'English'
+                : 'Computer'
+        } Teacher`;
+    }
+
+    if (
+        application.application_type === 'professional_staff' &&
+        application.professional_role === 'staff'
+    ) {
+        return 'Professional Staff';
+    }
+
+    if (application.application_type === 'volunteer_manager') {
+        return 'Volunteer Manager / Coordinator';
+    }
+
+    if (application.application_type === 'volunteer_support') {
+        return 'Volunteer Support Staff';
+    }
+
+    return application.application_type
+        .replaceAll('_', ' ')
+        .replace(/\b\w/g, (character) =>
+            character.toUpperCase()
+        );
+}
 
     return (
         <div className="min-h-screen bg-slate-100 px-4 py-10">
@@ -126,7 +155,9 @@ export default function Submitted({ application }: Props) {
                     <div className="mt-10 flex flex-col gap-4 md:flex-row">
 
                         <Link
-                            href="/track"
+                            href={`/track?tracking_code=${encodeURIComponent(
+                                application.tracking_code
+                            )}`}
                             className="flex-1 rounded-xl bg-blue-600 py-3 text-center font-semibold text-white hover:bg-blue-700"
                         >
                             Track My Application

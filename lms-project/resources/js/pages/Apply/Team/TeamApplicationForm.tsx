@@ -4,10 +4,15 @@ import { useMemo, useState } from 'react';
 type Props = {
     type: string;
     subject: 'english' | 'computer' | null;
+    professionalRole: 'teacher' | 'staff' | null;
 };
 
-export default function TeamApplicationForm({ type, subject }: Props) {
-    const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+export default function TeamApplicationForm({
+    type,
+    subject,
+    professionalRole,
+}: Props) {
+        const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [cvName, setCvName] = useState<string>('');
 
     const form = useForm({
@@ -26,6 +31,7 @@ export default function TeamApplicationForm({ type, subject }: Props) {
         university_school: '',
         date_of_graduation: '',
         field_of_study: '',
+        professional_role: professionalRole ?? '',
 
         language_qualification: '',
         qualification_completion_date: '',
@@ -74,7 +80,14 @@ export default function TeamApplicationForm({ type, subject }: Props) {
         setCvName(file?.name ?? '');
     }
 
-    const isTeacher = type === 'volunteer_teacher';
+   const isVolunteerTeacher = type === 'volunteer_teacher';
+
+const isProfessionalTeacher =
+    type === 'professional_staff' &&
+    professionalRole === 'teacher';
+
+const isTeacher =
+    isVolunteerTeacher || isProfessionalTeacher;
     const isManager = type === 'volunteer_manager';
     const isSupport = type === 'volunteer_support';
     const isProfessional = type === 'professional_staff';
@@ -93,7 +106,13 @@ export default function TeamApplicationForm({ type, subject }: Props) {
             return 'Volunteer Support Staff Application';
 
         case 'professional_staff':
-            return 'Professional Teacher / Staff Application';
+    if (professionalRole === 'teacher') {
+        return `Professional ${
+            isEnglish ? 'English' : 'Computer'
+        } Teacher Application`;
+    }
+
+    return 'Professional Staff Application';
 
         default:
             return 'Academy Team Application';
@@ -162,32 +181,72 @@ export default function TeamApplicationForm({ type, subject }: Props) {
                             <Input label="University / School" value={form.data.university_school} error={form.errors.university_school} onChange={(v) => form.setData('university_school', v)} />
                             <Input label="Date of Graduation" type="date" value={form.data.date_of_graduation} error={form.errors.date_of_graduation} onChange={(v) => form.setData('date_of_graduation', v)} />
 
-                            {type === 'volunteer_teacher' && (
+  {isTeacher && (
     isEnglish ? (
-                                <>
-                                   <Textarea
-                                    label="English Language Qualification"
-                                    value={form.data.language_qualification}
-                                    error={form.errors.language_qualification}
-                                    onChange={(v) => form.setData('language_qualification', v)}
-                                    placeholder="Example: English diploma, IELTS, TOEFL, teaching certificate, institute name..."
-                                />
-                                    <Input label="Date of Completion" type="date" value={form.data.qualification_completion_date} error={form.errors.qualification_completion_date} onChange={(v) => form.setData('qualification_completion_date', v)} />
-                                    <Input label="Total Years of English Teaching Experience" type="number" value={form.data.teaching_experience_years} error={form.errors.teaching_experience_years} onChange={(v) => form.setData('teaching_experience_years', v)} />
-                                </>
-                            ) : (
-                                <>
-                                   <Textarea
-                                    label="Computer Qualification"
-                                    value={form.data.computer_qualification}
-                                    error={form.errors.computer_qualification}
-                                    onChange={(v) => form.setData('computer_qualification', v)}
-                                    placeholder="Example: Computer diploma, IT certificate, programming course, university study..."
-                                />
-                                    <Input label="Date of Completion" type="date" value={form.data.qualification_completion_date} error={form.errors.qualification_completion_date} onChange={(v) => form.setData('qualification_completion_date', v)} />
-                                    <Input label="Total Years of Computer Teaching Experience" type="number" value={form.data.teaching_experience_years} error={form.errors.teaching_experience_years} onChange={(v) => form.setData('teaching_experience_years', v)} />
-                                </>
-                                )
+        <>
+            <Textarea
+                label="English Language Qualification"
+                value={form.data.language_qualification}
+                error={form.errors.language_qualification}
+                onChange={(v) =>
+                    form.setData('language_qualification', v)
+                }
+                placeholder="Example: English diploma, IELTS, TOEFL, teaching certificate, institute name..."
+            />
+
+            <Input
+                label="Date of Completion"
+                type="date"
+                value={form.data.qualification_completion_date}
+                error={form.errors.qualification_completion_date}
+                onChange={(v) =>
+                    form.setData('qualification_completion_date', v)
+                }
+            />
+
+            <Input
+                label="Total Years of English Teaching Experience"
+                type="number"
+                value={form.data.teaching_experience_years}
+                error={form.errors.teaching_experience_years}
+                onChange={(v) =>
+                    form.setData('teaching_experience_years', v)
+                }
+            />
+        </>
+    ) : (
+        <>
+            <Textarea
+                label="Computer Qualification"
+                value={form.data.computer_qualification}
+                error={form.errors.computer_qualification}
+                onChange={(v) =>
+                    form.setData('computer_qualification', v)
+                }
+                placeholder="Example: Computer diploma, IT certificate, programming course, university study..."
+            />
+
+            <Input
+                label="Date of Completion"
+                type="date"
+                value={form.data.qualification_completion_date}
+                error={form.errors.qualification_completion_date}
+                onChange={(v) =>
+                    form.setData('qualification_completion_date', v)
+                }
+            />
+
+            <Input
+                label="Total Years of Computer Teaching Experience"
+                type="number"
+                value={form.data.teaching_experience_years}
+                error={form.errors.teaching_experience_years}
+                onChange={(v) =>
+                    form.setData('teaching_experience_years', v)
+                }
+            />
+        </>
+    )
 )}
                         </div>
 
@@ -291,27 +350,27 @@ export default function TeamApplicationForm({ type, subject }: Props) {
 </Section>
 
                     <Section title="Biography">
-                        {isTeacher && (
-                            <Textarea
-                                label="Teaching / Work Experience"
-                                value={form.data.experience}
-                                error={form.errors.experience}
-                                onChange={(v) => form.setData('experience', v)}
-                                placeholder="Briefly describe your teaching experience..."
-                            />
-                        )}
+                        {isVolunteerTeacher && (
+    <Textarea
+        label="Teaching / Work Experience"
+        value={form.data.experience}
+        error={form.errors.experience}
+        onChange={(v) => form.setData('experience', v)}
+        placeholder="Briefly describe your teaching experience..."
+    />
+)}
 
-                        {isTeacher && (
-                            <div className="mt-5">
-                                <Textarea
-                                    label="Teaching Skills"
-                                    value={form.data.skills}
-                                    error={form.errors.skills}
-                                    onChange={(v) => form.setData('skills', v)}
-                                    placeholder="Mention teaching skills that can help the academy..."
-                                />
-                            </div>
-                        )}
+                        {isVolunteerTeacher && (
+                        <div className="mt-5">
+                            <Textarea
+                                label="Teaching Skills"
+                                value={form.data.skills}
+                                error={form.errors.skills}
+                                onChange={(v) => form.setData('skills', v)}
+                                placeholder="Mention teaching skills that can help the academy..."
+                            />
+                        </div>
+                    )}
 
                         <div className={isTeacher ? 'mt-5' : ''}>
                             <Textarea

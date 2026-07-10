@@ -30,6 +30,7 @@ class TeamApplication extends Model
         'experience',
         'skills',
         'motivation',
+        'professional_role',
 
         'availability',
         'preferred_mode',

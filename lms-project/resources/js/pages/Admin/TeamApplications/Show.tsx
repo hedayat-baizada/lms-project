@@ -33,18 +33,46 @@ const canRequestCorrection =
 
 
     function formatType() {
-        if (application.application_type === 'volunteer_teacher') {
-            return `Volunteer ${
-                application.teacher_subject === 'english'
-                    ? 'English'
-                    : 'Computer'
-            } Teacher`;
-        }
-
-        return application.application_type
-            .replaceAll('_', ' ')
-            .replace(/\b\w/g, (char: string) => char.toUpperCase());
+    if (application.application_type === 'volunteer_teacher') {
+        return `Volunteer ${
+            application.teacher_subject === 'english'
+                ? 'English'
+                : 'Computer'
+        } Teacher`;
     }
+
+    if (
+        application.application_type === 'professional_staff' &&
+        application.professional_role === 'teacher'
+    ) {
+        return `Professional ${
+            application.teacher_subject === 'english'
+                ? 'English'
+                : 'Computer'
+        } Teacher`;
+    }
+
+    if (
+        application.application_type === 'professional_staff' &&
+        application.professional_role === 'staff'
+    ) {
+        return 'Professional Staff';
+    }
+
+    if (application.application_type === 'volunteer_manager') {
+        return 'Volunteer Manager / Coordinator';
+    }
+
+    if (application.application_type === 'volunteer_support') {
+        return 'Volunteer Support Staff';
+    }
+
+    return application.application_type
+        .replaceAll('_', ' ')
+        .replace(/\b\w/g, (character: string) =>
+            character.toUpperCase()
+        );
+}
 
     function statusBadge(status: string) {
         switch (status) {

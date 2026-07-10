@@ -6,11 +6,25 @@ type Props = {
 };
 
 export default function ApprovedTeachers({ teachers }: Props) {
-    function formatSubject(subject: string | null) {
-        if (subject === 'english') return 'English Teacher';
-        if (subject === 'computer') return 'Computer Teacher';
-        return 'Teacher';
+    
+    
+function formatTeacherType(teacher: any) {
+    const subject =
+        teacher.teacher_subject === 'english'
+            ? 'English'
+            : teacher.teacher_subject === 'computer'
+              ? 'Computer'
+              : 'General';
+
+    if (
+        teacher.application_type === 'professional_staff' &&
+        teacher.professional_role === 'teacher'
+    ) {
+        return `Professional ${subject} Teacher`;
     }
+
+    return `Volunteer ${subject} Teacher`;
+}
 
     return (
         <AppLayout>
@@ -18,7 +32,7 @@ export default function ApprovedTeachers({ teachers }: Props) {
                 <div className="rounded-3xl bg-gradient-to-r from-emerald-800 to-teal-800 p-8 text-white shadow-xl">
                     <h1 className="text-4xl font-bold">Approved Teachers</h1>
                     <p className="mt-3 text-emerald-100">
-                        Approved volunteer teachers ready for Member 3 to create teacher accounts.
+                        Approved volunteer and professional teachers ready for Member 3 to create teacher accounts.
                     </p>
                 </div>
 
@@ -31,7 +45,7 @@ export default function ApprovedTeachers({ teachers }: Props) {
                                 <thead>
                                     <tr className="border-b text-sm text-gray-500">
                                         <th className="py-3">Name</th>
-                                        <th className="py-3">Subject</th>
+                                       <th className="py-3">Teacher Type</th>
                                         <th className="py-3">Email</th>
                                         <th className="py-3">WhatsApp</th>
                                         <th className="py-3">Approved Date</th>
@@ -46,8 +60,17 @@ export default function ApprovedTeachers({ teachers }: Props) {
                                                 {teacher.full_name}
                                             </td>
 
-                                            <td className="py-4">
-                                                {formatSubject(teacher.teacher_subject)}
+                                           <td className="py-4">
+                                                <span
+                                                    className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-sm font-semibold ${
+                                                        teacher.application_type === 'professional_staff' &&
+                                                        teacher.professional_role === 'teacher'
+                                                            ? 'bg-blue-100 text-blue-800'
+                                                            : 'bg-emerald-100 text-emerald-800'
+                                                    }`}
+                                                >
+                                                    {formatTeacherType(teacher)}
+                                                </span>
                                             </td>
 
                                             <td className="py-4">{teacher.email}</td>

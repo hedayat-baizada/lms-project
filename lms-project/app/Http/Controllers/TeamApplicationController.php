@@ -69,6 +69,7 @@ public function storeCorrection(Request $request, TeamApplication $teamApplicati
         'team_application_id' => $teamApplication->id,
         'old_status' => $oldStatus,
         'new_status' => 'correction_submitted',
+        
         'changed_by' => null,
         'notes' => 'Applicant submitted a correction: ' . $validated['correction_note'],
     ]);
@@ -88,6 +89,7 @@ public function create()
 {
     $type = request('type');
     $subject = request('subject');
+    $professionalRole = request('professional_role');
 
     abort_unless(
         in_array($type, [
@@ -100,12 +102,30 @@ public function create()
     );
 
     if ($type === 'volunteer_teacher') {
-        abort_unless(in_array($subject, ['english', 'computer']), 404);
+        abort_unless(
+            in_array($subject, ['english', 'computer']),
+            404
+        );
+    }
+
+    if ($type === 'professional_staff') {
+        abort_unless(
+            in_array($professionalRole, ['teacher', 'staff']),
+            404
+        );
+
+        if ($professionalRole === 'teacher') {
+            abort_unless(
+                in_array($subject, ['english', 'computer']),
+                404
+            );
+        }
     }
 
     return Inertia::render('Apply/Team/TeamApplicationForm', [
         'type' => $type,
         'subject' => $subject,
+        'professionalRole' => $professionalRole,
     ]);
 }
 
@@ -113,6 +133,7 @@ public function store(Request $request)
 {
     $type = $request->input('application_type');
     $subject = $request->input('teacher_subject');
+    $professionalRole = $request->input('professional_role');
 
     abort_unless(
         in_array($type, [
@@ -125,12 +146,48 @@ public function store(Request $request)
     );
 
     if ($type === 'volunteer_teacher') {
-        abort_unless(in_array($subject, ['english', 'computer']), 404);
+        abort_unless(
+            in_array($subject, ['english', 'computer']),
+            404
+        );
     }
 
+    if (
+        $type === 'professional_staff' &&
+        $professionalRole === 'teacher'
+    ) {
+        abort_unless(
+            in_array($subject, ['english', 'computer']),
+            404
+        );
+    }
     $validated = $request->validate([
-    'application_type' => 'required|in:volunteer_teacher,volunteer_manager,volunteer_support,professional_staff',
-    'teacher_subject' => 'nullable|in:english,computer',
+    'application_type' => [
+        'required',
+        'in:volunteer_teacher,volunteer_manager,volunteer_support,professional_staff',
+    ],
+    'professional_role' => [
+        'nullable',
+        'required_if:application_type,professional_staff',
+        'in:teacher,staff',
+    ],
+
+    'teacher_subject' => [
+    'nullable',
+    'in:english,computer',
+    function ($attribute, $value, $fail) use ($request) {
+        $needsSubject =
+            $request->application_type === 'volunteer_teacher' ||
+            (
+                $request->application_type === 'professional_staff' &&
+                $request->professional_role === 'teacher'
+            );
+
+        if ($needsSubject && ! $value) {
+            $fail('Please select English or Computer.');
+        }
+    },
+],
 
     'full_name' => 'required|string|min:3|max:100',
     'email' => 'required|email|max:255',
@@ -180,14 +237,30 @@ public function store(Request $request)
 ]);
 
     $application = TeamApplication::create([
-        ...$validated,
-        'tracking_code' => $this->generateTrackingCode(),
-        'application_type' => $type,
-        'teacher_subject' => $type === 'volunteer_teacher' ? $subject : null,
-        'phone' => $validated['whatsapp_number'],
-        'status' => 'waiting_review',
-        'submitted_at' => now(),
-    ]);
+    ...$validated,
+
+    'tracking_code' => $this->generateTrackingCode(),
+
+    'application_type' => $type,
+
+    'professional_role' =>
+        $type === 'professional_staff'
+            ? ($validated['professional_role'] ?? null)
+            : null,
+
+    'teacher_subject' =>
+        $type === 'volunteer_teacher' ||
+        (
+            $type === 'professional_staff' &&
+            ($validated['professional_role'] ?? null) === 'teacher'
+        )
+            ? $subject
+            : null,
+
+    'phone' => $validated['whatsapp_number'],
+    'status' => 'waiting_review',
+    'submitted_at' => now(),
+]);
 
     if ($request->hasFile('photo')) {
         $path = $request->file('photo')->store('team-applications/photos', 'public');
