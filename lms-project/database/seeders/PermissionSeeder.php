@@ -44,6 +44,7 @@ class PermissionSeeder extends Seeder
             'applications.reject',
             'approved-applicants.view',
             'approved-applicants.edit',
+            'team-application.view',
             
 
             // Students
@@ -233,9 +234,10 @@ class PermissionSeeder extends Seeder
         'applications.approve',
         'applications.reject',
 
-         
-       'approved-applicants.view',
+        'approved-applicants.view',
         'approved-applicants.edit',
+        
+        'team-application.view',
 
         'students.view',
 
