@@ -31,6 +31,8 @@ import {
     CircleUser,
     BookUser,
     UsersRound,
+    UserX,
+    UserRoundX,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -111,13 +113,13 @@ const mainNavItems: NavItem[] = [
                 title: 'Approved Teachers',
                 url: '/approved-teachers',
                 icon: GraduationCap,
-                permission: 'team-applications.view',
+                permission: 'approved-teachers-applications.view',
             },
             {
                 title: 'Approved Staffs',
                 url: '/approved-staffs',
                 icon: UsersRound,
-                permission: 'team-applications.view',
+                permission: 'approved-staffs-applications.view',
             },
             {
                 title: 'Team Applications',
@@ -126,6 +128,19 @@ const mainNavItems: NavItem[] = [
                 permission: 'team-applications.view',
             },
 
+            {
+                title: 'Rejected Students',
+                url: '/rejected-students',
+                icon: UserX,
+                permission: 'rejected-students-applications.view',
+            },
+
+            {
+                title: 'Rejected Team Applications',
+                url: '/rejected-team-applications',
+                icon: UserRoundX,
+                permission: 'rejected-team-applications.view',
+            },
 
         ],
     },
