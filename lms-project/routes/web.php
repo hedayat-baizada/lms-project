@@ -134,6 +134,18 @@ Route::get('/approved-teachers', [TeamApplicationReviewController::class, 'appro
 
 
 
+    Route::get(
+    '/rejected-students',
+    [AdminApplicationController::class, 'rejectedStudents']
+)->name('rejected-students.index');
+
+
+Route::get(
+    '/rejected-team-applications',
+    [TeamApplicationReviewController::class, 'rejectedTeamApplications']
+)->name('rejected-team-applications.index');
+
+
    
 
     // Route::get('dashboard', function () {

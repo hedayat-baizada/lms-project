@@ -22,7 +22,8 @@ class ApplicationController extends Controller
 
 public function correction(Application $application)
 {
-    $application->load(['correctionRequests']);
+     abort_unless($application->status === 'need_correction', 404);
+    $application->load(['documents','correctionRequests',]);
 
     if ($application->status !== 'need_correction') {
         return redirect()->route('apply.track', [
@@ -35,6 +36,16 @@ public function correction(Application $application)
         'latestCorrectionRequest' => $application->correctionRequests()
             ->latest()
             ->first(),
+            'replaceableDocuments' => $application->documents
+            ->where('document_type', '!=', 'correction')
+            ->map(function ($document) {
+                return [
+                    'id' => $document->id,
+                    'document_type' => $document->document_type,
+                    'document_owner_type' => $document->document_owner_type,
+                ];
+            })
+            ->values(),
     ]);
 }
 
@@ -46,10 +57,46 @@ public function storeCorrection(Request $request, Application $application)
         ]);
     }
 
-    $validated = $request->validate([
-        'correction_message' => 'required|string|max:2000',
-        'correction_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-    ]);
+   $validated = $request->validate([
+    'correction_message' => 'required|string|max:2000',
+
+    'replacement_document_type' => [
+        'nullable',
+        'required_with:correction_file',
+        'string',
+    ],
+
+    'correction_file' => [
+        'nullable',
+        'file',
+        'mimes:jpg,jpeg,png,pdf',
+        'max:5120',
+    ],
+]);
+
+
+
+$replacementDocument = null;
+
+if ($request->hasFile('correction_file')) {
+    $replacementDocument = $application->documents()
+        ->where(
+            'document_type',
+            $validated['replacement_document_type']
+        )
+        ->first();
+
+    if (! $replacementDocument) {
+        return back()->withErrors([
+            'replacement_document_type' =>
+                'Please select a valid document to replace.',
+        ]);
+    }
+}
+
+
+
+
 
     $filePath = null;
 
@@ -65,16 +112,24 @@ public function storeCorrection(Request $request, Application $application)
     //     'notes' => $validated['correction_message'],
     // ]);
 
-    if ($filePath) {
-        \App\Models\ApplicationDocument::create([
-            'application_id' => $application->id,
-            'document_owner_type' => 'applicant',
-            'document_type' => 'correction',
-            'document_number' => null,
-            'file_path' => $filePath,
-            'status' => 'submitted',
-        ]);
-    }
+  if ($filePath && $replacementDocument) {
+    \App\Models\ApplicationDocument::create([
+        'application_id' => $application->id,
+
+        'document_owner_type' =>
+            $replacementDocument->document_owner_type,
+
+        'document_type' =>
+            $replacementDocument->document_type,
+
+        'document_number' =>
+            $replacementDocument->document_number,
+
+        'file_path' => $filePath,
+
+        'status' => 'submitted',
+    ]);
+}
 
    $oldStatus = $application->status;
 

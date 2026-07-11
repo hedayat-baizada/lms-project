@@ -1,11 +1,38 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link } from '@inertiajs/react';
-
+import { useMemo, useState } from 'react';
 type Props = {
     applications: any[];
 };
 
 export default function ApprovedApplicantsIndex({ applications }: Props) {
+
+    const [search, setSearch] = useState('');
+
+
+    const filteredApplicants = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    if (!query) {
+        return applications;
+    }
+
+    return applications.filter((application: any) =>
+        [
+            application.full_name,
+            application.email,
+            application.tracking_code,
+            application.course_track,
+        ]
+            .join(' ')
+            .toLowerCase()
+            .includes(query)
+    );
+}, [applications, search]);
+
+function resetSearch() {
+    setSearch('');
+}
     return (
         <AppLayout>
             <div className="p-6">
@@ -23,6 +50,32 @@ export default function ApprovedApplicantsIndex({ applications }: Props) {
                     </p>
                 </div>
 
+
+                <div className="mb-6 flex flex-col gap-4 md:flex-row">
+
+    <input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search by name, email, tracking code, Prep-CEL, or CEL..."
+        className="flex-1 rounded-xl border border-slate-300 px-4 py-3 focus:border-green-500 focus:outline-none"
+    />
+
+    <button
+        type="button"
+        onClick={resetSearch}
+        disabled={!search}
+        className="rounded-xl border border-slate-300 px-5 py-3 font-semibold hover:bg-slate-100 disabled:opacity-50"
+    >
+        Reset Search
+    </button>
+
+</div>
+
+<p className="mb-6 text-sm text-slate-500">
+    Showing {filteredApplicants.length} of {applications.length} approved applicant(s).
+</p>
+
                 <div className="space-y-4">
                     {applications.length === 0 && (
                         <div className="rounded-2xl bg-white p-10 text-center shadow">
@@ -32,7 +85,7 @@ export default function ApprovedApplicantsIndex({ applications }: Props) {
                         </div>
                     )}
 
-                    {applications.map((application) => (
+                    {filteredApplicants.map((application) => (
                         <div
                             key={application.id}
                             className="rounded-2xl bg-white p-6 shadow"

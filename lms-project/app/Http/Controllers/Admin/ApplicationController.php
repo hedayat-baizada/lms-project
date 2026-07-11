@@ -15,7 +15,26 @@ use App\Models\ApplicationStatusLog;
 class ApplicationController extends Controller
 {
 
+public function rejectedStudents()
+{
+    $students = Application::where('status', 'rejected')
+        ->latest('updated_at')
+        ->get([
+            'id',
+            'full_name',
+            'email',
+            'tracking_code',
+            'course_track',
+            'updated_at',
+        ]);
 
+    return Inertia::render(
+        'Admin/Applications/RejectedStudents',
+        [
+            'students' => $students,
+        ]
+    );
+}
 
 
 public function approvedApplicants()
@@ -437,6 +456,9 @@ $placementSummary = [
     'wrong' => $wrong,
     'score' => $correct,
 ];
+
+
+
     
    return Inertia::render('Admin/Applications/Show', [
     'application' => [

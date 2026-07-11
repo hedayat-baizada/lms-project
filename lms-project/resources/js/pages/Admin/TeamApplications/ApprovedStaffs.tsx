@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
-
+import { useMemo, useState } from 'react';
 type Props = {
     staffs: any[];
 };
@@ -29,70 +29,75 @@ const categories = [
 ];
 
 export default function ApprovedStaffs({ staffs }: Props) {
-    const params = new URLSearchParams(window.location.search);
-    const selectedType = params.get('type') ?? 'all';
+const [search, setSearch] = useState('');
+const [category, setCategory] = useState('all');
 
-    const filteredStaffs = staffs.filter((staff) => {
-        if (selectedType === 'all') {
-            return true;
+function formatRole(staff: any) {
+    if (staff.application_type === 'volunteer_manager') {
+        return 'Volunteer Manager / Coordinator';
+    }
+
+    if (staff.application_type === 'volunteer_support') {
+        return 'Volunteer Support Staff';
+    }
+
+    return 'Professional Staff';
+}
+
+const filteredStaffs = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    return staffs.filter((staff) => {
+
+        const matchesSearch =
+            !query ||
+            [
+                staff.full_name,
+                staff.email,
+                staff.phone,
+                staff.tracking_code,
+                formatRole(staff),
+            ]
+                .filter(Boolean)
+                .some((value) =>
+                    String(value).toLowerCase().includes(query)
+                );
+
+        let matchesCategory = true;
+
+        if (category === 'manager') {
+            matchesCategory =
+                staff.application_type ===
+                'volunteer_manager';
         }
 
-        if (selectedType === 'professional_staff') {
-            return (
-                staff.application_type === 'professional_staff' &&
-                staff.professional_role === 'staff'
-            );
+        if (category === 'support') {
+            matchesCategory =
+                staff.application_type ===
+                'volunteer_support';
         }
 
-        return staff.application_type === selectedType;
+        if (category === 'professional') {
+            matchesCategory =
+                staff.application_type ===
+                    'professional_staff' &&
+                staff.professional_role === 'staff';
+        }
+
+        return matchesSearch && matchesCategory;
+
     });
 
-    function countByType(type: string) {
-        if (type === 'all') {
-            return staffs.length;
-        }
+}, [staffs, search, category]);
 
-        if (type === 'professional_staff') {
-            return staffs.filter(
-                (staff) =>
-                    staff.application_type === 'professional_staff' &&
-                    staff.professional_role === 'staff'
-            ).length;
-        }
+function resetSearch() {
+    setSearch('');
+    setCategory('all');
+}
 
-        return staffs.filter(
-            (staff) => staff.application_type === type
-        ).length;
-    }
 
-    function filter(type: string) {
-        if (type === 'all') {
-            router.get('/approved-staffs');
-            return;
-        }
 
-        router.get('/approved-staffs', { type });
-    }
-
-    function formatRole(staff: any) {
-        if (staff.application_type === 'volunteer_manager') {
-            return 'Volunteer Manager / Coordinator';
-        }
-
-        if (staff.application_type === 'volunteer_support') {
-            return 'Volunteer Support Staff';
-        }
-
-        if (
-            staff.application_type === 'professional_staff' &&
-            staff.professional_role === 'staff'
-        ) {
-            return 'Professional Staff';
-        }
-
-        return 'Staff';
-    }
-
+   
     function roleBadge(staff: any) {
         if (staff.application_type === 'volunteer_manager') {
             return 'bg-blue-100 text-blue-800';
@@ -119,30 +124,7 @@ export default function ApprovedStaffs({ staffs }: Props) {
                     </p>
                 </div>
 
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                    {categories.map((category) => (
-                        <button
-                            key={category.key}
-                            type="button"
-                            onClick={() => filter(category.key)}
-                            className={`rounded-3xl p-6 text-left text-white shadow transition hover:scale-[1.02] ${
-                                category.color
-                            } ${
-                                selectedType === category.key
-                                    ? 'ring-4 ring-offset-2 ring-slate-400'
-                                    : ''
-                            }`}
-                        >
-                            <p className="text-sm opacity-80">
-                                {category.label}
-                            </p>
-
-                            <p className="mt-3 text-4xl font-bold">
-                                {countByType(category.key)}
-                            </p>
-                        </button>
-                    ))}
-                </div>
+                
 
                 <div className="rounded-3xl bg-white p-6 shadow">
                     <div className="mb-6">
@@ -154,6 +136,74 @@ export default function ApprovedStaffs({ staffs }: Props) {
                             Showing {filteredStaffs.length} approved applicant(s).
                         </p>
                     </div>
+
+                    <div className="mb-6 grid gap-4 md:grid-cols-[1fr_280px_auto]">
+
+    <div>
+
+        <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Search approved staffs
+        </label>
+
+        <input
+            type="text"
+            value={search}
+            onChange={(e) =>
+                setSearch(e.target.value)
+            }
+            placeholder="Search by name, email, tracking code or role..."
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-indigo-500 focus:outline-none"
+        />
+
+    </div>
+
+    <div>
+
+        <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Staff Category
+        </label>
+
+        <select
+            value={category}
+            onChange={(e) =>
+                setCategory(e.target.value)
+            }
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-indigo-500 focus:outline-none"
+        >
+            <option value="all">
+                All Staffs
+            </option>
+
+            <option value="manager">
+                Volunteer Managers / Coordinators
+            </option>
+
+            <option value="support">
+                Volunteer Support Staff
+            </option>
+
+            <option value="professional">
+                Professional Staff
+            </option>
+
+        </select>
+
+    </div>
+
+    <button
+        type="button"
+        onClick={resetSearch}
+        disabled={!search && category === 'all'}
+        className="mt-auto rounded-xl border border-slate-300 px-5 py-3 font-semibold hover:bg-slate-100 disabled:opacity-40"
+    >
+        Reset Search
+    </button>
+
+</div>
+
+<p className="mb-6 text-sm text-slate-500">
+    Showing {filteredStaffs.length} of {staffs.length} approved staff(s).
+</p>
 
                     {filteredStaffs.length === 0 ? (
                         <div className="rounded-2xl bg-slate-50 p-10 text-center text-slate-500">

@@ -16,6 +16,30 @@ class TeamApplicationReviewController extends Controller
 
 
 
+public function rejectedTeamApplications()
+{
+    $applications = TeamApplication::where('status', 'rejected')
+        ->latest('updated_at')
+        ->get([
+            'id',
+            'full_name',
+            'email',
+            'tracking_code',
+            'application_type',
+            'teacher_subject',
+            'professional_role',
+            'updated_at',
+        ]);
+
+    return Inertia::render(
+        'Admin/TeamApplications/RejectedTeamApplications',
+        [
+            'applications' => $applications,
+        ]
+    );
+}
+
+
 public function correctionReview(TeamApplication $teamApplication)
 {
     $teamApplication->load([
