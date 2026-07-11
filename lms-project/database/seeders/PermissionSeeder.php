@@ -44,7 +44,31 @@ class PermissionSeeder extends Seeder
             'applications.reject',
             'approved-applicants.view',
             'approved-applicants.edit',
-            'team-application.view',
+
+           // Approved Teachers
+            'approved-teachers-applications.view',
+            'approved-teachers-applications.edit',
+
+            // Approved Staffs
+            'approved-staffs-applications.view',
+            'approved-staffs-applications.edit',
+
+            // Rejected Students
+            'rejected-students-applications.view',
+            'rejected-students-applications.restore',
+
+            // Rejected Team Applications
+            'rejected-team-applications.view',
+            'rejected-team-applications.restore',
+          
+
+
+            'team-applications.view',
+            'team-applications.create',
+            'team-applications.edit',
+            'team-applications.delete',
+
+            
             
 
             // Students
@@ -237,7 +261,23 @@ class PermissionSeeder extends Seeder
         'approved-applicants.view',
         'approved-applicants.edit',
         
-        'team-application.view',
+
+         'team-applications.view',
+        'team-applications.create',
+        'team-applications.edit',
+        'team-applications.delete',
+
+        'approved-staffs-applications.view',
+        'approved-staffs-applications.edit',
+
+        'approved-teachers-applications.view',
+        'approved-teachers-applications.edit',
+
+        'rejected-students-applications.view',
+        'rejected-students-applications.restore',
+
+        'rejected-team-applications.view',
+        'rejected-team-applications.restore',
 
         'students.view',
 
