@@ -30,6 +30,7 @@ import {
     UserCheck,
     CircleUser,
     BookUser,
+    UsersRound,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -110,7 +111,19 @@ const mainNavItems: NavItem[] = [
                 title: 'Approved Teachers',
                 url: '/approved-teachers',
                 icon: GraduationCap,
-                permission: 'team-application.view',
+                permission: 'team-applications.view',
+            },
+            {
+                title: 'Approved Staffs',
+                url: '/approved-staffs',
+                icon: UsersRound,
+                permission: 'team-applications.view',
+            },
+            {
+                title: 'Team Applications',
+                url: '/team-applications',
+                icon: Users,
+                permission: 'team-applications.view',
             },
 
 
