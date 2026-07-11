@@ -208,7 +208,7 @@ public function placementTest(Application $application)
         'notes' => request('notes'),
     ]);
 
-    return back()->with('success', 'Application rejected.');
+    return back()->with('error', 'Application rejected.');
 }
 
 public function requestCorrection(Application $application)

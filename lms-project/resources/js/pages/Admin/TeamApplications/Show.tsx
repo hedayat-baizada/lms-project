@@ -91,6 +91,69 @@ const canRequestCorrection =
         }
     }
 
+
+
+    const [showPreviousPhotos, setShowPreviousPhotos] = useState(false);
+const [showPreviousDocuments, setShowPreviousDocuments] = useState(false);
+
+
+const allDocuments = application.documents ?? [];
+
+function normalizeType(type: string) {
+    return type
+        .replace(/_correction$/i, '')
+        .replace(/_updated$/i, '');
+}
+
+function isImage(document: any) {
+    const path = document.file_url ?? '';
+
+    return /\.(jpg|jpeg|png|webp)$/i.test(path);
+}
+
+const groupedDocuments = Object.values(
+    allDocuments.reduce(
+        (groups: Record<string, any[]>, document: any) => {
+
+            const key = normalizeType(document.document_type);
+
+            if (!groups[key]) {
+                groups[key] = [];
+            }
+
+            groups[key].push(document);
+
+            return groups;
+
+        },
+        {}
+    )
+).map((group: any) =>
+    [...group].sort(
+        (a, b) =>
+            new Date(b.created_at).getTime() -
+            new Date(a.created_at).getTime()
+    )
+);
+
+const currentUploads = groupedDocuments.map((group: any) => group[0]);
+
+const previousUploads = groupedDocuments.flatMap(
+    (group: any) => group.slice(1)
+);
+
+const currentPhotos = currentUploads.filter(isImage);
+
+const currentDocuments = currentUploads.filter(
+    (d: any) => !isImage(d)
+);
+
+const previousPhotos = previousUploads.filter(isImage);
+
+const previousDocuments = previousUploads.filter(
+    (d: any) => !isImage(d)
+);
+
   
 
    return (
@@ -191,63 +254,141 @@ const canRequestCorrection =
                     </div>
                 </Section>
 
-                <Section title="Uploaded Documents">
-    {application.documents?.length === 0 && (
-        <p className="text-gray-500">No documents uploaded.</p>
+                <Section title="Current Uploaded Photos">
+
+    {currentPhotos.length === 0 ? (
+
+        <p className="text-gray-500">
+            No uploaded photos.
+        </p>
+
+    ) : (
+
+        <div className="grid gap-5 md:grid-cols-2">
+
+            {currentPhotos.map((document: any) => (
+
+                <UploadCard
+                    key={document.id}
+                    document={document}
+                    preview
+                />
+
+            ))}
+
+        </div>
+
     )}
 
-    <div className="grid gap-4 md:grid-cols-2">
-        {application.documents?.map((document: any) => {
-            const isImage = document.file_url?.match(/\.(jpg|jpeg|png|webp)$/i);
+    {previousPhotos.length > 0 && (
 
-            return (
-                <div
-                    key={document.id}
-                    className="rounded-2xl border bg-slate-50 p-5"
-                >
-                    <div className="flex items-start gap-4">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl shadow-sm">
-                            {isImage ? '🖼️' : '📄'}
-                        </div>
+        <div className="mt-6">
 
-                        <div className="min-w-0 flex-1">
-                            <p className="font-bold text-slate-900">
-                                {documentLabel(document.document_type)}
-                            </p>
+            <button
+                type="button"
+                onClick={() =>
+                    setShowPreviousPhotos(!showPreviousPhotos)
+                }
+                className="rounded-xl bg-blue-100 px-5 py-3 font-semibold text-blue-800"
+            >
+                {showPreviousPhotos
+                    ? 'Hide Previous Photos'
+                    : `View Previous Photos (${previousPhotos.length})`}
+            </button>
 
-                            <p className="mt-1 text-sm text-gray-500">
-                                Status: {document.status}
-                            </p>
+            {showPreviousPhotos && (
 
-                            <p className="mt-1 truncate text-sm text-gray-500">
-                                {document.file_path?.split('/').pop() ?? 'Uploaded file'}
-                            </p>
+                <div className="mt-5 grid gap-5 md:grid-cols-2">
 
-                            {document.file_url && (
-                                <a
-                                    href={document.file_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="mt-3 inline-flex rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900"
-                                >
-                                    Open Document
-                                </a>
-                            )}
-                        </div>
-                    </div>
+                    {previousPhotos.map((document: any) => (
 
-                    {isImage && (
-                        <img
-                            src={document.file_url}
-                            alt="Uploaded document"
-                            className="mt-4 max-h-64 w-full rounded-xl border bg-white object-contain"
+                        <UploadCard
+                            key={document.id}
+                            document={document}
+                            preview
                         />
-                    )}
+
+                    ))}
+
                 </div>
-            );
-        })}
-    </div>
+
+            )}
+
+        </div>
+
+    )}
+
 </Section>
+
+
+
+<Section title="Current Uploaded Documents">
+
+    {currentDocuments.length === 0 ? (
+
+        <p className="text-gray-500">
+            No uploaded documents.
+        </p>
+
+    ) : (
+
+        <div className="grid gap-5 md:grid-cols-2">
+
+            {currentDocuments.map((document: any) => (
+
+                <UploadCard
+                    key={document.id}
+                    document={document}
+                />
+
+            ))}
+
+        </div>
+
+    )}
+
+    {previousDocuments.length > 0 && (
+
+        <div className="mt-6">
+
+            <button
+                type="button"
+                onClick={() =>
+                    setShowPreviousDocuments(!showPreviousDocuments)
+                }
+                className="rounded-xl bg-slate-100 px-5 py-3 font-semibold"
+            >
+                {showPreviousDocuments
+                    ? 'Hide Previous Documents'
+                    : `View Previous Documents (${previousDocuments.length})`}
+            </button>
+
+            {showPreviousDocuments && (
+
+                <div className="mt-5 grid gap-5 md:grid-cols-2">
+
+                    {previousDocuments.map((document: any) => (
+
+                        <UploadCard
+                            key={document.id}
+                            document={document}
+                        />
+
+                    ))}
+
+                </div>
+
+            )}
+
+        </div>
+
+    )}
+
+</Section>
+
+
+
+
 
                 <Section title="Review Timeline">
     <div className="space-y-4">
@@ -656,4 +797,48 @@ function documentLabel(type: string) {
         default:
             return type.replaceAll('_', ' ');
     }
+}
+
+
+
+function UploadCard({
+    document,
+    preview = false,
+}: {
+    document: any;
+    preview?: boolean;
+}) {
+    return (
+
+        <div className="rounded-2xl border bg-slate-50 p-5">
+
+            <InfoGrid
+                items={[
+                    ['Type', document.document_type],
+                    ['Status', document.status],
+                ]}
+            />
+
+            <a
+                href={document.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-block font-medium text-blue-600 hover:underline"
+            >
+                Open Document
+            </a>
+
+            {preview && (
+
+                <img
+                    src={document.file_url}
+                    alt=""
+                    className="mt-4 max-h-72 rounded-xl border bg-white object-contain"
+                />
+
+            )}
+
+        </div>
+
+    );
 }

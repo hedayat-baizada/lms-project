@@ -5,6 +5,7 @@ type Flash = {
     message?: string | null;
     success?: string | null;
     error?: string | null;
+    warning?: string | null;
 };
 
 export default function FlashToast() {
@@ -12,8 +13,17 @@ export default function FlashToast() {
 
     const [visible, setVisible] = useState(false);
 
-    const text = flash.success || flash.error || flash.message;
-    const type = flash.error ? 'error' : 'success';
+    const text =
+    flash.success ||
+    flash.error ||
+    flash.warning ||
+    flash.message;
+
+const type = flash.error
+    ? 'error'
+    : flash.warning
+      ? 'warning'
+      : 'success';
 
     useEffect(() => {
         if (!text) return;
@@ -35,19 +45,29 @@ export default function FlashToast() {
         <div className="fixed right-6 top-6 z-50">
             <div
                 className={`rounded-2xl px-5 py-4 shadow-xl ${
-                    type === 'error'
-                        ? 'bg-red-600 text-white'
-                        : 'bg-green-600 text-white'
-                }`}
+                type === 'error'
+                    ? 'bg-red-600 text-white'
+                    : type === 'warning'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-green-600 text-white'
+            }`}
             >
                 <div className="flex items-start gap-3">
                     <span className="text-xl">
-                        {type === 'error' ? '⚠️' : '✅'}
+                        {type === 'error'
+                        ? '❌'
+                        : type === 'warning'
+                        ? '🟠'
+                        : '✅'}
                     </span>
 
                     <div>
                         <p className="font-semibold">
-                            {type === 'error' ? 'Action failed' : 'Success'}
+                          {type === 'error'
+                        ? 'Rejected'
+                        : type === 'warning'
+                        ? 'Correction Requested'
+                        : 'Success'}
                         </p>
 
                         <p className="text-sm opacity-90">

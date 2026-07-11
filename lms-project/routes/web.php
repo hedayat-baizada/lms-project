@@ -102,6 +102,13 @@ Route::post('/apply/team/form', [TeamApplicationController::class, 'store'])
 
 
 
+    Route::get('/approved-staffs', [TeamApplicationReviewController::class, 'approvedStaffs'])
+    ->name('approved-staffs.index');
+
+Route::get('/approved-staffs/{teamApplication}', [TeamApplicationReviewController::class, 'showApprovedStaff'])
+    ->name('approved-staffs.show');
+
+
 Route::prefix('team-applications')->group(function () {
 
     Route::get('/', [TeamApplicationReviewController::class, 'index'])

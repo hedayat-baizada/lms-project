@@ -3,6 +3,7 @@ import { Link, useForm } from '@inertiajs/react';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { useEffect, useState } from 'react';
 
+
 type Props = {
     application: any;
     placementSummary: {
@@ -23,6 +24,68 @@ export default function ApplicationShow({ application, placementSummary, placeme
     
     
     
+
+
+const [showPreviousPhotos, setShowPreviousPhotos] = useState(false);
+
+
+const allDocuments = application.documents ?? [];
+
+function normalizeDocumentType(type: string) {
+    return type
+        .replace(/_correction$/i, '')
+        .replace(/_replacement$/i, '')
+        .replace(/_updated$/i, '');
+}
+
+function isImageDocument(document: any) {
+    const path = document.file_url ?? document.file_path ?? '';
+
+    return /\.(jpg|jpeg|png|webp|gif)$/i.test(path);
+}
+
+const groupedStudentDocuments = Object.values(
+    allDocuments.reduce(
+        (groups: Record<string, any[]>, document: any) => {
+            const normalizedType = normalizeDocumentType(
+                document.document_type,
+            );
+
+            /*
+             * Include the owner in the key so an applicant ID and
+             * guardian ID are not accidentally grouped together.
+             */
+            const owner = document.document_owner_type ?? 'applicant';
+            const key = `${owner}:${normalizedType}`;
+
+            if (!groups[key]) {
+                groups[key] = [];
+            }
+
+            groups[key].push(document);
+
+            return groups;
+        },
+        {},
+    ),
+).map((group: any) =>
+    [...group].sort(
+        (first, second) =>
+            new Date(second.created_at).getTime() -
+            new Date(first.created_at).getTime(),
+    ),
+);
+
+const currentStudentPhotos = groupedStudentDocuments
+    .map((group: any) => group[0])
+    .filter((document: any) => document && isImageDocument(document));
+
+const previousStudentPhotos = groupedStudentDocuments
+    .flatMap((group: any) => group.slice(1))
+    .filter(isImageDocument);
+
+
+
 
 
 
@@ -133,47 +196,55 @@ export default function ApplicationShow({ application, placementSummary, placeme
 
                 
 
-                <Section title="Uploaded Documents">
-                    {application.documents?.length === 0 && (
-                        <p className="text-gray-500">No documents uploaded.</p>
+                <Section title="Current Uploaded Photos">
+    {currentStudentPhotos.length === 0 ? (
+        <p className="text-gray-500">
+            No uploaded photos found.
+        </p>
+    ) : (
+        <div className="grid gap-5 md:grid-cols-2">
+            {currentStudentPhotos.map((document: any) => (
+                <StudentPhotoCard
+                    key={document.id}
+                    document={document}
+                    label={studentDocumentLabel(
+                        document.document_type,
                     )}
+                />
+            ))}
+        </div>
+    )}
 
-                    <div className="grid gap-5 md:grid-cols-2">
-                        {application.documents?.map((document: any) => (
-                            <div key={document.id} className="rounded-2xl border bg-slate-50 p-5">
-                                <InfoGrid
-                                    items={[
-                                        ['Owner', document.document_owner_type],
-                                        ['Type', document.document_type],
-                                        ['Number', document.document_number ?? '-'],
-                                        ['Status', document.status],
-                                    ]}
-                                />
+    {previousStudentPhotos.length > 0 && (
+        <div className="mt-6">
+            <button
+                type="button"
+                onClick={() =>
+                    setShowPreviousPhotos((current) => !current)
+                }
+                className="rounded-xl border border-blue-300 bg-blue-50 px-5 py-3 font-semibold text-blue-800 hover:bg-blue-100"
+            >
+                {showPreviousPhotos
+                    ? 'Hide Previous Photos'
+                    : `View Previous Photos (${previousStudentPhotos.length})`}
+            </button>
 
-                                {document.file_url && (
-                                    <div className="mt-4">
-                                        <a
-                                            href={document.file_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="font-medium text-blue-600 hover:underline"
-                                        >
-                                            Open Uploaded Document
-                                        </a>
-
-                                        {document.file_url.match(/\.(jpg|jpeg|png|webp)$/i) && (
-                                            <img
-                                                src={document.file_url}
-                                                alt="Uploaded document"
-                                                className="mt-4 max-h-72 rounded-xl border bg-white object-contain"
-                                            />
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </Section>
+            {showPreviousPhotos && (
+                <div className="mt-5 grid gap-5 md:grid-cols-2">
+                    {previousStudentPhotos.map((document: any) => (
+                        <StudentPhotoCard
+                            key={document.id}
+                            document={document}
+                            label={`Previous ${studentDocumentLabel(
+                                document.document_type,
+                            )}`}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    )}
+</Section>
 
           <Section title="Placement Test">
     {!application.placement_test && (
@@ -846,4 +917,110 @@ function MiniStat({
             </p>
         </div>
     );
+}
+
+
+
+function StudentPhotoCard({
+    document,
+    label,
+}: {
+    document: any;
+    label: string;
+}) {
+    const filename =
+        document.original_name ??
+        document.file_name ??
+        document.file_path?.split('/').pop() ??
+        'Uploaded photo';
+
+    return (
+        <div className="rounded-2xl border bg-slate-50 p-5">
+            <InfoGrid
+                items={[
+                    [
+                        'Owner',
+                        formatDocumentOwner(
+                            document.document_owner_type,
+                        ),
+                    ],
+                    ['Type', label],
+                    ['Number', document.document_number ?? '-'],
+                    ['Status', document.status ?? '-'],
+                ]}
+            />
+
+            <p className="mt-4 truncate text-sm text-gray-500">
+                {filename}
+            </p>
+
+            {document.created_at && (
+                <p className="mt-1 text-xs text-gray-400">
+                    Uploaded:{' '}
+                    {new Date(document.created_at).toLocaleString()}
+                </p>
+            )}
+
+            {document.file_url && (
+                <>
+                    <a
+                        href={document.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900"
+                    >
+                        Open Photo
+                    </a>
+
+                    <img
+                        src={document.file_url}
+                        alt={label}
+                        className="mt-4 max-h-80 w-full rounded-xl border bg-white object-contain"
+                    />
+                </>
+            )}
+        </div>
+    );
+}
+
+function studentDocumentLabel(type: string) {
+    const normalizedType = type
+        .replace(/_correction$/i, '')
+        .replace(/_replacement$/i, '')
+        .replace(/_updated$/i, '');
+
+    switch (normalizedType) {
+        case 'photo':
+            return 'Applicant Photo';
+
+        case 'afghan_id':
+        case 'id_card':
+        case 'tazkira':
+            return 'Identity Document';
+
+        case 'guardian_id':
+            return 'Guardian Identity Document';
+
+        case 'other':
+            return 'Other Uploaded Photo';
+
+        default:
+            return normalizedType
+                .replaceAll('_', ' ')
+                .replace(/\b\w/g, (character) =>
+                    character.toUpperCase(),
+                );
+    }
+}
+
+function formatDocumentOwner(owner: string | null) {
+    if (!owner) {
+        return 'Applicant';
+    }
+
+    return owner
+        .replaceAll('_', ' ')
+        .replace(/\b\w/g, (character) =>
+            character.toUpperCase(),
+        );
 }

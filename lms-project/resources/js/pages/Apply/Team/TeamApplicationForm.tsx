@@ -171,13 +171,59 @@ const isTeacher =
 
                     <Section title="Education & Qualifications">
                         <div className="grid gap-5 md:grid-cols-2">
-                           <Textarea
-                            label="Highest Qualification"
-                            value={form.data.education_level}
-                            error={form.errors.education_level}
-                            onChange={(v) => form.setData('education_level', v)}
-                            placeholder="Example: Bachelor’s degree, diploma, certificates, current study details..."
-                        />
+                           <div>
+    <label className="mb-1 block font-medium">
+        Highest Qualification
+    </label>
+
+    <select
+        value={form.data.education_level}
+        onChange={(e) =>
+            form.setData('education_level', e.target.value)
+        }
+        className="w-full rounded-xl border px-4 py-3"
+    >
+        <option value="">Select your highest qualification</option>
+
+        <option value="Currently in High School">
+            Currently in High School
+        </option>
+
+        <option value="High School Graduate">
+            High School Graduate
+        </option>
+
+        <option value="Certificate">
+            Certificate
+        </option>
+
+        <option value="Diploma">
+            Diploma
+        </option>
+
+        <option value="Associate Degree">
+            Associate Degree
+        </option>
+
+        <option value="Bachelor's Degree">
+            Bachelor's Degree
+        </option>
+
+        <option value="Master's Degree">
+            Master's Degree
+        </option>
+
+        <option value="Doctorate / PhD">
+            Doctorate / PhD
+        </option>
+
+        <option value="Other">
+            Other / Not Listed
+        </option>
+    </select>
+
+    <Error message={form.errors.education_level} />
+</div>
                             <Input label="University / School" value={form.data.university_school} error={form.errors.university_school} onChange={(v) => form.setData('university_school', v)} />
                             <Input label="Date of Graduation" type="date" value={form.data.date_of_graduation} error={form.errors.date_of_graduation} onChange={(v) => form.setData('date_of_graduation', v)} />
 

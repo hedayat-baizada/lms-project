@@ -171,7 +171,7 @@ public function reject(Request $request, TeamApplication $teamApplication)
         'notes' => $request->notes,
     ]);
 
-    return back()->with('success', 'Application rejected.');
+  return back()->with('error', 'Application rejected.');
 }
 
 
@@ -202,7 +202,70 @@ public function requestCorrection(Request $request, TeamApplication $teamApplica
         'notes' => $request->message,
     ]);
 
-    return back()->with('success', 'Correction requested.');
+    return back()->with('warning', 'Correction requested.');
 }
+
+
+public function approvedStaffs()
+{
+    $staffs = TeamApplication::where('status', 'approved')
+        ->where(function ($query) {
+            $query
+                ->where('application_type', 'volunteer_manager')
+                ->orWhere('application_type', 'volunteer_support')
+                ->orWhere(function ($professionalQuery) {
+                    $professionalQuery
+                        ->where('application_type', 'professional_staff')
+                        ->where('professional_role', 'staff');
+                });
+        })
+        ->latest('approved_at')
+        ->get();
+
+    return Inertia::render('Admin/TeamApplications/ApprovedStaffs', [
+        'staffs' => $staffs,
+    ]);
+}
+
+public function showApprovedStaff(TeamApplication $teamApplication)
+{
+    abort_unless(
+        $teamApplication->status === 'approved' &&
+        (
+            in_array($teamApplication->application_type, [
+                'volunteer_manager',
+                'volunteer_support',
+            ]) ||
+            (
+                $teamApplication->application_type === 'professional_staff' &&
+                $teamApplication->professional_role === 'staff'
+            )
+        ),
+        404
+    );
+
+    $teamApplication->load([
+        'documents',
+        'correctionRequests',
+        'reviewActions.reviewer',
+        'statusLogs.changer',
+        'approvedByUser',
+    ]);
+
+    return Inertia::render('Admin/TeamApplications/ApprovedStaffShow', [
+        'application' => [
+            ...$teamApplication->toArray(),
+            'documents' => $teamApplication->documents->map(function ($document) {
+                return [
+                    ...$document->toArray(),
+                    'file_url' => asset('storage/' . $document->file_path),
+                ];
+            }),
+        ],
+    ]);
+}
+
+
+
 
 }

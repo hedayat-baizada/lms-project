@@ -198,7 +198,11 @@ public function store(Request $request)
     'address' => 'required|string|max:500',
     'permanent_address' => 'nullable|string|max:500',
 
-    'education_level' => 'required|string|max:2000',
+    'education_level' => [
+    'required',
+    'string',
+    'in:Currently in High School,High School Graduate,Certificate,Diploma,Associate Degree,Bachelor\'s Degree,Master\'s Degree,Doctorate / PhD,Other',
+],
     'university_school' => 'nullable|string|max:255',
     'date_of_graduation' => 'nullable|date',
 
