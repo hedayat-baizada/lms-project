@@ -53,7 +53,6 @@ const footerNavItems: NavItem[] = [
     },
 ];
 
-// ==================== منوی تیمی (با دسترسی‌ها) ====================
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -361,47 +360,47 @@ const mainNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
-    const role = auth.user.role as string;
     const can = useCan();
+    const roles: string[] = (auth.user?.roles as string[]) ?? [];
+    const isSuperAdmin = roles.includes('Super Admin');
+    const isAdmin = roles.includes('Admin') || isSuperAdmin;
+    const isTeacher = roles.includes('Teacher');
+    const isStudent = roles.includes('Student') || roles.length === 0;
 
-    // ==================== تولید منوی LMS بر اساس نقش ====================
-    const lmsNavItems: NavItem[] = (() => {
-        if (role === 'admin') {
-            return [
-                { title: 'Classes', url: '/admin/classes', icon: GraduationCap },
-                { title: 'Students', url: '/admin/students', icon: Users },
-                { title: 'Teachers', url: '/admin/teachers', icon: Monitor },
-            ];
-        } else if (role === 'teacher') {
-            return [
-                { title: 'My Classes', url: '/teacher/classes', icon: GraduationCap },
-                { title: 'Homework', url: '/teacher/homework', icon: BookOpen },
-                { title: 'Attendance', url: '/teacher/attendance', icon: Calendar },
-                { title: 'Exams', url: '/teacher/exams', icon: ClipboardList },
-            ];
-        } else if (role === 'student') {
-            return [
-                { title: 'My Classes', url: '/student/classes', icon: GraduationCap },
-                { title: 'My Results', url: '/student/results', icon: Trophy },
-            ];
-        }
-        return [];
-    })();
+    const lmsNavItems: NavItem[] = [];
 
-    // ==================== فیلتر کردن منوی تیمی بر اساس دسترسی‌ها ====================
+    if (isAdmin) {
+        lmsNavItems.push(
+            { title: 'Classes', url: '/admin/classes', icon: GraduationCap },
+            { title: 'Students', url: '/admin/students', icon: Users },
+            { title: 'Teachers', url: '/admin/teachers', icon: Monitor }
+        );
+    } else if (isTeacher) {
+        lmsNavItems.push(
+            { title: 'My Classes', url: '/teacher/classes', icon: GraduationCap },
+            { title: 'Homework', url: '/teacher/homework', icon: BookOpen },
+            { title: 'Attendance', url: '/teacher/attendance', icon: Calendar },
+            { title: 'Exams', url: '/teacher/exams', icon: ClipboardList }
+        );
+    } else if (isStudent) {
+        lmsNavItems.push(
+            { title: 'My Classes', url: '/student/classes', icon: GraduationCap },
+            { title: 'My Results', url: '/student/results', icon: Trophy }
+        );
+    }
+
     const filteredTeamItems = mainNavItems
         .map(item => ({
             ...item,
-            children: item.children?.filter(
-                child => !child.permission || can(child.permission)
-            ),
+            children: item.children?.filter(child => {
+                if (isAdmin) return true;
+                return !child.permission || can(child.permission);
+            }),
         }))
         .filter(item => !item.children || item.children.length > 0);
 
-    // ==================== ترکیب منوها ====================
     const allNavItems = [...filteredTeamItems];
 
-    // اگر منوی LMS خالی نبود، آن را به عنوان یک بخش جداگانه اضافه کن
     if (lmsNavItems.length > 0) {
         allNavItems.push({
             title: 'My LMS',
@@ -414,7 +413,6 @@ export function AppSidebar() {
         <Sidebar 
             collapsible="icon" 
             variant="inset"
-            // استایل‌های شیشه‌ای (میتوانید از آن‌ها استفاده کنید یا نه)
             className="bg-gradient-to-b from-slate-50/90 via-white/90 to-indigo-50/80 backdrop-blur-md border-r border-white/50 shadow-xl shadow-indigo-200/20"
         >
             <SidebarHeader className="relative border-b border-indigo-100/50 pb-4">
