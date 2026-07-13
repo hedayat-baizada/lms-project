@@ -9,12 +9,18 @@ use App\Models\Lesson;
 use App\Models\StudentLessonProgress;
 use App\Services\LessonUnlockService;
 use Illuminate\Http\Request;
-use App\Notifications\HomeworkReviewedNotification; // ✅ اضافه شد
+use App\Notifications\HomeworkReviewedNotification;
 
 class HomeworkController extends Controller
 {
     public function submit(Request $request, Lesson $lesson)
     {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('homework.submit')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'answer' => 'required|string',
         ]);
@@ -61,12 +67,16 @@ class HomeworkController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->isTeacher()) {
+        if (!$user->hasPermissionTo('homework.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($user->hasRole('teacher')) {
             $classRoom = $lesson->classRoom;
             if ($classRoom->teacher_id !== $user->id) {
                 return response()->json(['message' => 'Unauthorized - This lesson does not belong to your class'], 403);
             }
-        } elseif (!$user->isAdmin()) {
+        } elseif (!$user->hasRole('admin')) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -86,15 +96,19 @@ class HomeworkController extends Controller
     {
         $user = auth()->user();
 
+        if (!$user->hasPermissionTo('homework.review')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $homework = $submission->homework;
         $lesson = $homework->lesson;
         $classRoom = $lesson->classRoom;
 
-        if ($user->isTeacher() && $classRoom->teacher_id !== $user->id) {
+        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->isAdmin() && !$user->isTeacher()) {
+        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -109,7 +123,6 @@ class HomeworkController extends Controller
             'status'           => 'reviewed',
         ]);
 
-        // ✅ ارسال اعلان به دانشجو
         $student = $submission->student;
         $student->notify(new HomeworkReviewedNotification($submission));
 
@@ -120,13 +133,17 @@ class HomeworkController extends Controller
     {
         $user = auth()->user();
 
+        if (!$user->hasPermissionTo('homework.create')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $classRoom = $lesson->classRoom;
 
-        if ($user->isTeacher() && $classRoom->teacher_id !== $user->id) {
+        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->isAdmin() && !$user->isTeacher()) {
+        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -152,13 +169,17 @@ class HomeworkController extends Controller
     {
         $user = auth()->user();
 
+        if (!$user->hasPermissionTo('homework.edit')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $classRoom = $lesson->classRoom;
 
-        if ($user->isTeacher() && $classRoom->teacher_id !== $user->id) {
+        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->isAdmin() && !$user->isTeacher()) {
+        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

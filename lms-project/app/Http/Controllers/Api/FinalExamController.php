@@ -9,13 +9,19 @@ use App\Models\FinalExamQuestion;
 use App\Models\FinalExamSubmission;
 use App\Models\StudentLessonProgress;
 use Illuminate\Http\Request;
-use App\Notifications\ExamGradedNotification; // ✅ اضافه شد
+use App\Notifications\ExamGradedNotification;
 
 class FinalExamController extends Controller
 {
     public function show(ClassRoom $classRoom)
     {
-        $student = auth()->user();
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('exams.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $student = $user;
 
         $totalLessons = $classRoom->lessons()->count();
         $completedLessons = StudentLessonProgress::where('user_id', $student->id)
@@ -43,13 +49,19 @@ class FinalExamController extends Controller
 
     public function submit(Request $request, ClassRoom $classRoom)
     {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('exams.submit')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'answers'                => 'required|array',
             'answers.*.question_id'  => 'required|exists:final_exam_questions,id',
             'answers.*.answer'       => 'required|string',
         ]);
 
-        $student = auth()->user();
+        $student = $user;
         $exam    = FinalExam::where('class_room_id', $classRoom->id)->first();
 
         if (!$exam) {
@@ -80,6 +92,12 @@ class FinalExamController extends Controller
 
     public function store(Request $request, ClassRoom $classRoom)
     {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('exams.create')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'title'       => 'required|string',
             'description' => 'nullable|string',
@@ -111,6 +129,10 @@ class FinalExamController extends Controller
     {
         $user = auth()->user();
 
+        if (!$user->hasPermissionTo('exams.grade')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $exam = $submission->finalExam;
         if (!$exam) {
             return response()->json(['message' => 'Exam not found'], 404);
@@ -121,11 +143,11 @@ class FinalExamController extends Controller
             return response()->json(['message' => 'Class not found'], 404);
         }
 
-        if ($user->isTeacher() && $classRoom->teacher_id !== $user->id) {
+        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->isAdmin() && !$user->isTeacher()) {
+        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -140,7 +162,6 @@ class FinalExamController extends Controller
             'status'           => 'reviewed',
         ]);
 
-        // ✅ ارسال اعلان به دانشجو
         $student = $submission->student;
         $student->notify(new ExamGradedNotification($submission));
 
@@ -151,11 +172,15 @@ class FinalExamController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->isTeacher() && $classRoom->teacher_id !== $user->id) {
+        if (!$user->hasPermissionTo('exams.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->isAdmin() && !$user->isTeacher()) {
+        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
