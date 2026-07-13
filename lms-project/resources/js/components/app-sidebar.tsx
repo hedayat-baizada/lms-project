@@ -34,6 +34,9 @@ import {
     Calendar,
     ClipboardList,
     Trophy,
+    UsersRound,
+    UserX,
+    UserRoundX,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -124,8 +127,35 @@ const mainNavItems: NavItem[] = [
                 title: 'Approved Teachers',
                 url: '/approved-teachers',
                 icon: GraduationCap,
-                permission: 'team-application.view',
+                permission: 'approved-teachers-applications.view',
             },
+            {
+                title: 'Approved Staffs',
+                url: '/approved-staffs',
+                icon: UsersRound,
+                permission: 'approved-staffs-applications.view',
+            },
+            {
+                title: 'Team Applications',
+                url: '/team-applications',
+                icon: Users,
+                permission: 'team-applications.view',
+            },
+
+            {
+                title: 'Rejected Students',
+                url: '/rejected-students',
+                icon: UserX,
+                permission: 'rejected-students-applications.view',
+            },
+
+            {
+                title: 'Rejected Team Applications',
+                url: '/rejected-team-applications',
+                icon: UserRoundX,
+                permission: 'rejected-team-applications.view',
+            },
+
         ],
     },
     {
