@@ -8,14 +8,19 @@ use App\Models\Lesson;
 use App\Models\StudentLessonProgress;
 use App\Services\LessonUnlockService;
 use Illuminate\Http\Request;
-use App\Notifications\ClassStartedNotification; // ✅ اضافه شد
+use App\Notifications\ClassStartedNotification;
 
 class AttendanceController extends Controller
 {
     public function request(Request $request, Lesson $lesson)
     {
-        $student = auth()->user();
+        $user = auth()->user();
 
+        if (!$user->hasPermissionTo('attendance.request')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $student = $user;
         $existing = AttendanceRequest::where([
             'user_id'   => $student->id,
             'lesson_id' => $lesson->id,
@@ -42,8 +47,13 @@ class AttendanceController extends Controller
 
     public function status(Lesson $lesson)
     {
-        $student = auth()->user();
+        $user = auth()->user();
 
+        if (!$user->hasPermissionTo('attendance.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $student = $user;
         $attendance = AttendanceRequest::where([
             'user_id'   => $student->id,
             'lesson_id' => $lesson->id,
@@ -58,13 +68,17 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
 
+        if (!$user->hasPermissionTo('attendance.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $query = AttendanceRequest::with(['student', 'lesson.classRoom'])->orderBy('created_at', 'desc');
 
-        if ($user->isTeacher()) {
+        if ($user->hasRole('teacher')) {
             $query->whereHas('lesson.classRoom', function ($q) use ($user) {
                 $q->where('teacher_id', $user->id);
             });
-        } elseif (!$user->isAdmin()) {
+        } elseif (!$user->hasRole('admin')) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -76,11 +90,15 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->isTeacher() && $lesson->classRoom->teacher_id !== $user->id) {
+        if (!$user->hasPermissionTo('attendance.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($user->hasRole('teacher') && $lesson->classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->isAdmin() && !$user->isTeacher()) {
+        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -95,13 +113,17 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
 
+        if (!$user->hasPermissionTo('attendance.approve')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $classRoom = $attendance->lesson->classRoom;
 
-        if ($user->isTeacher() && $classRoom->teacher_id !== $user->id) {
+        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->isAdmin() && !$user->isTeacher()) {
+        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -129,7 +151,6 @@ class AttendanceController extends Controller
         $service = new LessonUnlockService();
         $service->unlockNextLesson($student, $lesson);
 
-        // ✅ ارسال اعلان به دانشجو
         $student->notify(new ClassStartedNotification($classRoom, $student));
 
         return response()->json(['message' => 'Attendance approved successfully']);
@@ -139,13 +160,17 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
 
+        if (!$user->hasPermissionTo('attendance.reject')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $classRoom = $attendance->lesson->classRoom;
 
-        if ($user->isTeacher() && $classRoom->teacher_id !== $user->id) {
+        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->isAdmin() && !$user->isTeacher()) {
+        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

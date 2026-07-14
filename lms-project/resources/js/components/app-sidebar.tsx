@@ -53,7 +53,6 @@ const footerNavItems: NavItem[] = [
     },
 ];
 
-// ==================== منوی تیمی (با دسترسی‌ها) ====================
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -364,7 +363,7 @@ export function AppSidebar() {
     const role = auth.user.role as string;
     const can = useCan();
 
-    // ==================== تولید منوی LMS بر اساس نقش ====================
+    
     const lmsNavItems: NavItem[] = (() => {
         if (role === 'admin') {
             return [
@@ -388,7 +387,6 @@ export function AppSidebar() {
         return [];
     })();
 
-    // ==================== فیلتر کردن منوی تیمی بر اساس دسترسی‌ها ====================
     const filteredTeamItems = mainNavItems
         .map(item => ({
             ...item,
@@ -398,10 +396,8 @@ export function AppSidebar() {
         }))
         .filter(item => !item.children || item.children.length > 0);
 
-    // ==================== ترکیب منوها ====================
     const allNavItems = [...filteredTeamItems];
 
-    // اگر منوی LMS خالی نبود، آن را به عنوان یک بخش جداگانه اضافه کن
     if (lmsNavItems.length > 0) {
         allNavItems.push({
             title: 'My LMS',
@@ -414,7 +410,7 @@ export function AppSidebar() {
         <Sidebar 
             collapsible="icon" 
             variant="inset"
-            // استایل‌های شیشه‌ای (میتوانید از آن‌ها استفاده کنید یا نه)
+            
             className="bg-gradient-to-b from-slate-50/90 via-white/90 to-indigo-50/80 backdrop-blur-md border-r border-white/50 shadow-xl shadow-indigo-200/20"
         >
             <SidebarHeader className="relative border-b border-indigo-100/50 pb-4">
