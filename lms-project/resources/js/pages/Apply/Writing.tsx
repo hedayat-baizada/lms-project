@@ -119,12 +119,13 @@ export default function WritingTest({ application, placementTest, writingPrompt 
                         <div className="rounded-2xl bg-white p-8 shadow">
                             <div className="mb-6 rounded-xl border border-blue-100 bg-blue-50 p-5">
                                 <h2 className="text-xl font-semibold text-blue-900">
-                                    Writing Prompt
+                                    Writing Title
                                 </h2>
 
-                                <p className="mt-2 text-gray-700">
+                                <h2 className="mt-3 rounded-xl border-l-4 border-blue-600 bg-blue-50 px-5 py-4 text-xl font-bold leading-8 text-slate-900">
+
                                     {writingPrompt?.question_text ?? 'How would you describe yourself?'}
-                                </p>
+                                </h2>
 
                                 <p className="mt-1 text-sm text-gray-600">
                                     Recommended minimum: {minimumWords} words.

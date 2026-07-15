@@ -3,24 +3,24 @@ import { useForm } from '@inertiajs/react';
 type Props = {
     application: any;
     latestCorrectionRequest: any;
-    replaceableDocuments: {
-        id: number;
-        document_type: string;
-        document_owner_type: string;
-    }[];
+    // replaceableDocuments: {
+    //     id: number;
+    //     document_type: string;
+    //     document_owner_type: string;
+    // }[];
 };
 
 export default function Correction({
     application,
     latestCorrectionRequest,
-    replaceableDocuments,
+    // replaceableDocuments,
 }: Props) {
 
 
 
     const form = useForm({
         correction_message: '',
-        replacement_document_type: '',
+        
         correction_file: null as File | null,
     });
 
@@ -80,48 +80,12 @@ export default function Correction({
 
                     <div className="mt-6">
                         <label className="mb-2 block font-semibold">
-                            Upload File if Needed
+                            Supporting File (optional)
                         </label>
-
-                        <div>
-    <label className="mb-2 block font-semibold">
-        Document You Are Replacing
-    </label>
-
-    <select
-        value={form.data.replacement_document_type}
-        onChange={(e) =>
-            form.setData(
-                'replacement_document_type',
-                e.target.value
-            )
-        }
-        className="w-full rounded-xl border px-4 py-3"
-    >
-        <option value="">
-            Select a document
-        </option>
-
-        {replaceableDocuments.map((document) => (
-            <option
-                key={document.id}
-                value={document.document_type}
-            >
-                {formatDocumentType(document.document_type)}
-                {' — '}
-                {formatDocumentType(
-                    document.document_owner_type
-                )}
-            </option>
-        ))}
-    </select>
-
-    {form.errors.replacement_document_type && (
-        <p className="mt-2 text-sm text-red-600">
-            {form.errors.replacement_document_type}
-        </p>
-    )}
-</div>
+                        <p className="mb-3 text-sm text-slate-500">
+                            Upload a file only when the reviewer requested one.
+                        </p>
+      
 
                         <input
                             type="file"
