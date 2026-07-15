@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import PublicApplicationLayout from '@/layouts/public-application-layout';
 
 type Props = {
     application: any;
@@ -24,7 +25,8 @@ export default function TeamCorrection({
     }
 
     return (
-        <div className="min-h-screen bg-slate-100 py-10">
+        <PublicApplicationLayout>
+        <div className=" min-h-screen bg-slate-100 py-10">
             <div className="mx-auto max-w-4xl space-y-8 px-5">
 
                 <div className="rounded-3xl bg-gradient-to-r from-orange-600 to-red-600 p-8 text-white shadow-xl">
@@ -132,5 +134,6 @@ export default function TeamCorrection({
                 </form>
             </div>
         </div>
+        </PublicApplicationLayout>
     );
 }

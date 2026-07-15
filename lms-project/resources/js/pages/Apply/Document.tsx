@@ -1,5 +1,6 @@
 import { useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import PublicApplicationLayout from '@/layouts/public-application-layout';
 
 type PageProps = {
     application: {
@@ -54,6 +55,7 @@ export default function DocumentStep() {
     }
 
     return (
+        <PublicApplicationLayout>
         <div className="min-h-screen bg-gray-100 py-10">
             <div className="mx-auto max-w-2xl rounded bg-white p-8 shadow">
                 <h1 className="mb-2 text-3xl font-bold">
@@ -193,6 +195,7 @@ export default function DocumentStep() {
                 </form>
             </div>
         </div>
+        </PublicApplicationLayout>
     );
 }
 
@@ -238,5 +241,6 @@ function FileUploadPreview({
                 </div>
             )}
         </div>
+        
     );
 }

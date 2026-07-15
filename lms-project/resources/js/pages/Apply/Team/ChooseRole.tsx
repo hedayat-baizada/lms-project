@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
+import PublicApplicationLayout from '@/layouts/public-application-layout';
 
 export default function ChooseRole() {
     const [teacherTrack, setTeacherTrack] = useState('');
@@ -8,7 +9,8 @@ export default function ChooseRole() {
     const [professionalSubject, setProfessionalSubject] = useState('');
 
     return (
-        <div className="min-h-screen bg-slate-100 py-12">
+        <PublicApplicationLayout>
+        <div className=" min-h-screen bg-slate-100 py-12">
             <div className="mx-auto max-w-6xl px-6">
 
                 <Link
@@ -178,5 +180,6 @@ export default function ChooseRole() {
                 </div>
             </div>
         </div>
+        </PublicApplicationLayout>
     );
 }

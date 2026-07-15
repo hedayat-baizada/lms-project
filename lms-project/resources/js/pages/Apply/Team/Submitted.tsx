@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
+import PublicApplicationLayout from '@/layouts/public-application-layout';
 
 type Props = {
     application: {
@@ -68,7 +69,8 @@ export default function Submitted({ application }: Props) {
 }
 
     return (
-        <div className="min-h-screen bg-slate-100 px-4 py-10">
+        <PublicApplicationLayout>
+        <div className=" min-h-screen bg-slate-100 px-4 py-10">
             <div className="mx-auto max-w-3xl">
 
                 <div className="rounded-3xl bg-white p-10 shadow-xl">
@@ -176,5 +178,6 @@ export default function Submitted({ application }: Props) {
 
             </div>
         </div>
+        </PublicApplicationLayout>
     );
 }

@@ -1,4 +1,5 @@
 import { useForm, usePage } from '@inertiajs/react';
+import PublicApplicationLayout from '@/layouts/public-application-layout';
 
 type PageProps = {
     application: {
@@ -28,6 +29,7 @@ export default function CourseStep() {
     const isCel = data.course_track === 'cel';
 
     return (
+          <PublicApplicationLayout>
         <div className="min-h-screen bg-gray-100 py-10">
             <div className="mx-auto max-w-2xl bg-white p-8 rounded shadow">
                 <h1 className="text-3xl font-bold mb-2">
@@ -145,5 +147,6 @@ export default function CourseStep() {
                 </form>
             </div>
         </div>
+        </PublicApplicationLayout>
     );
 }

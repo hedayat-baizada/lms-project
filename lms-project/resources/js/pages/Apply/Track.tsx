@@ -1,6 +1,7 @@
 import { useForm, usePage } from '@inertiajs/react';
 import { router} from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
+import PublicApplicationLayout from '@/layouts/public-application-layout';
 
 type Props = {
     application: any | null;
@@ -55,6 +56,7 @@ case 'correction_submitted':
     }
 
     return (
+        <PublicApplicationLayout>
         <div className="min-h-screen bg-slate-100 py-10 px-4">
             <div className="mx-auto max-w-5xl">
 
@@ -423,6 +425,7 @@ case 'correction_submitted':
 
             </div>
         </div>
+        </PublicApplicationLayout>
     );
 }
 

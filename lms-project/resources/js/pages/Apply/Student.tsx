@@ -1,4 +1,5 @@
 import { useForm, usePage } from '@inertiajs/react';
+import PublicApplicationLayout from '@/layouts/public-application-layout';
 
 export default function StudentApplication() {
     const { flash } = usePage().props as {
@@ -24,11 +25,23 @@ export default function StudentApplication() {
     }
 
     return (
+         <PublicApplicationLayout>
         <div className="min-h-screen bg-gray-100 py-10">
             <div className="mx-auto max-w-2xl bg-white p-8 rounded shadow">
-                <h1 className="text-3xl font-bold mb-6">
-                    Student Application - Personal Information
+                <div className="mb-8 border-b border-slate-200 pb-6">
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">
+                    Student Admission
+                </p>
+
+                <h1 className="mt-2 text-3xl font-bold text-slate-900">
+                    Personal Information
                 </h1>
+
+                <p className="mt-2 text-slate-600">
+                    Please provide accurate information before continuing to the next
+                    step.
+                </p>
+            </div>
 
                 {flash?.message && (
                     <div className="mb-4 rounded bg-blue-100 p-3 text-blue-700">
@@ -133,5 +146,6 @@ export default function StudentApplication() {
                 </form>
             </div>
         </div>
+        </PublicApplicationLayout>
     );
 }

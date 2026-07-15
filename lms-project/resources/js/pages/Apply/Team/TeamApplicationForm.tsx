@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import PublicApplicationLayout from '@/layouts/public-application-layout';
 
 type Props = {
     type: string;
@@ -120,7 +121,8 @@ const isTeacher =
 })();
 
     return (
-        <div className="min-h-screen bg-slate-100 px-4 py-10">
+        <PublicApplicationLayout>
+        <div className=" min-h-screen bg-slate-100 px-4 py-10">
             <div className="mx-auto max-w-5xl space-y-8">
                 <div className="rounded-3xl bg-gradient-to-r from-emerald-700 to-teal-700 p-8 text-white shadow-xl">
                     <p className="text-sm uppercase tracking-[0.3em] text-emerald-100">
@@ -512,6 +514,7 @@ const isTeacher =
                 </form>
             </div>
         </div>
+        </PublicApplicationLayout>
     );
 }
 

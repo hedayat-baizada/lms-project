@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import PublicApplicationLayout from '@/layouts/public-application-layout';
 
 type Props = {
     application: any;
@@ -21,6 +22,7 @@ export default function ReviewApplication({ application }: Props) {
     }
 
     return (
+        <PublicApplicationLayout>
         <div className="min-h-screen bg-gray-100 py-10">
             <div className="mx-auto max-w-4xl space-y-6 rounded-xl bg-white p-8 shadow">
                 <div>
@@ -107,5 +109,6 @@ export default function ReviewApplication({ application }: Props) {
                 </form>
             </div>
         </div>
+        </PublicApplicationLayout>
     );
 }

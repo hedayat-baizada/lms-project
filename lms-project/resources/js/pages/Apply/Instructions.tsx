@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { celLevels, prepCelLevels } from '@/data/courseDescriptions';
+import PublicApplicationLayout from '@/layouts/public-application-layout';
 
 type Props = {
     application: any;
@@ -78,6 +79,7 @@ export default function Instructions({ application, placementTest }: Props) {
 // ];
 
     return (
+        <PublicApplicationLayout>
         <div className="min-h-screen bg-slate-100 px-4 py-10">
             <div className="mx-auto max-w-4xl space-y-6">
                 <div className="rounded-3xl bg-gradient-to-r from-blue-800 to-indigo-900 p-8 text-white shadow-xl">
@@ -266,5 +268,6 @@ export default function Instructions({ application, placementTest }: Props) {
                 </div>
             </div>
         </div>
+        </PublicApplicationLayout>
     );
 }
