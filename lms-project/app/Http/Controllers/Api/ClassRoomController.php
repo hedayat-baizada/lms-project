@@ -261,4 +261,45 @@ class ClassRoomController extends Controller
 
         return response()->json($students);
     }
+
+    /**
+     * Remove a student from a class
+     */
+    public function removeStudent(ClassRoom $classRoom, $studentId)
+    {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('enrollments.delete')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $student = User::find($studentId);
+        if (!$student) {
+            return response()->json(['message' => 'Student not found'], 404);
+        }
+
+        // Check if student is enrolled in this class
+        $enrolled = $classRoom->students()
+            ->where('user_id', $studentId)
+            ->wherePivot('status', 'active')
+            ->exists();
+
+        if (!$enrolled) {
+            return response()->json(['message' => 'Student is not enrolled in this class'], 400);
+        }
+
+        // Remove the student from the class
+        $classRoom->students()->detach($studentId);
+
+        // Also clean up any progress records for this student in this class
+        \App\Models\StudentLessonProgress::where('user_id', $studentId)
+            ->whereIn('lesson_id', $classRoom->lessons()->pluck('id'))
+            ->delete();
+
+        return response()->json(['message' => 'Student removed successfully']);
+    }
 }
