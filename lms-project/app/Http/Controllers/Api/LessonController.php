@@ -13,6 +13,12 @@ use App\Notifications\LessonReleasedNotification;
 
 class LessonController extends Controller
 {
+    
+    private function isAdminOrTeacher($user): bool
+    {
+        return $user->hasRole('Admin') || $user->hasRole('Super Admin') || $user->hasRole('Teacher');
+    }
+
     public function index(ClassRoom $classRoom)
     {
         $user = auth()->user();
@@ -23,7 +29,7 @@ class LessonController extends Controller
 
         $lessons = $classRoom->lessons()->with('homework')->get();
 
-        if ($user->hasRole('admin') || $user->hasRole('teacher')) {
+        if ($this->isAdminOrTeacher($user)) {
             return response()->json($lessons);
         }
 
@@ -70,7 +76,7 @@ class LessonController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($user->hasRole('admin') || $user->hasRole('teacher')) {
+        if ($this->isAdminOrTeacher($user)) {
             $lesson->load('homework');
             return response()->json($lesson);
         }

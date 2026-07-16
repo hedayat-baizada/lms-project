@@ -12,6 +12,17 @@ use App\Notifications\ClassStartedNotification;
 
 class AttendanceController extends Controller
 {
+  
+    private function isAdminLike($user): bool
+    {
+        return $user->hasRole('Admin') || $user->hasRole('Super Admin');
+    }
+
+    private function isTeacherRole($user): bool
+    {
+        return $user->hasRole('Teacher');
+    }
+
     public function request(Request $request, Lesson $lesson)
     {
         $user = auth()->user();
@@ -74,11 +85,11 @@ class AttendanceController extends Controller
 
         $query = AttendanceRequest::with(['student', 'lesson.classRoom'])->orderBy('created_at', 'desc');
 
-        if ($user->hasRole('teacher')) {
+        if ($this->isTeacherRole($user)) {
             $query->whereHas('lesson.classRoom', function ($q) use ($user) {
                 $q->where('teacher_id', $user->id);
             });
-        } elseif (!$user->hasRole('admin')) {
+        } elseif (!$this->isAdminLike($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -94,11 +105,11 @@ class AttendanceController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($user->hasRole('teacher') && $lesson->classRoom->teacher_id !== $user->id) {
+        if ($this->isTeacherRole($user) && $lesson->classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
+        if (!$this->isAdminLike($user) && !$this->isTeacherRole($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -119,11 +130,11 @@ class AttendanceController extends Controller
 
         $classRoom = $attendance->lesson->classRoom;
 
-        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
+        if (!$this->isAdminLike($user) && !$this->isTeacherRole($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -166,11 +177,11 @@ class AttendanceController extends Controller
 
         $classRoom = $attendance->lesson->classRoom;
 
-        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
+        if (!$this->isAdminLike($user) && !$this->isTeacherRole($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

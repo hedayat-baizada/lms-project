@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-       
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
@@ -60,16 +59,11 @@ class PermissionSeeder extends Seeder
             // Rejected Team Applications
             'rejected-team-applications.view',
             'rejected-team-applications.restore',
-          
-
 
             'team-applications.view',
             'team-applications.create',
             'team-applications.edit',
             'team-applications.delete',
-
-            
-            
 
             // Students
             'students.view',
@@ -109,7 +103,7 @@ class PermissionSeeder extends Seeder
             'class-groups.edit',
             'class-groups.delete',
 
-            // Attendance
+            // Attendance (legacy/admissions module)
             'attendance.view',
             'attendance.create',
             'attendance.edit',
@@ -134,7 +128,6 @@ class PermissionSeeder extends Seeder
             'volunteers.create',
             'volunteers.edit',
             'volunteers.delete',
-
 
              // Teacher Attendance
             'teacher-attendance.view',
@@ -172,8 +165,6 @@ class PermissionSeeder extends Seeder
             'programs.edit',
             'programs.delete',
 
-            
-
             // Lesson Plans
             'lesson-plans.view',
             'lesson-plans.create',
@@ -198,11 +189,9 @@ class PermissionSeeder extends Seeder
             'announcements.edit',
             'announcements.delete',
 
-            
            // Reports
             'reports.view',
             'reports.export',
-
             'reports.students.view',
             'reports.attendance.view',
             'reports.academic.view',
@@ -217,6 +206,39 @@ class PermissionSeeder extends Seeder
             // Settings
             'settings.view',
             'settings.edit',
+
+    
+            // ================================================================
+            'classes.view',
+            'classes.create',
+            'classes.edit',
+            'classes.delete',
+
+            'lessons.view',
+            'lessons.create',
+            'lessons.edit',
+            'lessons.delete',
+
+            'homework.view',
+            'homework.create',
+            'homework.edit',
+            'homework.delete',
+            'homework.review',
+            'homework.submit',
+
+            'exams.view',
+            'exams.create',
+            'exams.edit',
+            'exams.delete',
+            'exams.grade',
+            'exams.submit',
+
+            'attendance.approve',
+            'attendance.reject',
+            'attendance.request',
+
+            'enrollments.create',
+            'enrollments.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -233,7 +255,7 @@ class PermissionSeeder extends Seeder
         $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
         $admin = Role::firstOrCreate(['name' => 'Admin']);
         $admissionOfficer = Role::firstOrCreate(['name' => 'Admission Officer']);
-        $teacher = Role::firstOrCreate(['name' => 'Teacher']);        
+        $teacher = Role::firstOrCreate(['name' => 'Teacher']);
         $volunteer = Role::firstOrCreate(['name' => 'Volunteer']);
         $courseManager = Role::firstOrCreate(['name' => 'Course Manager']);
         $reportManager = Role::firstOrCreate(['name' => 'Report Manager']);
@@ -247,171 +269,159 @@ class PermissionSeeder extends Seeder
         $admin->syncPermissions(Permission::all());
 
 
-          // Admission Officer
+        // Admission Officer
         $admissionOfficer->syncPermissions([
-        'dashboard.view',
+            'dashboard.view',
 
-        // Admissions
-        'applications.view',
-        'applications.create',
-        'applications.edit',
-        'applications.approve',
-        'applications.reject',
+            // Admissions
+            'applications.view',
+            'applications.create',
+            'applications.edit',
+            'applications.approve',
+            'applications.reject',
 
-        'approved-applicants.view',
-        'approved-applicants.edit',
-        
+            'approved-applicants.view',
+            'approved-applicants.edit',
 
-         'team-applications.view',
-        'team-applications.create',
-        'team-applications.edit',
-        'team-applications.delete',
+            'team-applications.view',
+            'team-applications.create',
+            'team-applications.edit',
+            'team-applications.delete',
 
-        'approved-staffs-applications.view',
-        'approved-staffs-applications.edit',
+            'approved-staffs-applications.view',
+            'approved-staffs-applications.edit',
 
-        'approved-teachers-applications.view',
-        'approved-teachers-applications.edit',
+            'approved-teachers-applications.view',
+            'approved-teachers-applications.edit',
 
-        'rejected-students-applications.view',
-        'rejected-students-applications.restore',
+            'rejected-students-applications.view',
+            'rejected-students-applications.restore',
 
-        'rejected-team-applications.view',
-        'rejected-team-applications.restore',
+            'rejected-team-applications.view',
+            'rejected-team-applications.restore',
 
-        'students.view',
+            'students.view',
 
-        'guardians.view',
+            'guardians.view',
 
-        'interviews.view',
-        'interviews.conduct',
+            'interviews.view',
+            'interviews.conduct',
 
-        'placement-tests.view',
-        'placement-tests.evaluate',
+            'placement-tests.view',
+            'placement-tests.evaluate',
 
-        // Volunteers
-        'volunteers.view',
-        'volunteer-roles.view',
-        'volunteer-attendance.view',
-        'volunteer-assignments.view',
+            // Volunteers
+            'volunteers.view',
+            'volunteer-roles.view',
+            'volunteer-attendance.view',
+            'volunteer-assignments.view',
 
-        'announcements.view',
-    ]);
+            'announcements.view',
+        ]);
 
 
-     // Volunteer
-      $volunteer->syncPermissions([
-        'dashboard.view',
+        // Volunteer
+        $volunteer->syncPermissions([
+            'dashboard.view',
 
-        'students.view',
+            'students.view',
 
-        'courses.view',
-        'class-groups.view',
-        'class-schedules.view',
+            'courses.view',
+            'class-groups.view',
+            'class-schedules.view',
 
-        'attendance.view',
-        'attendance.mark',
+            'attendance.view',
+            'attendance.mark',
 
-        'lesson-plans.view',
+            'lesson-plans.view',
 
-        'assessments.view',
+            'assessments.view',
 
-        'announcements.view',
-    ]);
+            'announcements.view',
+        ]);
+
         // Course Manager
-         $courseManager->syncPermissions(Permission::all());
-        // $courseManager->syncPermissions([
-        //     'dashboard.view',
-
-
-        // /////////////////
-
-             
-        //      'approved-applicants.view',
-        //     'approved-applicants.edit',
-
-        //     'programs.view',
-        //     'programs.create',
-        //     'programs.edit',
-        //     'programs.delete',
-
-        //     'courses.view',
-        //     'courses.create',
-        //     'courses.edit',
-        //     'courses.delete',
-
-        //     'class-groups.view',
-        //     'class-groups.create',
-        //     'class-groups.edit',
-        //     'class-groups.delete',
-
-        //     'attendance.view',
-        //     'attendance.mark',
-
-        //     'result-cards.view',
-        //     'result-cards.generate',
-
-        //     'announcements.view',
-        // ]);
+        $courseManager->syncPermissions(Permission::all());
 
         // Teacher
+    
         $teacher->syncPermissions([
-        'dashboard.view',
+            'dashboard.view',
 
-        'students.view',
+            'students.view',
 
-        'attendance.view',
-        'attendance.mark',
+            'attendance.view',
+            'attendance.mark',
 
-        'courses.view',
-        'class-groups.view',
+            'courses.view',
+            'class-groups.view',
 
-        'lesson-plans.view',
-        'assessments.view',
+            'lesson-plans.view',
+            'assessments.view',
 
-        'result-cards.view',
+            'result-cards.view',
 
-        'announcements.view',
-    ]);
+            'announcements.view',
+
+            // --- LMS ---
+            'classes.view',
+            'lessons.view',
+            'lessons.create',
+            'lessons.edit',
+            'lessons.delete',
+            'homework.view',
+            'homework.create',
+            'homework.edit',
+            'homework.review',
+            'exams.view',
+            'exams.create',
+            'exams.edit',
+            'exams.grade',
+            'attendance.approve',
+            'attendance.reject',
+            'enrollments.create',
+        ]);
 
 
-     // Report Manager
-       $reportManager->syncPermissions([
-        'dashboard.view',
+        // Report Manager
+        $reportManager->syncPermissions([
+            'dashboard.view',
 
-        'reports.view',
-        'reports.export',
+            'reports.view',
+            'reports.export',
 
-        'reports.students.view',
-        'reports.attendance.view',
-        'reports.academic.view',
-        'reports.teachers.view',
-        'reports.volunteers.view',
-        'reports.admissions.view',
-        'reports.results.view',
-    ]);
-        // Student
-       $student->syncPermissions([
-        'dashboard.view',
+            'reports.students.view',
+            'reports.attendance.view',
+            'reports.academic.view',
+            'reports.teachers.view',
+            'reports.volunteers.view',
+            'reports.admissions.view',
+            'reports.results.view',
+        ]);
 
-        'courses.view',
-        'class-schedules.view',
-
-        'attendance.view',
-
-        'result-cards.view',
-
-        'assessments.view',
-
-        'announcements.view',
-    ]);
-
-       
         
+        $student->syncPermissions([
+            'dashboard.view',
 
-        
-       
+            'courses.view',
+            'class-schedules.view',
+
+            'attendance.view',
+
+            'result-cards.view',
+
+            'assessments.view',
+
+            'announcements.view',
+
+            // --- LMS ---
+            'classes.view',
+            'lessons.view',
+            'homework.view',
+            'homework.submit',
+            'exams.view',
+            'exams.submit',
+            'attendance.request',
+        ]);
     }
 }
-    
-

@@ -11,6 +11,41 @@ use Illuminate\Support\Facades\DB;
 
 class ClassRoomController extends Controller
 {
+     
+    private function isAdminLike($user): bool
+    {
+        return $user->hasRole('Admin') || $user->hasRole('Super Admin');
+    }
+
+    private function isTeacherRole($user): bool
+    {
+        return $user->hasRole('Teacher');
+    }
+
+    private function isStudentRole($user): bool
+    {
+        return $user->hasRole('Student');
+    }
+
+     
+    private function validTeacherIds(): array
+    {
+        return User::where('role', 'teacher')
+            ->orWhereHas('roles', fn($q) => $q->where('name', 'Teacher'))
+            ->pluck('id')
+            ->unique()
+            ->toArray();
+    }
+
+    private function validStudentIds(): array
+    {
+        return User::where('role', 'student')
+            ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
+            ->pluck('id')
+            ->unique()
+            ->toArray();
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -19,12 +54,12 @@ class ClassRoomController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($user->hasRole('teacher')) {
+        if ($this->isTeacherRole($user)) {
             $classRooms = ClassRoom::with('teacher')
                 ->where('teacher_id', $user->id)
                 ->where('is_active', true)
                 ->get();
-        } elseif ($user->hasRole('student')) {
+        } elseif ($this->isStudentRole($user)) {
             $classRooms = ClassRoom::whereHas('students', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })->with('teacher')->where('is_active', true)->get();
@@ -53,7 +88,7 @@ class ClassRoomController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -85,12 +120,18 @@ class ClassRoomController extends Controller
             'has_video'   => 'boolean',
             'description' => 'nullable|string',
             'is_active'   => 'boolean',
-            'teacher_id'  => 'required|exists:users,id|in:' . implode(',', User::where('role', 'teacher')->pluck('id')->toArray()),
+            'teacher_id'  => 'required|exists:users,id|in:' . implode(',', $this->validTeacherIds()),
             'start_date'  => 'nullable|date',
             'end_date'    => 'nullable|date|after_or_equal:start_date',
         ]);
 
-        $classRoom = ClassRoom::create($request->all());
+        $data = $request->all();       
+
+        if (!array_key_exists('is_active', $data)) {
+            $data['is_active'] = true;
+        }
+
+        $classRoom = ClassRoom::create($data);
 
         return response()->json($classRoom, 201);
     }
@@ -110,7 +151,7 @@ class ClassRoomController extends Controller
             'has_video'   => 'boolean',
             'description' => 'nullable|string',
             'is_active'   => 'boolean',
-            'teacher_id'  => 'sometimes|exists:users,id|in:' . implode(',', User::where('role', 'teacher')->pluck('id')->toArray()),
+            'teacher_id'  => 'sometimes|exists:users,id|in:' . implode(',', $this->validTeacherIds()),
             'start_date'  => 'nullable|date',
             'end_date'    => 'nullable|date|after_or_equal:start_date',
         ]);
@@ -145,7 +186,7 @@ class ClassRoomController extends Controller
         }
 
         $request->validate([
-            'student_id' => 'required|exists:users,id|in:' . implode(',', User::where('role', 'student')->pluck('id')->toArray()),
+            'student_id' => 'required|exists:users,id|in:' . implode(',', $this->validStudentIds()),
             'teacher_id' => 'sometimes|exists:users,id',
             'start_date' => 'nullable|date',
             'end_date'   => 'nullable|date|after:start_date',
@@ -206,11 +247,11 @@ class ClassRoomController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
+        if (!$this->isAdminLike($user) && !$this->isTeacherRole($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
