@@ -23,10 +23,12 @@ class HandleInertiaRequests extends Middleware
 
         return array_merge(parent::share($request), [
             'name' => config('app.name'),
+
             'quote' => [
                 'message' => trim($message),
                 'author' => trim($author),
             ],
+
             'auth' => [
                 'user' => $user ? [
                     'id' => $user->id,
@@ -37,9 +39,11 @@ class HandleInertiaRequests extends Middleware
                     'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
                 ] : null,
             ],
+
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
+                'warning' => fn () => $request->session()->get('warning'),
             ],
         ]);
     }
