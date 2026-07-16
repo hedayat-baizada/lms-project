@@ -13,6 +13,17 @@ use App\Notifications\ExamGradedNotification;
 
 class FinalExamController extends Controller
 {
+    
+    private function isAdminLike($user): bool
+    {
+        return $user->hasRole('Admin') || $user->hasRole('Super Admin');
+    }
+
+    private function isTeacherRole($user): bool
+    {
+        return $user->hasRole('Teacher');
+    }
+
     public function show(ClassRoom $classRoom)
     {
         $user = auth()->user();
@@ -143,11 +154,11 @@ class FinalExamController extends Controller
             return response()->json(['message' => 'Class not found'], 404);
         }
 
-        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
+        if (!$this->isAdminLike($user) && !$this->isTeacherRole($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -176,11 +187,11 @@ class FinalExamController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
+        if (!$this->isAdminLike($user) && !$this->isTeacherRole($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

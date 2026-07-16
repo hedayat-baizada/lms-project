@@ -11,22 +11,19 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $roles = $user->getRoleNames()->toArray();
 
-        return Inertia::render('Admin/Dashboard', [
-            'roles' => $user->getRoleNames(),
+        $stats = [
+            'students'    => User::where('role', 'student')->count(),
+            'teachers'    => User::where('role', 'teacher')->count(),
+            'volunteers'  => 0,
+            'applications'=> 0,
+            'users'       => User::count(),
+        ];
 
-            'stats' => [
-                'users' => User::count(),
-
-                // replace with real models later
-                'students' => 250,
-                'teachers' => 18,
-                'volunteers' => 22,
-                'applications' => 40,
-                'courses' => 15,
-                'programs' => 6,
-                'attendance' => 94,
-            ],
+        return Inertia::render('Dashboard', [
+            'stats' => $stats,
+            'roles' => $roles,
         ]);
     }
 }

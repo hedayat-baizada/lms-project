@@ -28,8 +28,6 @@ import {
     History,
     Settings,
     UserCheck,
-    CircleUser,
-    BookUser,
     Monitor,
     Calendar,
     ClipboardList,
@@ -141,21 +139,18 @@ const mainNavItems: NavItem[] = [
                 icon: Users,
                 permission: 'team-applications.view',
             },
-
             {
                 title: 'Rejected Students',
                 url: '/rejected-students',
                 icon: UserX,
                 permission: 'rejected-students-applications.view',
             },
-
             {
                 title: 'Rejected Team Applications',
                 url: '/rejected-team-applications',
                 icon: UserRoundX,
                 permission: 'rejected-team-applications.view',
             },
-
         ],
     },
     {
@@ -360,39 +355,41 @@ const mainNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
-    const role = auth.user.role as string;
     const can = useCan();
+    const roles: string[] = (auth.user?.roles as string[]) ?? [];
+    const isAdmin = roles.includes('Admin') || roles.includes('Super Admin');
+    const isTeacher = roles.includes('Teacher');
+    const isStudent = roles.includes('Student') || roles.length === 0;
 
-    
-    const lmsNavItems: NavItem[] = (() => {
-        if (role === 'admin') {
-            return [
-                { title: 'Classes', url: '/admin/classes', icon: GraduationCap },
-                { title: 'Students', url: '/admin/students', icon: Users },
-                { title: 'Teachers', url: '/admin/teachers', icon: Monitor },
-            ];
-        } else if (role === 'teacher') {
-            return [
-                { title: 'My Classes', url: '/teacher/classes', icon: GraduationCap },
-                { title: 'Homework', url: '/teacher/homework', icon: BookOpen },
-                { title: 'Attendance', url: '/teacher/attendance', icon: Calendar },
-                { title: 'Exams', url: '/teacher/exams', icon: ClipboardList },
-            ];
-        } else if (role === 'student') {
-            return [
-                { title: 'My Classes', url: '/student/classes', icon: GraduationCap },
-                { title: 'My Results', url: '/student/results', icon: Trophy },
-            ];
-        }
-        return [];
-    })();
+    const lmsNavItems: NavItem[] = [];
+
+    if (isAdmin) {
+        lmsNavItems.push(
+            { title: 'Classes', url: '/admin/classes', icon: GraduationCap },
+            { title: 'Students', url: '/admin/students', icon: Users },
+            { title: 'Teachers', url: '/admin/teachers', icon: Monitor }
+        );
+    } else if (isTeacher) {
+        lmsNavItems.push(
+            { title: 'My Classes', url: '/teacher/classes', icon: GraduationCap },
+            { title: 'Homework', url: '/teacher/homework', icon: BookOpen },
+            { title: 'Attendance', url: '/teacher/attendance', icon: Calendar },
+            { title: 'Exams', url: '/teacher/exams', icon: ClipboardList }
+        );
+    } else if (isStudent) {
+        lmsNavItems.push(
+            { title: 'My Classes', url: '/student/classes', icon: GraduationCap },
+            { title: 'My Results', url: '/student/results', icon: Trophy }
+        );
+    }
 
     const filteredTeamItems = mainNavItems
         .map(item => ({
             ...item,
-            children: item.children?.filter(
-                child => !child.permission || can(child.permission)
-            ),
+            children: item.children?.filter(child => {
+                if (isAdmin) return true;
+                return !child.permission || can(child.permission);
+            }),
         }))
         .filter(item => !item.children || item.children.length > 0);
 
@@ -410,7 +407,6 @@ export function AppSidebar() {
         <Sidebar 
             collapsible="icon" 
             variant="inset"
-            
             className="bg-gradient-to-b from-slate-50/90 via-white/90 to-indigo-50/80 backdrop-blur-md border-r border-white/50 shadow-xl shadow-indigo-200/20"
         >
             <SidebarHeader className="relative border-b border-indigo-100/50 pb-4">

@@ -13,6 +13,16 @@ use App\Notifications\HomeworkReviewedNotification;
 
 class HomeworkController extends Controller
 {
+    private function isAdminLike($user): bool
+    {
+        return $user->hasRole('Admin') || $user->hasRole('Super Admin');
+    }
+
+    private function isTeacherRole($user): bool
+    {
+        return $user->hasRole('Teacher');
+    }
+
     public function submit(Request $request, Lesson $lesson)
     {
         $user = auth()->user();
@@ -71,12 +81,12 @@ class HomeworkController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($user->hasRole('teacher')) {
+        if ($this->isTeacherRole($user)) {
             $classRoom = $lesson->classRoom;
             if ($classRoom->teacher_id !== $user->id) {
                 return response()->json(['message' => 'Unauthorized - This lesson does not belong to your class'], 403);
             }
-        } elseif (!$user->hasRole('admin')) {
+        } elseif (!$this->isAdminLike($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -104,11 +114,11 @@ class HomeworkController extends Controller
         $lesson = $homework->lesson;
         $classRoom = $lesson->classRoom;
 
-        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
+        if (!$this->isAdminLike($user) && !$this->isTeacherRole($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -139,11 +149,11 @@ class HomeworkController extends Controller
 
         $classRoom = $lesson->classRoom;
 
-        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
+        if (!$this->isAdminLike($user) && !$this->isTeacherRole($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -175,11 +185,11 @@ class HomeworkController extends Controller
 
         $classRoom = $lesson->classRoom;
 
-        if ($user->hasRole('teacher') && $classRoom->teacher_id !== $user->id) {
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized - You are not the teacher of this class'], 403);
         }
 
-        if (!$user->hasRole('admin') && !$user->hasRole('teacher')) {
+        if (!$this->isAdminLike($user) && !$this->isTeacherRole($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

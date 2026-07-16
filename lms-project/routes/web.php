@@ -93,30 +93,45 @@ Route::middleware(['auth'])->group(function () {
     // ==================== API Routes (بدون Sanctum، با Session) ====================
 
     // ---- Admin Stats ----
+    // FIX: هم ستون role (سیستم قدیمی) و هم رول Spatie (سیستم User Management) چک می‌شود
+    // تا کاربرانی که از هرکدام از دو مسیر ساخته شده‌اند دیده شوند.
     Route::get('/api/admin/stats', function () {
         return response()->json([
-            'total_students' => \App\Models\User::where('role', 'student')->count(),
-            'total_teachers' => \App\Models\User::where('role', 'teacher')->count(),
+            'total_students' => \App\Models\User::where('role', 'student')
+                ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
+                ->count(),
+            'total_teachers' => \App\Models\User::where('role', 'teacher')
+                ->orWhereHas('roles', fn($q) => $q->where('name', 'Teacher'))
+                ->count(),
             'total_classes'  => \App\Models\ClassRoom::count(),
             'total_lessons'  => \App\Models\Lesson::count(),
             'total_homework_submissions' => \App\Models\HomeworkSubmission::count(),
             'pending_homework' => \App\Models\HomeworkSubmission::where('status', 'pending')->count(),
             'total_exam_submissions' => \App\Models\FinalExamSubmission::count(),
             'pending_attendance' => \App\Models\AttendanceRequest::where('status', 'pending')->count(),
-            'recent_students' => \App\Models\User::where('role', 'student')->latest()->take(5)->get(['id', 'name', 'email', 'created_at']),
+            'recent_students' => \App\Models\User::where('role', 'student')
+                ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
+                ->latest()->take(5)->get(['id', 'name', 'email', 'created_at']),
         ]);
     })->middleware('auth');
 
     // ---- Admin Lists ----
+    // FIX: همان منطق بالا برای لیست دانش‌آموزان و معلمان
     Route::get('/api/admin/students', function () {
-        return \App\Models\User::where('role', 'student')->get();
+        return \App\Models\User::where('role', 'student')
+            ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
+            ->get();
     })->middleware('auth');
 
     Route::get('/api/admin/teachers', function () {
-        return \App\Models\User::where('role', 'teacher')->get();
+        return \App\Models\User::where('role', 'teacher')
+            ->orWhereHas('roles', fn($q) => $q->where('name', 'Teacher'))
+            ->get();
     })->middleware('auth');
 
     // ---- Admin User Management ----
+    // FIX: هنگام ساخت کاربر از این مودال، رول Spatie هم assign می‌شود
+    // تا با سیستم User Management (که از roles.view/create/edit استفاده می‌کند) هماهنگ بماند.
     Route::post('/api/admin/users', function (Request $request) {
         $request->validate([
             'name'     => 'required|string',
@@ -131,6 +146,9 @@ Route::middleware(['auth'])->group(function () {
             'password' => bcrypt($request->password),
             'role'     => $request->role,
         ]);
+
+        // هم‌زمان رول Spatie را هم می‌دهیم: 'teacher' -> 'Teacher', 'student' -> 'Student'
+        $user->assignRole(ucfirst($request->role));
 
         return response()->json($user, 201);
     })->middleware('auth');
