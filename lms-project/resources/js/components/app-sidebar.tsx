@@ -3,8 +3,8 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { type NavItem, type SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
     Folder,
@@ -28,13 +28,28 @@ import {
     History,
     Settings,
     UserCheck,
-    CircleUser,
-    BookUser,
+    Monitor,
+    Calendar,
+    ClipboardList,
+    Trophy,
     UsersRound,
     UserX,
     UserRoundX,
 } from 'lucide-react';
 import AppLogo from './app-logo';
+
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Repository',
+        url: 'https://github.com/laravel/react-starter-kit',
+        icon: Folder,
+    },
+    {
+        title: 'Documentation',
+        url: 'https://laravel.com/docs/starter-kits',
+        icon: BookOpen,
+    },
+];
 
 const mainNavItems: NavItem[] = [
     {
@@ -42,12 +57,10 @@ const mainNavItems: NavItem[] = [
         url: '/dashboard',
         icon: LayoutGrid,
     },
-
     {
         title: 'User Management',
         icon: Users,
         children: [
-
             {
                 title: 'Users',
                 url: '/users',
@@ -68,7 +81,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Admissions',
         icon: FileText,
@@ -127,25 +139,20 @@ const mainNavItems: NavItem[] = [
                 icon: Users,
                 permission: 'team-applications.view',
             },
-
             {
                 title: 'Rejected Students',
                 url: '/rejected-students',
                 icon: UserX,
                 permission: 'rejected-students-applications.view',
             },
-
             {
                 title: 'Rejected Team Applications',
                 url: '/rejected-team-applications',
                 icon: UserRoundX,
                 permission: 'rejected-team-applications.view',
             },
-
         ],
     },
-
-
     {
         title: 'Academic',
         icon: GraduationCap,
@@ -188,7 +195,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Teachers',
         icon: Presentation,
@@ -213,7 +219,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Volunteers',
         icon: HandHelping,
@@ -244,7 +249,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Teaching Operations',
         icon: BookOpen,
@@ -269,7 +273,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Communication',
         icon: Megaphone,
@@ -282,7 +285,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Reports',
         icon: BarChart3,
@@ -331,8 +333,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
-
     {
         title: 'System',
         icon: Settings,
@@ -353,58 +353,97 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        url: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        url: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
+    const { auth } = usePage<SharedData>().props;
     const can = useCan();
+   const roles: string[] = (auth.user?.roles as string[]) ?? [];
+const isSuperAdmin = roles.includes('Super Admin');
+const isAdmin = roles.includes('Admin') || isSuperAdmin;
+const isTeacher = roles.includes('Teacher');
+    const isStudent = roles.includes('Student') || roles.length === 0;
 
-    const filteredItems = mainNavItems
+    const lmsNavItems: NavItem[] = [];
+
+    if (isAdmin) {
+        lmsNavItems.push(
+            { title: 'Classes', url: '/admin/classes', icon: GraduationCap },
+            { title: 'Students', url: '/admin/students', icon: Users },
+            { title: 'Teachers', url: '/admin/teachers', icon: Monitor }
+        );
+    } else if (isTeacher) {
+        lmsNavItems.push(
+            { title: 'My Classes', url: '/teacher/classes', icon: GraduationCap },
+            { title: 'Homework', url: '/teacher/homework', icon: BookOpen },
+            { title: 'Attendance', url: '/teacher/attendance', icon: Calendar },
+            { title: 'Exams', url: '/teacher/exams', icon: ClipboardList }
+        );
+    } else if (isStudent) {
+        lmsNavItems.push(
+            { title: 'My Classes', url: '/student/classes', icon: GraduationCap },
+            { title: 'My Results', url: '/student/results', icon: Trophy }
+        );
+    }
+
+    const filteredTeamItems = mainNavItems
         .map(item => ({
             ...item,
-            children: item.children?.filter(
-                child =>
-                    !child.permission ||
-                    can(child.permission)
-            ),
+            children: item.children?.filter(child => {
+                if (isAdmin) return true;
+                return !child.permission || can(child.permission);
+            }),
         }))
-        .filter(
-            item =>
-                !item.children ||
-                item.children.length > 0
-        );
+        .filter(item => !item.children || item.children.length > 0);
+
+    const allNavItems = [...filteredTeamItems];
+
+    if (lmsNavItems.length > 0) {
+        allNavItems.push({
+            title: 'My LMS',
+            icon: BookOpen,
+            children: lmsNavItems,
+        });
+    }
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+        <Sidebar 
+            collapsible="icon" 
+            variant="inset"
+            className="bg-gradient-to-b from-slate-50/90 via-white/90 to-indigo-50/80 backdrop-blur-md border-r border-white/50 shadow-xl shadow-indigo-200/20"
+        >
+            <SidebarHeader className="relative border-b border-indigo-100/50 pb-4">
+                <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-300 to-purple-300 opacity-20 blur-3xl pointer-events-none"></div>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
-                                <AppLogo />
+                        <SidebarMenuButton 
+                            size="lg" 
+                            asChild
+                            className="hover:bg-white/50 transition-all duration-200 data-[state=open]:bg-white/50 rounded-xl"
+                        >
+                            <Link href="/dashboard" prefetch className="group flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-md shadow-indigo-200 transition-transform group-hover:scale-105 group-hover:shadow-indigo-300">
+                                    <GraduationCap className="h-6 w-6 text-white" />
+                                </div>
+                                <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700 transition-all">
+                                    EduPortal
+                                </span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
-                <NavMain items={filteredItems} />
+            <SidebarContent className="py-4">
+                <div className="space-y-1">
+                    <NavMain items={allNavItems} />
+                </div>
             </SidebarContent>
 
-            <SidebarFooter>
+            <SidebarFooter className="relative border-t border-indigo-100/50 pt-4">
+                <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-gradient-to-tr from-purple-300 to-pink-300 opacity-20 blur-3xl pointer-events-none"></div>
                 <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavUser />
+                <div className="mt-3 rounded-xl bg-white/40 backdrop-blur-sm border border-white/50 shadow-sm transition-all hover:shadow-md hover:bg-white/60 p-1">
+                    <NavUser />
+                </div>
             </SidebarFooter>
         </Sidebar>
     );
