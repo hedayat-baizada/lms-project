@@ -11,16 +11,55 @@ use Illuminate\Support\Facades\DB;
 
 class ClassRoomController extends Controller
 {
+     
+    private function isAdminLike($user): bool
+    {
+        return $user->hasRole('Admin') || $user->hasRole('Super Admin');
+    }
+
+    private function isTeacherRole($user): bool
+    {
+        return $user->hasRole('Teacher');
+    }
+
+    private function isStudentRole($user): bool
+    {
+        return $user->hasRole('Student');
+    }
+
+     
+    private function validTeacherIds(): array
+    {
+        return User::where('role', 'teacher')
+            ->orWhereHas('roles', fn($q) => $q->where('name', 'Teacher'))
+            ->pluck('id')
+            ->unique()
+            ->toArray();
+    }
+
+    private function validStudentIds(): array
+    {
+        return User::where('role', 'student')
+            ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
+            ->pluck('id')
+            ->unique()
+            ->toArray();
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
 
-        if ($user->isTeacher()) {
+        if (!$user->hasPermissionTo('classes.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($this->isTeacherRole($user)) {
             $classRooms = ClassRoom::with('teacher')
                 ->where('teacher_id', $user->id)
                 ->where('is_active', true)
                 ->get();
-        } elseif ($user->isStudent()) {
+        } elseif ($this->isStudentRole($user)) {
             $classRooms = ClassRoom::whereHas('students', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })->with('teacher')->where('is_active', true)->get();
@@ -30,7 +69,6 @@ class ClassRoomController extends Controller
                 ->get();
         }
 
-        // افزودن وضعیت تاریخ به هر کلاس
         $classRooms->each(function ($class) {
             $class->is_active_now = $class->isActiveNow();
             $class->has_started = $class->hasStarted();
@@ -46,7 +84,11 @@ class ClassRoomController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->isTeacher() && $classRoom->teacher_id !== $user->id) {
+        if (!$user->hasPermissionTo('classes.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -54,7 +96,6 @@ class ClassRoomController extends Controller
             $q->wherePivot('status', 'active');
         }]);
 
-        // افزودن وضعیت تاریخ به کلاس
         $classRoom->is_active_now = $classRoom->isActiveNow();
         $classRoom->has_started = $classRoom->hasStarted();
         $classRoom->has_ended = $classRoom->hasEnded();
@@ -66,6 +107,12 @@ class ClassRoomController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('classes.create')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'name'        => 'required|string|max:255',
             'type'        => 'required|in:english,computer',
@@ -73,18 +120,30 @@ class ClassRoomController extends Controller
             'has_video'   => 'boolean',
             'description' => 'nullable|string',
             'is_active'   => 'boolean',
-            'teacher_id'  => 'required|exists:users,id|in:' . implode(',', User::where('role', 'teacher')->pluck('id')->toArray()),
+            'teacher_id'  => 'required|exists:users,id|in:' . implode(',', $this->validTeacherIds()),
             'start_date'  => 'nullable|date',
             'end_date'    => 'nullable|date|after_or_equal:start_date',
         ]);
 
-        $classRoom = ClassRoom::create($request->all());
+        $data = $request->all();       
+
+        if (!array_key_exists('is_active', $data)) {
+            $data['is_active'] = true;
+        }
+
+        $classRoom = ClassRoom::create($data);
 
         return response()->json($classRoom, 201);
     }
 
     public function update(Request $request, ClassRoom $classRoom)
     {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('classes.edit')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'name'        => 'sometimes|string|max:255',
             'type'        => 'sometimes|in:english,computer',
@@ -92,7 +151,7 @@ class ClassRoomController extends Controller
             'has_video'   => 'boolean',
             'description' => 'nullable|string',
             'is_active'   => 'boolean',
-            'teacher_id'  => 'sometimes|exists:users,id|in:' . implode(',', User::where('role', 'teacher')->pluck('id')->toArray()),
+            'teacher_id'  => 'sometimes|exists:users,id|in:' . implode(',', $this->validTeacherIds()),
             'start_date'  => 'nullable|date',
             'end_date'    => 'nullable|date|after_or_equal:start_date',
         ]);
@@ -104,23 +163,34 @@ class ClassRoomController extends Controller
 
     public function destroy(ClassRoom $classRoom)
     {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('classes.delete')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $classRoom->delete();
         return response()->json(['message' => 'Class deleted successfully']);
     }
 
     public function enrollStudent(Request $request, ClassRoom $classRoom)
     {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('enrollments.create')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($classRoom->hasEnded()) {
+            return response()->json(['message' => 'This class has ended. Enrollment is closed.'], 400);
+        }
+
         $request->validate([
-            'student_id' => 'required|exists:users,id|in:' . implode(',', User::where('role', 'student')->pluck('id')->toArray()),
+            'student_id' => 'required|exists:users,id|in:' . implode(',', $this->validStudentIds()),
             'teacher_id' => 'sometimes|exists:users,id',
             'start_date' => 'nullable|date',
             'end_date'   => 'nullable|date|after:start_date',
         ]);
-
-        // جلوگیری از ثبت‌نام در کلاس تمام‌شده
-        if ($classRoom->hasEnded()) {
-            return response()->json(['message' => 'This class has ended. Enrollment is closed.'], 400);
-        }
 
         $studentId = $request->student_id;
         $teacherId = $request->teacher_id ?? $classRoom->teacher_id;
@@ -173,11 +243,15 @@ class ClassRoomController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->isTeacher() && $classRoom->teacher_id !== $user->id) {
+        if (!$user->hasPermissionTo('students.view')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if (!$user->isAdmin() && !$user->isTeacher()) {
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id !== $user->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if (!$this->isAdminLike($user) && !$this->isTeacherRole($user)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

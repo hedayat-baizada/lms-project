@@ -61,17 +61,17 @@ class AdminUserSeeder extends Seeder
             'Volunteer',
         ]);
 
-        // Course Manager (Hassan)
-        $hassan = User::firstOrCreate(
-            ['email' => 'hassan@gmail.com'],
-            [
-                'name' => 'Hassan',
-                'password' => Hash::make('12345678'),
-                'email_verified_at' => now(),
-            ]
-        );
+        /// Admin (Hassan)
+$hassan = User::firstOrCreate(
+    ['email' => 'hassan@gmail.com'],
+    [
+        'name' => 'Hassan',
+        'password' => Hash::make('12345678'),
+        'email_verified_at' => now(),
+    ]
+);
 
-        $hassan->syncRoles(['Course Manager']);
+$hassan->syncRoles(['Admin']);
 
         // Report Manager (Zulfiqar)
         $zulfiqar = User::firstOrCreate(

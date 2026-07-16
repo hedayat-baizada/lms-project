@@ -4,5 +4,5 @@ export function useCan() {
     const page = usePage<any>();
 
     return (permission: string) =>
-        page.props.auth?.permissions?.includes(permission) ?? false;
+        page.props.auth?.user?.permissions?.includes(permission) ?? false;
 }

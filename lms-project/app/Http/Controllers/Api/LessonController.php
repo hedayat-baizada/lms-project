@@ -9,16 +9,27 @@ use App\Models\StudentLessonProgress;
 use App\Services\LessonUnlockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Notifications\LessonReleasedNotification; // ✅ اضافه شد
+use App\Notifications\LessonReleasedNotification;
 
 class LessonController extends Controller
 {
+    
+    private function isAdminOrTeacher($user): bool
+    {
+        return $user->hasRole('Admin') || $user->hasRole('Super Admin') || $user->hasRole('Teacher');
+    }
+
     public function index(ClassRoom $classRoom)
     {
         $user = auth()->user();
+
+        if (!$user->hasPermissionTo('lessons.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $lessons = $classRoom->lessons()->with('homework')->get();
 
-        if (!$user || $user->role === 'admin' || $user->role === 'teacher') {
+        if ($this->isAdminOrTeacher($user)) {
             return response()->json($lessons);
         }
 
@@ -61,7 +72,11 @@ class LessonController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin' || $user->role === 'teacher') {
+        if (!$user->hasPermissionTo('lessons.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($this->isAdminOrTeacher($user)) {
             $lesson->load('homework');
             return response()->json($lesson);
         }
@@ -100,6 +115,10 @@ class LessonController extends Controller
     {
         $student = auth()->user();
 
+        if (!$student->hasPermissionTo('lessons.view')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         if ($classRoom->hasEnded()) {
             return response()->json(['message' => 'This class has ended.'], 403);
         }
@@ -134,6 +153,12 @@ class LessonController extends Controller
 
     public function store(Request $request, ClassRoom $classRoom)
     {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('lessons.create')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'title'        => 'required|string',
             'type'         => 'required|in:video,online_meet',
@@ -159,7 +184,6 @@ class LessonController extends Controller
 
         $lesson = $classRoom->lessons()->create($data);
 
-        // ✅ ارسال اعلان به همه دانشجویان کلاس اگر درس منتشر شده باشد
         if ($lesson->isReleased()) {
             $students = $classRoom->students;
             foreach ($students as $student) {
@@ -172,6 +196,12 @@ class LessonController extends Controller
 
     public function update(Request $request, ClassRoom $classRoom, Lesson $lesson)
     {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('lessons.edit')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'title'        => 'sometimes|string',
             'type'         => 'sometimes|in:video,online_meet',
@@ -202,6 +232,12 @@ class LessonController extends Controller
 
     public function destroy(ClassRoom $classRoom, Lesson $lesson)
     {
+        $user = auth()->user();
+
+        if (!$user->hasPermissionTo('lessons.delete')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         if ($lesson->video_path && Storage::disk('public')->exists($lesson->video_path)) {
             Storage::disk('public')->delete($lesson->video_path);
         }

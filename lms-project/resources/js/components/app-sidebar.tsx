@@ -28,8 +28,6 @@ import {
     History,
     Settings,
     UserCheck,
-    CircleUser,
-    BookUser,
     Monitor,
     Calendar,
     ClipboardList,
@@ -141,21 +139,18 @@ const mainNavItems: NavItem[] = [
                 icon: Users,
                 permission: 'team-applications.view',
             },
-
             {
                 title: 'Rejected Students',
                 url: '/rejected-students',
                 icon: UserX,
                 permission: 'rejected-students-applications.view',
             },
-
             {
                 title: 'Rejected Team Applications',
                 url: '/rejected-team-applications',
                 icon: UserRoundX,
                 permission: 'rejected-team-applications.view',
             },
-
         ],
     },
     {
@@ -361,10 +356,10 @@ const mainNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
     const can = useCan();
-    const roles: string[] = (auth.user?.roles as string[]) ?? [];
-    const isSuperAdmin = roles.includes('Super Admin');
-    const isAdmin = roles.includes('Admin') || isSuperAdmin;
-    const isTeacher = roles.includes('Teacher');
+   const roles: string[] = (auth.user?.roles as string[]) ?? [];
+const isSuperAdmin = roles.includes('Super Admin');
+const isAdmin = roles.includes('Admin') || isSuperAdmin;
+const isTeacher = roles.includes('Teacher');
     const isStudent = roles.includes('Student') || roles.length === 0;
 
     const lmsNavItems: NavItem[] = [];
