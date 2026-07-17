@@ -1,13 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\ApplicationController as AdminApplicationController;
-
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamApplicationReviewController;
-
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -18,6 +16,7 @@ use App\Http\Controllers\Api\HomeworkController;
 use App\Http\Controllers\Api\FinalExamController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\StudentProgressController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 
 Route::get('/', function () {
@@ -26,136 +25,101 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
 
-
-Route::get('/applications', [AdminApplicationController::class, 'index'])
-    ->name('applications.index');
+    Route::get('/applications', [AdminApplicationController::class, 'index'])
+        ->name('applications.index');
 
     Route::get('/applications/{application}', [AdminApplicationController::class, 'show'])
-    ->name('applications.show');
+        ->name('applications.show');
 
     Route::post('/applications/{application}/score', [AdminApplicationController::class, 'score'])
-    ->name('applications.score');
+        ->name('applications.score');
 
     Route::post('/applications/{application}/reject', [AdminApplicationController::class, 'reject'])
-    ->name('applications.reject');
+        ->name('applications.reject');
 
-Route::post('/applications/{application}/request-correction', [AdminApplicationController::class, 'requestCorrection'])
-    ->name('applications.request-correction');
+    Route::post('/applications/{application}/request-correction', [AdminApplicationController::class, 'requestCorrection'])
+        ->name('applications.request-correction');
 
     Route::get('/applications/{application}/placement-test', [AdminApplicationController::class, 'placementTest'])
-    ->name('applications.placement-test');
+        ->name('applications.placement-test');
 
     Route::get('/applications/{application}/writing', [AdminApplicationController::class, 'writingReview'])
-    ->name('applications.writing');
+        ->name('applications.writing');
 
     Route::get('/applications/{application}/speaking', [AdminApplicationController::class, 'speakingReview'])
-    ->name('applications.speaking');
+        ->name('applications.speaking');
 
     Route::post('/applications/{application}/approve', [AdminApplicationController::class, 'approve'])
-    ->name('applications.approve');
-
-
-
+        ->name('applications.approve');
 
     Route::get('/apply/student/{application}/correction', [ApplicationController::class, 'correction'])
-    ->name('apply.student.correction');
+        ->name('apply.student.correction');
 
-Route::post('/apply/student/{application}/correction', [ApplicationController::class, 'storeCorrection'])
-    ->name('apply.student.correction.store');
-
-
+    Route::post('/apply/student/{application}/correction', [ApplicationController::class, 'storeCorrection'])
+        ->name('apply.student.correction.store');
 
     Route::get('/applications/{application}/history', [AdminApplicationController::class, 'history'])
-    ->name('applications.history');
-
-
-
+        ->name('applications.history');
 
     Route::get('/approved-applicants', [AdminApplicationController::class, 'approvedApplicants'])
-    ->name('approved-applicants.index');
+        ->name('approved-applicants.index');
 
-Route::get('/approved-applicants/{application}', [AdminApplicationController::class, 'showApprovedApplicant'])
-    ->name('approved-applicants.show');
-
+    Route::get('/approved-applicants/{application}', [AdminApplicationController::class, 'showApprovedApplicant'])
+        ->name('approved-applicants.show');
 
     Route::get('/apply/team', function () {
-    return Inertia::render('Apply/Team/ChooseRole');
-})->name('apply.team');
+        return Inertia::render('Apply/Team/ChooseRole');
+    })->name('apply.team');
 
+    Route::get('/apply/team/teacher/{subject}', [TeamApplicationController::class, 'teacher'])
+        ->name('apply.team.teacher');
 
-
-
-
-
-Route::get('/apply/team/teacher/{subject}', [TeamApplicationController::class, 'teacher'])
-    ->name('apply.team.teacher');
-
-Route::post('/apply/team/teacher/{subject}', [TeamApplicationController::class, 'storeTeacher'])
-    ->name('apply.team.teacher.store');
-
+    Route::post('/apply/team/teacher/{subject}', [TeamApplicationController::class, 'storeTeacher'])
+        ->name('apply.team.teacher.store');
 
     Route::get('/apply/team/{teamApplication}/submitted', [TeamApplicationController::class, 'submitted'])
-    ->name('apply.team.submitted');
+        ->name('apply.team.submitted');
 
     Route::get('/apply/team/form', [TeamApplicationController::class, 'create'])
-    ->name('apply.team.form');
+        ->name('apply.team.form');
 
-Route::post('/apply/team/form', [TeamApplicationController::class, 'store'])
-    ->name('apply.team.store');
-
-
+    Route::post('/apply/team/form', [TeamApplicationController::class, 'store'])
+        ->name('apply.team.store');
 
     Route::get('/team-applications/{teamApplication}/correction-review', [TeamApplicationReviewController::class, 'correctionReview'])
-    ->name('team-applications.correction-review');
-
-
+        ->name('team-applications.correction-review');
 
     Route::get('/approved-staffs', [TeamApplicationReviewController::class, 'approvedStaffs'])
-    ->name('approved-staffs.index');
+        ->name('approved-staffs.index');
 
-Route::get('/approved-staffs/{teamApplication}', [TeamApplicationReviewController::class, 'showApprovedStaff'])
-    ->name('approved-staffs.show');
+    Route::get('/approved-staffs/{teamApplication}', [TeamApplicationReviewController::class, 'showApprovedStaff'])
+        ->name('approved-staffs.show');
 
+    Route::prefix('team-applications')->group(function () {
+        Route::get('/', [TeamApplicationReviewController::class, 'index'])
+            ->name('team-applications.index');
 
-Route::prefix('team-applications')->group(function () {
+        Route::get('/{teamApplication}', [TeamApplicationReviewController::class, 'show'])
+            ->name('team-applications.show');
 
-    Route::get('/', [TeamApplicationReviewController::class, 'index'])
-        ->name('team-applications.index');
+        Route::post('/{teamApplication}/approve', [TeamApplicationReviewController::class, 'approve'])
+            ->name('team-applications.approve');
 
-    Route::get('/{teamApplication}', [TeamApplicationReviewController::class, 'show'])
-        ->name('team-applications.show');
+        Route::post('/{teamApplication}/reject', [TeamApplicationReviewController::class, 'reject'])
+            ->name('team-applications.reject');
 
-            Route::post('/{teamApplication}/approve', [TeamApplicationReviewController::class, 'approve'])
-        ->name('team-applications.approve');
+        Route::post('/{teamApplication}/request-correction', [TeamApplicationReviewController::class, 'requestCorrection'])
+            ->name('team-applications.request-correction');
+    });
 
-    Route::post('/{teamApplication}/reject', [TeamApplicationReviewController::class, 'reject'])
-        ->name('team-applications.reject');
+    Route::get('/approved-teachers', [TeamApplicationReviewController::class, 'approvedTeachers'])
+        ->name('approved-teachers.index');
 
-    Route::post('/{teamApplication}/request-correction', [TeamApplicationReviewController::class, 'requestCorrection'])
-        ->name('team-applications.request-correction');
+    Route::get('/rejected-students', [AdminApplicationController::class, 'rejectedStudents'])
+        ->name('rejected-students.index');
 
-});
-
-
-Route::get('/approved-teachers', [TeamApplicationReviewController::class, 'approvedTeachers'])
-    ->name('approved-teachers.index');
-
-
-
-    Route::get(
-    '/rejected-students',
-    [AdminApplicationController::class, 'rejectedStudents']
-)->name('rejected-students.index');
-
-
-Route::get(
-    '/rejected-team-applications',
-    [TeamApplicationReviewController::class, 'rejectedTeamApplications']
-)->name('rejected-team-applications.index');
-
-
-   
-
+    Route::get('/rejected-team-applications', [TeamApplicationReviewController::class, 'rejectedTeamApplications'])
+        ->name('rejected-team-applications.index');
 
     // ==================== Dashboard ====================
     Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -177,6 +141,9 @@ Route::get(
         });
         Route::get('classes/{id}/exam', function ($id) {
             return Inertia::render('Admin/classes/exam', ['classId' => (int) $id]);
+        });
+        Route::get('classes/{id}/enroll', function ($id) {
+            return Inertia::render('Admin/classes/enroll', ['classId' => (int) $id]);
         });
         Route::get('students', function () {
             return Inertia::render('Admin/students/index');
@@ -227,48 +194,42 @@ Route::get(
         });
     });
 
-    // ==================== API Routes (بدون Sanctum، با Session) ====================
+    // ================================================================
+    // 📢 NOTIFICATION WEB ROUTES (for your NotificationBell component)
+    // ================================================================
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::get('/notifications/dropdown', [NotificationController::class, 'getDropdown']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
 
-    // ---- Admin Stats ----
-    // FIX: هم ستون role (سیستم قدیمی) و هم رول Spatie (سیستم User Management) چک می‌شود
-    // تا کاربرانی که از هرکدام از دو مسیر ساخته شده‌اند دیده شوند.
+    // ==================== API Routes (Session-based) ====================
+
+    // ---- Admin Stats (FIXED: using Spatie roles only) ----
     Route::get('/api/admin/stats', function () {
         return response()->json([
-            'total_students' => \App\Models\User::where('role', 'student')
-                ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
-                ->count(),
-            'total_teachers' => \App\Models\User::where('role', 'teacher')
-                ->orWhereHas('roles', fn($q) => $q->where('name', 'Teacher'))
-                ->count(),
+            'total_students' => \App\Models\User::role('Student')->count(),
+            'total_teachers' => \App\Models\User::role('Teacher')->count(),
             'total_classes'  => \App\Models\ClassRoom::count(),
             'total_lessons'  => \App\Models\Lesson::count(),
             'total_homework_submissions' => \App\Models\HomeworkSubmission::count(),
             'pending_homework' => \App\Models\HomeworkSubmission::where('status', 'pending')->count(),
             'total_exam_submissions' => \App\Models\FinalExamSubmission::count(),
             'pending_attendance' => \App\Models\AttendanceRequest::where('status', 'pending')->count(),
-            'recent_students' => \App\Models\User::where('role', 'student')
-                ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
+            'recent_students' => \App\Models\User::role('Student')
                 ->latest()->take(5)->get(['id', 'name', 'email', 'created_at']),
         ]);
     })->middleware('auth');
 
-    // ---- Admin Lists ----
-    // FIX: همان منطق بالا برای لیست دانش‌آموزان و معلمان
+    // ---- Admin Lists (FIXED: using Spatie roles) ----
     Route::get('/api/admin/students', function () {
-        return \App\Models\User::where('role', 'student')
-            ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
-            ->get();
+        return \App\Models\User::role('Student')->get();
     })->middleware('auth');
 
     Route::get('/api/admin/teachers', function () {
-        return \App\Models\User::where('role', 'teacher')
-            ->orWhereHas('roles', fn($q) => $q->where('name', 'Teacher'))
-            ->get();
+        return \App\Models\User::role('Teacher')->get();
     })->middleware('auth');
 
     // ---- Admin User Management ----
-    // FIX: هنگام ساخت کاربر از این مودال، رول Spatie هم assign می‌شود
-    // تا با سیستم User Management (که از roles.view/create/edit استفاده می‌کند) هماهنگ بماند.
     Route::post('/api/admin/users', function (Request $request) {
         $request->validate([
             'name'     => 'required|string',
@@ -284,7 +245,6 @@ Route::get(
             'role'     => $request->role,
         ]);
 
-        // هم‌زمان رول Spatie را هم می‌دهیم: 'teacher' -> 'Teacher', 'student' -> 'Student'
         $user->assignRole(ucfirst($request->role));
 
         return response()->json($user, 201);
@@ -319,6 +279,7 @@ Route::get(
     Route::delete('/api/classes/{classRoom}', [ClassRoomController::class, 'destroy'])->middleware('auth');
     Route::post('/api/classes/{classRoom}/enroll', [ClassRoomController::class, 'enrollStudent'])->middleware('auth');
     Route::get('/api/classes/{classRoom}/students', [ClassRoomController::class, 'students'])->middleware('auth');
+    Route::delete('/api/classes/{classRoom}/students/{student}', [ClassRoomController::class, 'removeStudent'])->middleware('auth');
 
     // ---- Lesson Management ----
     Route::get('/api/classes/{classRoom}/lessons', [LessonController::class, 'index'])->middleware('auth');
@@ -433,35 +394,33 @@ Route::get(
             ->get();
     })->middleware('auth');
 
-    // ---- Notifications ----
-    Route::get('/api/notifications', function () {
-        $user = auth()->user();
-        return response()->json([
-            'unread_count' => $user->unreadNotifications->count(),
-            'notifications' => $user->notifications()->latest()->take(20)->get(),
-        ]);
-    })->middleware('auth');
+    // ---- Notifications (OLD API) – now commented out, use web routes above ----
+    // Route::get('/api/notifications', function () {
+    //     $user = auth()->user();
+    //     return response()->json([
+    //         'unread_count' => $user->unreadNotifications->count(),
+    //         'notifications' => $user->notifications()->latest()->take(20)->get(),
+    //     ]);
+    // })->middleware('auth');
 
-    Route::put('/api/notifications/{id}/read', function ($id) {
-        $user = auth()->user();
-        $notification = $user->notifications()->where('id', $id)->first();
-        if ($notification) {
-            $notification->markAsRead();
-        }
-        return response()->json(['message' => 'Marked as read']);
-    })->middleware('auth');
+    // Route::put('/api/notifications/{id}/read', function ($id) {
+    //     $user = auth()->user();
+    //     $notification = $user->notifications()->where('id', $id)->first();
+    //     if ($notification) {
+    //         $notification->markAsRead();
+    //     }
+    //     return response()->json(['message' => 'Marked as read']);
+    // })->middleware('auth');
 
-    Route::put('/api/notifications/read-all', function () {
-        $user = auth()->user();
-        $user->unreadNotifications->markAsRead();
-        return response()->json(['message' => 'All notifications marked as read']);
-    })->middleware('auth');
+    // Route::put('/api/notifications/read-all', function () {
+    //     $user = auth()->user();
+    //     $user->unreadNotifications->markAsRead();
+    //     return response()->json(['message' => 'All notifications marked as read']);
+    // })->middleware('auth');
 
 });
 
-
-
-
+// ==================== Public / Apply Routes ====================
 Route::get('/apply', function () {
     return Inertia::render('Apply/Index');
 })->name('apply.index');
@@ -472,17 +431,11 @@ Route::get('/apply/student', [ApplicationController::class, 'student'])
 Route::post('/apply/student/personal-info', [ApplicationController::class, 'storePersonalInfo'])
     ->name('apply.student.personal-info.store');
 
-
-    
-
-    Route::get('/apply/student/{application}/document', [ApplicationController::class, 'document'])
+Route::get('/apply/student/{application}/document', [ApplicationController::class, 'document'])
     ->name('apply.student.document');
 
 Route::post('/apply/student/{application}/document', [ApplicationController::class, 'storeDocument'])
     ->name('apply.student.document.store');
-
-
-    
 
 Route::get('/apply/student/{application}/course', [ApplicationController::class, 'course'])
     ->name('apply.student.course');
@@ -499,20 +452,17 @@ Route::get('/apply/student/{application}/review', [ApplicationController::class,
 Route::post('/apply/student/{application}/review/submit', [ApplicationController::class, 'submitFinal'])
     ->name('apply.student.submit-final');
 
-    Route::get('/apply/student/{application}/instructions', [ApplicationController::class, 'instructions'])
+Route::get('/apply/student/{application}/instructions', [ApplicationController::class, 'instructions'])
     ->name('apply.student.instructions');
 
 Route::post('/apply/student/{application}/test/draft', [ApplicationController::class, 'saveTestDraft'])
     ->name('apply.student.test.draft');
 
-
-    Route::get('/apply/student/{application}/submitted', [ApplicationController::class, 'submitted'])
+Route::get('/apply/student/{application}/submitted', [ApplicationController::class, 'submitted'])
     ->name('apply.student.submitted');
 
-    Route::post('/apply/student/{application}/speaking/skip', [ApplicationController::class, 'skipSpeaking'])
+Route::post('/apply/student/{application}/speaking/skip', [ApplicationController::class, 'skipSpeaking'])
     ->name('apply.student.speaking.skip');
-
-
 
 Route::post('/apply/student/{application}/test', [ApplicationController::class, 'storeTestAnswers'])
     ->name('apply.student.test.store');
@@ -523,34 +473,26 @@ Route::get('/apply/student/{application}/writing', [ApplicationController::class
 Route::post('/apply/student/{application}/writing', [ApplicationController::class, 'storeWriting'])
     ->name('apply.student.writing.store');
 
-
-    Route::get('/apply/student/{application}/speaking', [ApplicationController::class, 'speaking'])
+Route::get('/apply/student/{application}/speaking', [ApplicationController::class, 'speaking'])
     ->name('apply.student.speaking');
 
 Route::post('/apply/student/{application}/speaking', [ApplicationController::class, 'storeSpeaking'])
     ->name('apply.student.speaking.store');
 
-
 Route::post('/apply/student/{application}/test/drafts', [ApplicationController::class, 'saveTestDrafts'])
     ->name('apply.student.test.drafts');
 
-    Route::post('/apply/student/{application}/speaking/start', [ApplicationController::class, 'startSpeaking'])
+Route::post('/apply/student/{application}/speaking/start', [ApplicationController::class, 'startSpeaking'])
     ->name('apply.student.speaking.start');
-
 
 Route::get('/track', [ApplicationController::class, 'track'])
     ->name('apply.track');
 
-
-
-
-    Route::get('/apply/team/{teamApplication}/correction', [TeamApplicationController::class, 'correction'])
+Route::get('/apply/team/{teamApplication}/correction', [TeamApplicationController::class, 'correction'])
     ->name('apply.team.correction');
 
 Route::post('/apply/team/{teamApplication}/correction', [TeamApplicationController::class, 'storeCorrection'])
     ->name('apply.team.correction.store');
-
-
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
