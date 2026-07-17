@@ -300,16 +300,7 @@ class PermissionSeeder extends Seeder
             'rejected-team-applications.view',
             'rejected-team-applications.restore',
 
-            'students.view',
-
-            'guardians.view',
-
-            'interviews.view',
-            'interviews.conduct',
-
-            'placement-tests.view',
-            'placement-tests.evaluate',
-
+           
             // Volunteers
             'volunteers.view',
             'volunteer-roles.view',

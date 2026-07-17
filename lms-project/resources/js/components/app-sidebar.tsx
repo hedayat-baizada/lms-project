@@ -91,30 +91,7 @@ const mainNavItems: NavItem[] = [
                 icon: FileText,
                 permission: 'applications.view',
             },
-            {
-                title: 'Students',
-                url: '/students',
-                icon: GraduationCap,
-                permission: 'students.view',
-            },
-            {
-                title: 'Guardians',
-                url: '/guardians',
-                icon: UserRound,
-                permission: 'guardians.view',
-            },
-            {
-                title: 'Interviews',
-                url: '/interviews',
-                icon: ClipboardCheck,
-                permission: 'interviews.view',
-            },
-            {
-                title: 'Placement Tests',
-                url: '/placement-tests',
-                icon: FileCheck,
-                permission: 'placement-tests.view',
-            },
+
             {
                 title: 'Approved Applicants',
                 url: '/approved-applicants',
@@ -356,10 +333,10 @@ const mainNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
     const can = useCan();
-   const roles: string[] = (auth.user?.roles as string[]) ?? [];
-const isSuperAdmin = roles.includes('Super Admin');
-const isAdmin = roles.includes('Admin') || isSuperAdmin;
-const isTeacher = roles.includes('Teacher');
+    const roles: string[] = (auth.user?.roles as string[]) ?? [];
+    const isSuperAdmin = roles.includes('Super Admin');
+    const isAdmin = roles.includes('Admin') || isSuperAdmin;
+    const isTeacher = roles.includes('Teacher');
     const isStudent = roles.includes('Student') || roles.length === 0;
 
     const lmsNavItems: NavItem[] = [];
@@ -405,8 +382,8 @@ const isTeacher = roles.includes('Teacher');
     }
 
     return (
-        <Sidebar 
-            collapsible="icon" 
+        <Sidebar
+            collapsible="icon"
             variant="inset"
             className="bg-gradient-to-b from-slate-50/90 via-white/90 to-indigo-50/80 backdrop-blur-md border-r border-white/50 shadow-xl shadow-indigo-200/20"
         >
@@ -414,8 +391,8 @@ const isTeacher = roles.includes('Teacher');
                 <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-300 to-purple-300 opacity-20 blur-3xl pointer-events-none"></div>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton 
-                            size="lg" 
+                        <SidebarMenuButton
+                            size="lg"
                             asChild
                             className="hover:bg-white/50 transition-all duration-200 data-[state=open]:bg-white/50 rounded-xl"
                         >
