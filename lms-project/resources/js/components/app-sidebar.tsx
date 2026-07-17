@@ -348,28 +348,73 @@ export function AppSidebar() {
             { title: 'Teachers', url: '/admin/teachers', icon: Monitor }
         );
     } else if (isTeacher) {
-        lmsNavItems.push(
-            { title: 'My Classes', url: '/teacher/classes', icon: GraduationCap },
-            { title: 'Homework', url: '/teacher/homework', icon: BookOpen },
-            { title: 'Attendance', url: '/teacher/attendance', icon: Calendar },
-            { title: 'Exams', url: '/teacher/exams', icon: ClipboardList }
-        );
+        if (can('classes.view')) {
+            lmsNavItems.push({
+                title: 'My Classes',
+                url: '/teacher/classes',
+                icon: GraduationCap,
+            });
+        }
+
+        if (can('homework.view')) {
+            lmsNavItems.push({
+                title: 'Homework',
+                url: '/teacher/homework',
+                icon: BookOpen,
+            });
+        }
+
+        if (can('attendance.approve')) {
+            lmsNavItems.push({
+                title: 'Attendance',
+                url: '/teacher/attendance',
+                icon: Calendar,
+            });
+        }
+
+        if (can('exams.view')) {
+            lmsNavItems.push({
+                title: 'Exams',
+                url: '/teacher/exams',
+                icon: ClipboardList,
+            });
+        }
     } else if (isStudent) {
-        lmsNavItems.push(
-            { title: 'My Classes', url: '/student/classes', icon: GraduationCap },
-            { title: 'My Results', url: '/student/results', icon: Trophy }
-        );
+        if (can('classes.view')) {
+            lmsNavItems.push({
+                title: 'My Classes',
+                url: '/student/classes',
+                icon: GraduationCap,
+            });
+        }
+
+        if (can('result-cards.view')) {
+            lmsNavItems.push({
+                title: 'My Results',
+                url: '/student/results',
+                icon: Trophy,
+            });
+        }
     }
 
-    const filteredTeamItems = mainNavItems
-        .map(item => ({
-            ...item,
-            children: item.children?.filter(child => {
-                if (isAdmin) return true;
-                return !child.permission || can(child.permission);
-            }),
-        }))
-        .filter(item => !item.children || item.children.length > 0);
+    let filteredTeamItems: NavItem[] = [];
+
+    if (isTeacher) {
+        // Teacher only sees Dashboard
+        filteredTeamItems = mainNavItems.filter(
+            item => item.title === 'Dashboard'
+        );
+    } else {
+        filteredTeamItems = mainNavItems
+            .map(item => ({
+                ...item,
+                children: item.children?.filter(child => {
+                    if (isAdmin) return true;
+                    return !child.permission || can(child.permission);
+                }),
+            }))
+            .filter(item => !item.children || item.children.length > 0);
+    }
 
     const allNavItems = [...filteredTeamItems];
 
