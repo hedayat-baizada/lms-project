@@ -8,8 +8,6 @@ use App\Models\User; // ✅ we need this
 
 class NotificationController extends Controller
 {
-    // ✅ Hardcoded to user ID 1 (your admin account)
-    // This works 100% – we tested it
     private function getUser()
     {
         return User::find(1);

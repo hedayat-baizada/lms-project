@@ -16,7 +16,7 @@ use App\Http\Controllers\Api\HomeworkController;
 use App\Http\Controllers\Api\FinalExamController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\StudentProgressController;
-use App\Http\Controllers\NotificationController; // ✅ Added for web notification routes
+use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 
 Route::get('/', function () {
@@ -204,36 +204,29 @@ Route::middleware(['auth'])->group(function () {
 
     // ==================== API Routes (Session-based) ====================
 
-    // ---- Admin Stats ----
+    // ---- Admin Stats (FIXED: using Spatie roles only) ----
     Route::get('/api/admin/stats', function () {
         return response()->json([
-            'total_students' => \App\Models\User::where('role', 'student')
-                ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
-                ->count(),
-            'total_teachers' => \App\Models\User::where('role', 'teacher')
-                ->orWhereHas('roles', fn($q) => $q->where('name', 'Teacher'))
-                ->count(),
+            'total_students' => \App\Models\User::role('Student')->count(),
+            'total_teachers' => \App\Models\User::role('Teacher')->count(),
             'total_classes'  => \App\Models\ClassRoom::count(),
             'total_lessons'  => \App\Models\Lesson::count(),
             'total_homework_submissions' => \App\Models\HomeworkSubmission::count(),
             'pending_homework' => \App\Models\HomeworkSubmission::where('status', 'pending')->count(),
             'total_exam_submissions' => \App\Models\FinalExamSubmission::count(),
             'pending_attendance' => \App\Models\AttendanceRequest::where('status', 'pending')->count(),
-            'recent_students' => \App\Models\User::where('role', 'student')
-                ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
+            'recent_students' => \App\Models\User::role('Student')
                 ->latest()->take(5)->get(['id', 'name', 'email', 'created_at']),
         ]);
     })->middleware('auth');
 
-    // ---- Admin Lists ----
+    // ---- Admin Lists (FIXED: using Spatie roles) ----
     Route::get('/api/admin/students', function () {
         return \App\Models\User::role('Student')->get();
     })->middleware('auth');
 
     Route::get('/api/admin/teachers', function () {
-        return \App\Models\User::where('role', 'teacher')
-            ->orWhereHas('roles', fn($q) => $q->where('name', 'Teacher'))
-            ->get();
+        return \App\Models\User::role('Teacher')->get();
     })->middleware('auth');
 
     // ---- Admin User Management ----
