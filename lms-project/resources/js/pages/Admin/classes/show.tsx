@@ -1,8 +1,8 @@
 import AppLayout from '@/layouts/app-layout'
 import { type BreadcrumbItem } from '@/types'
-import { Head } from '@inertiajs/react'
+import { Head, router } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
-import { Plus, Edit, Trash2, Eye, Video, Monitor, BookOpen, List, Calendar, FileText, X, Pencil } from 'lucide-react'
+import { Plus, Edit, Trash2, Eye, Video, Monitor, BookOpen, List, Calendar, FileText, X, Pencil, Users, Mail, UserCheck } from 'lucide-react'
 
 // ===== Interfaces =====
 interface Teacher {
@@ -43,6 +43,12 @@ interface ClassRoom {
     end_date: string | null
 }
 
+interface Student {
+    id: number
+    name: string
+    email: string
+}
+
 interface Props {
     classId: number
 }
@@ -50,7 +56,9 @@ interface Props {
 export default function ClassShow({ classId }: Props) {
     const [classRoom, setClassRoom] = useState<ClassRoom | null>(null)
     const [lessons, setLessons] = useState<Lesson[]>([])
+    const [students, setStudents] = useState<Student[]>([])
     const [loading, setLoading] = useState(true)
+    const [studentsLoading, setStudentsLoading] = useState(true)
     const [showLessonModal, setShowLessonModal] = useState(false)
     const [showHomeworkModal, setShowHomeworkModal] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
@@ -58,7 +66,8 @@ export default function ClassShow({ classId }: Props) {
     const [message, setMessage] = useState('')
     const [homeworkMessage, setHomeworkMessage] = useState('')
     const [editMessage, setEditMessage] = useState('')
-    
+    const [studentRemoveMessage, setStudentRemoveMessage] = useState('')
+
     const [videoFile, setVideoFile] = useState<File | null>(null)
     const [editVideoFile, setEditVideoFile] = useState<File | null>(null)
 
@@ -131,6 +140,23 @@ export default function ClassShow({ classId }: Props) {
         }).catch(() => setLoading(false))
     }
 
+    function loadStudents() {
+        setStudentsLoading(true)
+        fetch('/api/classes/' + classId + '/students', {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'include',
+        })
+            .then(r => r.json())
+            .then(data => {
+                setStudents(Array.isArray(data) ? data : [])
+                setStudentsLoading(false)
+            })
+            .catch(() => {
+                setStudents([])
+                setStudentsLoading(false)
+            })
+    }
+
     useEffect(() => {
         fetch('/api/admin/teachers', {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
@@ -143,6 +169,7 @@ export default function ClassShow({ classId }: Props) {
 
     useEffect(() => {
         loadData()
+        loadStudents()
     }, [classId])
 
     function buildLessonFormData(data: any, file: File | null) {
@@ -151,14 +178,14 @@ export default function ClassShow({ classId }: Props) {
         formData.append('type', data.type)
         formData.append('order', String(data.order))
         if (data.description) formData.append('description', data.description)
-        
+
         if (file) {
             formData.append('video_file', file)
         } else {
             if (data.video_url) formData.append('video_url', data.video_url)
             if (data.meet_link) formData.append('meet_link', data.meet_link)
         }
-        
+
         return formData
     }
 
@@ -225,7 +252,7 @@ export default function ClassShow({ classId }: Props) {
 
     function handleAddLesson() {
         if (!lessonForm.title) { setMessage('Please fill required fields.'); return }
-        
+
         if (lessonForm.type === 'video' && !videoFile && !lessonForm.video_url) {
             setMessage('Please upload a video file or provide a video URL.')
             return
@@ -336,6 +363,38 @@ export default function ClassShow({ classId }: Props) {
         setShowEditModal(true)
     }
 
+    // --- Students Management ---
+    function handleRemoveStudent(studentId: number) {
+        if (!confirm('Are you sure you want to remove this student from the class?')) return
+
+        fetch(`/api/classes/${classId}/students/${studentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-XSRF-TOKEN': getCsrf(),
+            },
+            credentials: 'include',
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Error occurred')
+                    })
+                }
+                return response.json()
+            })
+            .then(() => {
+                setStudentRemoveMessage('✅ Student removed!')
+                loadStudents()
+                setTimeout(() => setStudentRemoveMessage(''), 2000)
+            })
+            .catch(error => {
+                setStudentRemoveMessage('❌ ' + error.message)
+                setTimeout(() => setStudentRemoveMessage(''), 3000)
+            })
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={classRoom?.name ?? 'Class'} />
@@ -390,120 +449,193 @@ export default function ClassShow({ classId }: Props) {
                     </div>
                 </div>
 
-                {loading && (
-                    <div className="flex justify-center items-center py-12">
-                        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                    </div>
-                )}
-                {!loading && lessons.length === 0 && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/50 shadow-lg shadow-slate-200/60 p-12 text-center">
-                        <List className="h-12 w-12 mx-auto text-slate-300 mb-4" />
-                        <p className="text-slate-500 font-medium">No lessons yet.</p>
-                        <p className="text-sm text-slate-400 mt-1">Add your first lesson using the button above.</p>
+                {/* Student Remove Status Message */}
+                {studentRemoveMessage && (
+                    <div className={`rounded-xl px-4 py-3 text-sm font-medium ${studentRemoveMessage.includes('✅') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
+                        {studentRemoveMessage}
                     </div>
                 )}
 
-                {!loading && lessons.length > 0 && (
-                    <div className="space-y-4">
-                        {lessons.map((lesson, index) => (
-                            <div key={lesson.id} className="group rounded-2xl bg-white/70 backdrop-blur-sm border border-white/50 shadow-lg shadow-slate-200/60 p-5 hover:shadow-xl hover:shadow-indigo-200/50 hover:-translate-y-0.5 transition-all duration-300">
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                    <div className="flex items-start gap-4 flex-1">
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-600 font-bold text-sm">
-                                            {index + 1}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="text-lg font-semibold text-slate-800">{lesson.title}</h3>
-                                            <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${lesson.type === 'video' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                                                    {lesson.type === 'video' ? <Video className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
-                                                    {lesson.type === 'video' ? 'Video' : 'Online Meet'}
-                                                </span>
-                                                <span className="text-xs text-slate-400">Order: {lesson.order}</span>
-                                                {lesson.description && (
-                                                    <span className="text-xs text-slate-500 truncate max-w-[200px]">{lesson.description}</span>
+                {/* Two-Column Layout: Lessons + Students */}
+                <div className="grid gap-6 lg:grid-cols-4">
+                    {/* Lessons Column - takes 3/4 */}
+                    <div className="lg:col-span-3">
+                        {loading && (
+                            <div className="flex justify-center items-center py-12">
+                                <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                            </div>
+                        )}
+                        {!loading && lessons.length === 0 && (
+                            <div className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/50 shadow-lg shadow-slate-200/60 p-12 text-center">
+                                <List className="h-12 w-12 mx-auto text-slate-300 mb-4" />
+                                <p className="text-slate-500 font-medium">No lessons yet.</p>
+                                <p className="text-sm text-slate-400 mt-1">Add your first lesson using the button above.</p>
+                            </div>
+                        )}
+                        {!loading && lessons.length > 0 && (
+                            <div className="space-y-4">
+                                {lessons.map((lesson, index) => (
+                                    <div key={lesson.id} className="group rounded-2xl bg-white/70 backdrop-blur-sm border border-white/50 shadow-lg shadow-slate-200/60 p-5 hover:shadow-xl hover:shadow-indigo-200/50 hover:-translate-y-0.5 transition-all duration-300">
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                            <div className="flex items-start gap-4 flex-1">
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-600 font-bold text-sm">
+                                                    {index + 1}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="text-lg font-semibold text-slate-800">{lesson.title}</h3>
+                                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${lesson.type === 'video' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                                                            {lesson.type === 'video' ? <Video className="h-3 w-3" /> : <Monitor className="h-3 w-3" />}
+                                                            {lesson.type === 'video' ? 'Video' : 'Online Meet'}
+                                                        </span>
+                                                        <span className="text-xs text-slate-400">Order: {lesson.order}</span>
+                                                        {lesson.description && (
+                                                            <span className="text-xs text-slate-500 truncate max-w-[200px]">{lesson.description}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                {lesson.type === 'video' && (lesson.video_path || lesson.video_url) && (
+                                                    <a
+                                                        href={lesson.video_path ? `/storage/${lesson.video_path}` : getUrl(lesson.video_url!)}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-100 transition-colors"
+                                                    >
+                                                        <Eye className="h-3 w-3" />
+                                                        Watch
+                                                    </a>
                                                 )}
+                                                {lesson.type === 'online_meet' && lesson.meet_link && (
+                                                    <a
+                                                        href={getUrl(lesson.meet_link)}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="inline-flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-600 hover:bg-green-100 transition-colors"
+                                                    >
+                                                        <Monitor className="h-3 w-3" />
+                                                        Join
+                                                    </a>
+                                                )}
+                                                {lesson.type === 'video' && (
+                                                    <button
+                                                        className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors ${lesson.homework ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-700'}`}
+                                                        onClick={() => {
+                                                            setSelectedLesson(lesson)
+                                                            setHomeworkForm({ title: '', question: '' })
+                                                            setHomeworkMessage('')
+                                                            setShowHomeworkModal(true)
+                                                        }}
+                                                    >
+                                                        <BookOpen className="h-3 w-3" />
+                                                        {lesson.homework ? 'Homework' : '+ Homework'}
+                                                    </button>
+                                                )}
+                                                <button
+                                                    className="inline-flex items-center gap-1 rounded-full bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-600 hover:bg-yellow-100 transition-colors"
+                                                    onClick={() => openEditLesson(lesson)}
+                                                >
+                                                    <Edit className="h-3 w-3" />
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors"
+                                                    onClick={() => handleDeleteLesson(lesson)}
+                                                >
+                                                    <Trash2 className="h-3 w-3" />
+                                                    Delete
+                                                </button>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        {lesson.type === 'video' && (lesson.video_path || lesson.video_url) && (
-                                            <a
-                                                href={lesson.video_path ? `/storage/${lesson.video_path}` : getUrl(lesson.video_url!)}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-100 transition-colors"
-                                            >
-                                                <Eye className="h-3 w-3" />
-                                                Watch
-                                            </a>
+                                        {lesson.type === 'video' && lesson.video_path && (
+                                            <div className="mt-3 ml-14 rounded-xl overflow-hidden border border-slate-200/50 bg-slate-50/50">
+                                                <video controls className="w-full max-h-64 object-contain">
+                                                    <source src={`/storage/${lesson.video_path}`} />
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            </div>
                                         )}
-                                        {lesson.type === 'online_meet' && lesson.meet_link && (
-                                            <a
-                                                href={getUrl(lesson.meet_link)}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="inline-flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-600 hover:bg-green-100 transition-colors"
-                                            >
-                                                <Monitor className="h-3 w-3" />
-                                                Join
-                                            </a>
-                                        )}
-                                        {lesson.type === 'video' && (
-                                            <button
-                                                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors ${lesson.homework ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-700'}`}
-                                                onClick={() => {
-                                                    setSelectedLesson(lesson)
-                                                    setHomeworkForm({ title: '', question: '' })
-                                                    setHomeworkMessage('')
-                                                    setShowHomeworkModal(true)
-                                                }}
-                                            >
-                                                <BookOpen className="h-3 w-3" />
-                                                {lesson.homework ? 'Homework' : '+ Homework'}
-                                            </button>
-                                        )}
-                                        <button
-                                            className="inline-flex items-center gap-1 rounded-full bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-600 hover:bg-yellow-100 transition-colors"
-                                            onClick={() => openEditLesson(lesson)}
-                                        >
-                                            <Edit className="h-3 w-3" />
-                                            Edit
-                                        </button>
-                                        <button
-                                            className="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-100 transition-colors"
-                                            onClick={() => handleDeleteLesson(lesson)}
-                                        >
-                                            <Trash2 className="h-3 w-3" />
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
 
-                                {lesson.type === 'video' && lesson.video_path && (
-                                    <div className="mt-3 ml-14 rounded-xl overflow-hidden border border-slate-200/50 bg-slate-50/50">
-                                        <video controls className="w-full max-h-64 object-contain">
-                                            <source src={`/storage/${lesson.video_path}`} />
-                                            Your browser does not support the video tag.
-                                        </video>
+                                        {lesson.homework && (
+                                            <div className="mt-3 ml-14 rounded-xl bg-purple-50/80 p-4 border border-purple-100/50">
+                                                <p className="text-sm font-semibold text-purple-700 flex items-center gap-2">
+                                                    <FileText className="h-4 w-4" />
+                                                    {lesson.homework.title}
+                                                </p>
+                                                <p className="text-sm text-slate-600 mt-1">{lesson.homework.question}</p>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
-                                {lesson.homework && (
-                                    <div className="mt-3 ml-14 rounded-xl bg-purple-50/80 p-4 border border-purple-100/50">
-                                        <p className="text-sm font-semibold text-purple-700 flex items-center gap-2">
-                                            <FileText className="h-4 w-4" />
-                                            {lesson.homework.title}
-                                        </p>
-                                        <p className="text-sm text-slate-600 mt-1">{lesson.homework.question}</p>
+                    {/* Students Column - takes 1/4 */}
+                    <div className="lg:col-span-1">
+                        <div className="rounded-2xl bg-white/70 backdrop-blur-sm border border-white/50 shadow-lg shadow-slate-200/60 overflow-hidden sticky top-6">
+                            <div className="bg-gradient-to-r from-indigo-50 to-purple-50/80 px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                                <h2 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                                    <Users className="h-4 w-4 text-indigo-500" />
+                                    Enrolled Students
+                                    <span className="text-xs font-normal text-slate-400 ml-1">
+                                        ({students.length})
+                                    </span>
+                                </h2>
+                                <button
+                                    className="text-xs text-indigo-600 hover:text-indigo-800 font-medium hover:underline transition-all"
+                                    onClick={() => router.visit(`/admin/classes/${classId}/enroll`)}
+                                >
+                                    + Add
+                                </button>
+                            </div>
+
+                            <div className="p-3 max-h-[500px] overflow-y-auto">
+                                {studentsLoading ? (
+                                    <div className="flex justify-center items-center py-6">
+                                        <div className="w-6 h-6 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                                    </div>
+                                ) : students.length === 0 ? (
+                                    <div className="text-center py-6">
+                                        <Users className="h-8 w-8 mx-auto text-slate-300 mb-2" />
+                                        <p className="text-slate-500 text-xs">No students enrolled.</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-slate-100">
+                                        {students.map((student) => (
+                                            <div key={student.id} className="py-2 flex items-center justify-between hover:bg-indigo-50/30 px-2 rounded-lg transition-colors">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600 font-medium text-xs">
+                                                        {student.name.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-medium text-slate-700 truncate">{student.name}</p>
+                                                        <p className="text-[10px] text-slate-400 truncate flex items-center gap-0.5">
+                                                            <Mail className="h-2.5 w-2.5" />
+                                                            {student.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    className="p-1 rounded-full text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                                                    onClick={() => handleRemoveStudent(student.id)}
+                                                    title="Remove from class"
+                                                >
+                                                    <Trash2 className="h-3 w-3" />
+                                                </button>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>
-                        ))}
+                        </div>
                     </div>
-                )}
+                </div>
 
+                {/* Edit Class Modal */}
                 {showEditModal && (
                     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/50 relative max-h-[90vh] overflow-y-auto">
@@ -655,6 +787,7 @@ export default function ClassShow({ classId }: Props) {
                     </div>
                 )}
 
+                {/* Add Lesson Modal */}
                 {showLessonModal && (
                     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/50 relative max-h-[90vh] overflow-y-auto">
@@ -777,6 +910,7 @@ export default function ClassShow({ classId }: Props) {
                     </div>
                 )}
 
+                {/* Edit Lesson Modal */}
                 {showEditModal && selectedLesson && (
                     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/50 relative max-h-[90vh] overflow-y-auto">
@@ -901,6 +1035,7 @@ export default function ClassShow({ classId }: Props) {
                     </div>
                 )}
 
+                {/* Homework Modal */}
                 {showHomeworkModal && selectedLesson && (
                     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/50 relative">

@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\HomeworkController;
 use App\Http\Controllers\Api\FinalExamController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\StudentProgressController;
+use App\Http\Controllers\NotificationController; // ✅ Added for web notification routes
 use Illuminate\Http\Request;
 
 Route::get('/', function () {
@@ -192,6 +193,14 @@ Route::middleware(['auth'])->group(function () {
             return Inertia::render('student/results/index');
         });
     });
+
+    // ================================================================
+    // 📢 NOTIFICATION WEB ROUTES (for your NotificationBell component)
+    // ================================================================
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::get('/notifications/dropdown', [NotificationController::class, 'getDropdown']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
 
     // ==================== API Routes (Session-based) ====================
 
@@ -392,29 +401,29 @@ Route::middleware(['auth'])->group(function () {
             ->get();
     })->middleware('auth');
 
-    // ---- Notifications ----
-    Route::get('/api/notifications', function () {
-        $user = auth()->user();
-        return response()->json([
-            'unread_count' => $user->unreadNotifications->count(),
-            'notifications' => $user->notifications()->latest()->take(20)->get(),
-        ]);
-    })->middleware('auth');
+    // ---- Notifications (OLD API) – now commented out, use web routes above ----
+    // Route::get('/api/notifications', function () {
+    //     $user = auth()->user();
+    //     return response()->json([
+    //         'unread_count' => $user->unreadNotifications->count(),
+    //         'notifications' => $user->notifications()->latest()->take(20)->get(),
+    //     ]);
+    // })->middleware('auth');
 
-    Route::put('/api/notifications/{id}/read', function ($id) {
-        $user = auth()->user();
-        $notification = $user->notifications()->where('id', $id)->first();
-        if ($notification) {
-            $notification->markAsRead();
-        }
-        return response()->json(['message' => 'Marked as read']);
-    })->middleware('auth');
+    // Route::put('/api/notifications/{id}/read', function ($id) {
+    //     $user = auth()->user();
+    //     $notification = $user->notifications()->where('id', $id)->first();
+    //     if ($notification) {
+    //         $notification->markAsRead();
+    //     }
+    //     return response()->json(['message' => 'Marked as read']);
+    // })->middleware('auth');
 
-    Route::put('/api/notifications/read-all', function () {
-        $user = auth()->user();
-        $user->unreadNotifications->markAsRead();
-        return response()->json(['message' => 'All notifications marked as read']);
-    })->middleware('auth');
+    // Route::put('/api/notifications/read-all', function () {
+    //     $user = auth()->user();
+    //     $user->unreadNotifications->markAsRead();
+    //     return response()->json(['message' => 'All notifications marked as read']);
+    // })->middleware('auth');
 
 });
 
