@@ -300,16 +300,7 @@ class PermissionSeeder extends Seeder
             'rejected-team-applications.view',
             'rejected-team-applications.restore',
 
-            'students.view',
-
-            'guardians.view',
-
-            'interviews.view',
-            'interviews.conduct',
-
-            'placement-tests.view',
-            'placement-tests.evaluate',
-
+           
             // Volunteers
             'volunteers.view',
             'volunteer-roles.view',
@@ -348,20 +339,20 @@ class PermissionSeeder extends Seeder
         $teacher->syncPermissions([
             'dashboard.view',
 
-            'students.view',
+           // 'students.view',
 
-            'attendance.view',
-            'attendance.mark',
+            //'attendance.view',
+           // 'attendance.mark',
 
-            'courses.view',
-            'class-groups.view',
+            //'courses.view',
+            //'class-groups.view',
 
-            'lesson-plans.view',
-            'assessments.view',
+           // 'lesson-plans.view',
+           // 'assessments.view',
 
-            'result-cards.view',
+           // 'result-cards.view',
 
-            'announcements.view',
+           // 'announcements.view',
 
             // --- LMS ---
             'classes.view',

@@ -2,7 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Trash2, Pencil } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -32,6 +32,7 @@ export default function ClassesIndex() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [message, setMessage] = useState('');
+    const [deleteMessage, setDeleteMessage] = useState('');
 
     const [form, setForm] = useState({
         name: '',
@@ -64,7 +65,6 @@ export default function ClassesIndex() {
 
     useEffect(() => {
         loadData();
-        // بارگذاری لیست معلمان برای مودال
         fetch('/api/admin/teachers', {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'include',
@@ -109,6 +109,42 @@ export default function ClassesIndex() {
             .catch(() => setMessage('❌ Network error'));
     }
 
+    // 🗑️ DELETE FUNCTION
+    function handleDeleteClass(classRoom: ClassRoom) {
+        if (!confirm(`Are you sure you want to delete "${classRoom.name}"? This cannot be undone.`)) {
+            return;
+        }
+
+        setDeleteMessage('Deleting...');
+
+        fetch('/api/classes/' + classRoom.id, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-XSRF-TOKEN': getCsrf(),
+            },
+            credentials: 'include',
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Error occurred');
+                    });
+                }
+                return response.json();
+            })
+            .then(() => {
+                setDeleteMessage('✅ Class deleted successfully!');
+                loadData();
+                setTimeout(() => setDeleteMessage(''), 2000);
+            })
+            .catch(error => {
+                setDeleteMessage('❌ ' + error.message);
+                setTimeout(() => setDeleteMessage(''), 3000);
+            });
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Classes" />
@@ -129,6 +165,19 @@ export default function ClassesIndex() {
                         + Add Class
                     </button>
                 </div>
+
+                {/* Delete Status Message */}
+                {deleteMessage && (
+                    <div className={`rounded-xl px-4 py-3 text-sm font-medium ${
+                        deleteMessage.includes('✅') 
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                            : deleteMessage.includes('❌') 
+                                ? 'bg-rose-50 text-rose-700 border border-rose-200' 
+                                : 'bg-blue-50 text-blue-700 border border-blue-200'
+                    }`}>
+                        {deleteMessage}
+                    </div>
+                )}
 
                 {loading ? (
                     <div className="flex justify-center items-center py-12">
@@ -199,12 +248,21 @@ export default function ClassesIndex() {
                                                     </span>
                                                 </div>
 
-                                                <button
-                                                    className="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:underline underline-offset-2 transition-all"
-                                                    onClick={() => router.visit(`/admin/classes/${classRoom.id}`)}
-                                                >
-                                                    View Details →
-                                                </button>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <button
+                                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:underline underline-offset-2 transition-all"
+                                                        onClick={() => router.visit(`/admin/classes/${classRoom.id}`)}
+                                                    >
+                                                        View Details →
+                                                    </button>
+                                                    <button
+                                                        className="ml-auto p-1.5 rounded-full text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-all"
+                                                        onClick={() => handleDeleteClass(classRoom)}
+                                                        title="Delete Class"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
@@ -274,12 +332,21 @@ export default function ClassesIndex() {
                                                     </span>
                                                 </div>
 
-                                                <button
-                                                    className="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:underline underline-offset-2 transition-all"
-                                                    onClick={() => router.visit(`/admin/classes/${classRoom.id}`)}
-                                                >
-                                                    View Details →
-                                                </button>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <button
+                                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:underline underline-offset-2 transition-all"
+                                                        onClick={() => router.visit(`/admin/classes/${classRoom.id}`)}
+                                                    >
+                                                        View Details →
+                                                    </button>
+                                                    <button
+                                                        className="ml-auto p-1.5 rounded-full text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-all"
+                                                        onClick={() => handleDeleteClass(classRoom)}
+                                                        title="Delete Class"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
@@ -288,9 +355,7 @@ export default function ClassesIndex() {
                     </>
                 )}
 
-                {/* ============================================================ */}
                 {/* Modal for Add Class */}
-                {/* ============================================================ */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/50 relative max-h-[90vh] overflow-y-auto">

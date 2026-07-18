@@ -91,30 +91,7 @@ const mainNavItems: NavItem[] = [
                 icon: FileText,
                 permission: 'applications.view',
             },
-            {
-                title: 'Students',
-                url: '/students',
-                icon: GraduationCap,
-                permission: 'students.view',
-            },
-            {
-                title: 'Guardians',
-                url: '/guardians',
-                icon: UserRound,
-                permission: 'guardians.view',
-            },
-            {
-                title: 'Interviews',
-                url: '/interviews',
-                icon: ClipboardCheck,
-                permission: 'interviews.view',
-            },
-            {
-                title: 'Placement Tests',
-                url: '/placement-tests',
-                icon: FileCheck,
-                permission: 'placement-tests.view',
-            },
+
             {
                 title: 'Approved Applicants',
                 url: '/approved-applicants',
@@ -146,55 +123,14 @@ const mainNavItems: NavItem[] = [
                 permission: 'rejected-students-applications.view',
             },
             {
-                title: 'Rejected Team Applications',
+                title: 'Rejected Team',
                 url: '/rejected-team-applications',
                 icon: UserRoundX,
                 permission: 'rejected-team-applications.view',
             },
         ],
     },
-    {
-        title: 'Academic',
-        icon: GraduationCap,
-        children: [
-            {
-                title: 'Programs',
-                url: '/programs',
-                icon: BookOpen,
-                permission: 'programs.view',
-            },
-            {
-                title: 'Courses',
-                url: '/courses',
-                icon: BookMarked,
-                permission: 'courses.view',
-            },
-            {
-                title: 'Class Groups',
-                url: '/class-groups',
-                icon: Layers3,
-                permission: 'class-groups.view',
-            },
-            {
-                title: 'Student Attendance',
-                url: '/attendance',
-                icon: CalendarCheck,
-                permission: 'attendance.view',
-            },
-            {
-                title: 'Result Cards',
-                url: '/result-cards',
-                icon: Award,
-                permission: 'result-cards.view',
-            },
-            {
-                title: 'Approved Applicants',
-                url: '/approved-applicants',
-                icon: UserCheck,
-                permission: 'approved-applicants.view',
-            },
-        ],
-    },
+
     {
         title: 'Teachers',
         icon: Presentation,
@@ -356,10 +292,10 @@ const mainNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
     const can = useCan();
-   const roles: string[] = (auth.user?.roles as string[]) ?? [];
-const isSuperAdmin = roles.includes('Super Admin');
-const isAdmin = roles.includes('Admin') || isSuperAdmin;
-const isTeacher = roles.includes('Teacher');
+    const roles: string[] = (auth.user?.roles as string[]) ?? [];
+    const isSuperAdmin = roles.includes('Super Admin');
+    const isAdmin = roles.includes('Admin') || isSuperAdmin;
+    const isTeacher = roles.includes('Teacher');
     const isStudent = roles.includes('Student') || roles.length === 0;
 
     const lmsNavItems: NavItem[] = [];
@@ -371,28 +307,73 @@ const isTeacher = roles.includes('Teacher');
             { title: 'Teachers', url: '/admin/teachers', icon: Monitor }
         );
     } else if (isTeacher) {
-        lmsNavItems.push(
-            { title: 'My Classes', url: '/teacher/classes', icon: GraduationCap },
-            { title: 'Homework', url: '/teacher/homework', icon: BookOpen },
-            { title: 'Attendance', url: '/teacher/attendance', icon: Calendar },
-            { title: 'Exams', url: '/teacher/exams', icon: ClipboardList }
-        );
+        if (can('classes.view')) {
+            lmsNavItems.push({
+                title: 'My Classes',
+                url: '/teacher/classes',
+                icon: GraduationCap,
+            });
+        }
+
+        if (can('homework.view')) {
+            lmsNavItems.push({
+                title: 'Homework',
+                url: '/teacher/homework',
+                icon: BookOpen,
+            });
+        }
+
+        if (can('attendance.approve')) {
+            lmsNavItems.push({
+                title: 'Attendance',
+                url: '/teacher/attendance',
+                icon: Calendar,
+            });
+        }
+
+        if (can('exams.view')) {
+            lmsNavItems.push({
+                title: 'Exams',
+                url: '/teacher/exams',
+                icon: ClipboardList,
+            });
+        }
     } else if (isStudent) {
-        lmsNavItems.push(
-            { title: 'My Classes', url: '/student/classes', icon: GraduationCap },
-            { title: 'My Results', url: '/student/results', icon: Trophy }
-        );
+        if (can('classes.view')) {
+            lmsNavItems.push({
+                title: 'My Classes',
+                url: '/student/classes',
+                icon: GraduationCap,
+            });
+        }
+
+        if (can('result-cards.view')) {
+            lmsNavItems.push({
+                title: 'My Results',
+                url: '/student/results',
+                icon: Trophy,
+            });
+        }
     }
 
-    const filteredTeamItems = mainNavItems
-        .map(item => ({
-            ...item,
-            children: item.children?.filter(child => {
-                if (isAdmin) return true;
-                return !child.permission || can(child.permission);
-            }),
-        }))
-        .filter(item => !item.children || item.children.length > 0);
+    let filteredTeamItems: NavItem[] = [];
+
+    if (isTeacher) {
+        // Teacher only sees Dashboard
+        filteredTeamItems = mainNavItems.filter(
+            item => item.title === 'Dashboard'
+        );
+    } else {
+        filteredTeamItems = mainNavItems
+            .map(item => ({
+                ...item,
+                children: item.children?.filter(child => {
+                    if (isAdmin) return true;
+                    return !child.permission || can(child.permission);
+                }),
+            }))
+            .filter(item => !item.children || item.children.length > 0);
+    }
 
     const allNavItems = [...filteredTeamItems];
 
@@ -405,8 +386,8 @@ const isTeacher = roles.includes('Teacher');
     }
 
     return (
-        <Sidebar 
-            collapsible="icon" 
+        <Sidebar
+            collapsible="icon"
             variant="inset"
             className="bg-gradient-to-b from-slate-50/90 via-white/90 to-indigo-50/80 backdrop-blur-md border-r border-white/50 shadow-xl shadow-indigo-200/20"
         >
@@ -414,8 +395,8 @@ const isTeacher = roles.includes('Teacher');
                 <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-300 to-purple-300 opacity-20 blur-3xl pointer-events-none"></div>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton 
-                            size="lg" 
+                        <SidebarMenuButton
+                            size="lg"
                             asChild
                             className="hover:bg-white/50 transition-all duration-200 data-[state=open]:bg-white/50 rounded-xl"
                         >
