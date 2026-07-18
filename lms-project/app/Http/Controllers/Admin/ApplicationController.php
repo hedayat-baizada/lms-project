@@ -71,7 +71,7 @@ public function showApprovedApplicant(Application $application)
             }),
         ],
     ]);
-}
+}  
 
 
 
@@ -456,7 +456,6 @@ $placementSummary = [
     'wrong' => $wrong,
     'score' => $correct,
 ];
-
 
 
     
