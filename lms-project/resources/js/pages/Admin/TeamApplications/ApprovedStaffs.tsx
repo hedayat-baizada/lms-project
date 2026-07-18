@@ -230,14 +230,32 @@ function resetSearch() {
                                             className="border-b last:border-none"
                                         >
                                             <td className="py-4">
-                                                <div className="font-semibold text-slate-900">
-                                                    {staff.full_name}
-                                                </div>
+    <div className="flex items-center gap-3">
 
-                                                <div className="text-sm text-slate-500">
-                                                    {staff.tracking_code}
-                                                </div>
-                                            </td>
+        {staff.applicant_photo ? (
+            <img
+                src={staff.applicant_photo}
+                alt={staff.full_name}
+                className="h-14 w-14 rounded-full border object-cover"
+            />
+        ) : (
+            <div className="flex h-14 w-14 items-center justify-center rounded-full border bg-slate-100 text-xs text-slate-500">
+                No Photo
+            </div>
+        )}
+
+        <div>
+            <div className="font-semibold text-slate-900">
+                {staff.full_name}
+            </div>
+
+            <div className="text-sm text-slate-500">
+                {staff.tracking_code}
+            </div>
+        </div>
+
+    </div>
+</td>
 
                                             <td className="py-4">
                                                 <span

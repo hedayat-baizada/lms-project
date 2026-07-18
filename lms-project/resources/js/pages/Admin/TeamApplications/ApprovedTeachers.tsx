@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 
 type Props = {
     teachers: any[];
+    applicant_photo?: string | null;
 };
 
 export default function ApprovedTeachers({ teachers }: Props) {
@@ -175,9 +176,27 @@ function resetSearch() {
                                 <tbody>
                                    {filteredTeachers.map((teacher) => (
                                         <tr key={teacher.id} className="border-b last:border-none">
-                                            <td className="py-4 font-semibold">
-                                                {teacher.full_name}
-                                            </td>
+                                           <td className="py-4">
+    <div className="flex items-center gap-3">
+
+        {teacher.applicant_photo ? (
+            <img
+                src={teacher.applicant_photo}
+                alt={teacher.full_name}
+                className="h-14 w-14 rounded-full border object-cover"
+            />
+        ) : (
+            <div className="flex h-14 w-14 items-center justify-center rounded-full border bg-slate-100 text-xs text-slate-500">
+                No Photo
+            </div>
+        )}
+
+        <div className="font-semibold">
+            {teacher.full_name}
+        </div>
+
+    </div>
+</td>
 
                                            <td className="py-4">
                                                 <span
