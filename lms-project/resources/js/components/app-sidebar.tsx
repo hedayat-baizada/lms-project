@@ -123,55 +123,14 @@ const mainNavItems: NavItem[] = [
                 permission: 'rejected-students-applications.view',
             },
             {
-                title: 'Rejected Team Applications',
+                title: 'Rejected Team',
                 url: '/rejected-team-applications',
                 icon: UserRoundX,
                 permission: 'rejected-team-applications.view',
             },
         ],
     },
-    {
-        title: 'Academic',
-        icon: GraduationCap,
-        children: [
-            {
-                title: 'Programs',
-                url: '/programs',
-                icon: BookOpen,
-                permission: 'programs.view',
-            },
-            {
-                title: 'Courses',
-                url: '/courses',
-                icon: BookMarked,
-                permission: 'courses.view',
-            },
-            {
-                title: 'Class Groups',
-                url: '/class-groups',
-                icon: Layers3,
-                permission: 'class-groups.view',
-            },
-            {
-                title: 'Student Attendance',
-                url: '/attendance',
-                icon: CalendarCheck,
-                permission: 'attendance.view',
-            },
-            {
-                title: 'Result Cards',
-                url: '/result-cards',
-                icon: Award,
-                permission: 'result-cards.view',
-            },
-            {
-                title: 'Approved Applicants',
-                url: '/approved-applicants',
-                icon: UserCheck,
-                permission: 'approved-applicants.view',
-            },
-        ],
-    },
+
     {
         title: 'Teachers',
         icon: Presentation,
