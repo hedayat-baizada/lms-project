@@ -17,6 +17,12 @@ use App\Http\Controllers\Api\FinalExamController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\StudentProgressController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\AttendanceSettingController;
+use App\Http\Controllers\AttendanceHolidaysController;
+use App\Http\Controllers\AttendancePeriodsController;
+use App\Http\Controllers\AttendanceRecordController;
+use App\Http\Controllers\ClassSessionController;
+use App\Http\Controllers\AttendaceSummaryController;
 use Illuminate\Http\Request;
 
 
@@ -501,5 +507,25 @@ Route::get('/apply/team/{teamApplication}/correction', [TeamApplicationControlle
 Route::post('/apply/team/{teamApplication}/correction', [TeamApplicationController::class, 'storeCorrection'])
     ->name('apply.team.correction.store');
 
+
+
+    // ====================attendance routes======================
+
+
+Route::get('teacher/Attendance_setting',[AttendanceSettingController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_setting');
+
+
+Route::get('teacher/atttendance_period',[AttendancePeriodsController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_period');
+
+
+Route::get('teacher/attendacne_record',[AttendanceRecordController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_record');
+
+
+Route::get('teacher/atttendance_holiday',[AttendanceHolidaysController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_holiday');
+
+Route::get('teacher/attendace_sammary',[AttendaceSummaryController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_summary');
+
+
+Route::get('teacher/attendance_session',[ClassSessionController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_session');
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
