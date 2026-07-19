@@ -1,0 +1,1026 @@
+import AppLayout from '@/layouts/app-layout';
+import { Link, useForm } from '@inertiajs/react';
+import ConfirmationModal from '@/components/ConfirmationModal';
+import { useEffect, useState } from 'react';
+
+
+type Props = {
+    application: any;
+    placementSummary: {
+    total: number;
+    correct: number;
+    wrong: number;
+    score: number;
+};
+    placementLevels: {
+        id: number;
+        program: string;
+        level_code: string;
+        display_name: string;
+    }[];
+};
+
+export default function ApplicationShow({ application, placementSummary, placementLevels = [], }: Props) {
+    
+    
+    
+
+
+const [showPreviousPhotos, setShowPreviousPhotos] = useState(false);
+
+
+const allDocuments = application.documents ?? [];
+
+function normalizeDocumentType(type: string) {
+    return type
+        .replace(/_correction$/i, '')
+        .replace(/_replacement$/i, '')
+        .replace(/_updated$/i, '');
+}
+
+function isImageDocument(document: any) {
+    const path = document.file_url ?? document.file_path ?? '';
+
+    return /\.(jpg|jpeg|png|webp|gif)$/i.test(path);
+}
+
+const groupedStudentDocuments = Object.values(
+    allDocuments.reduce(
+        (groups: Record<string, any[]>, document: any) => {
+            const normalizedType = normalizeDocumentType(
+                document.document_type,
+            );
+
+            /*
+             * Include the owner in the key so an applicant ID and
+             * guardian ID are not accidentally grouped together.
+             */
+            const owner = document.document_owner_type ?? 'applicant';
+            const key = `${owner}:${normalizedType}`;
+
+            if (!groups[key]) {
+                groups[key] = [];
+            }
+
+            groups[key].push(document);
+
+            return groups;
+        },
+        {},
+    ),
+).map((group: any) =>
+    [...group].sort(
+        (first, second) =>
+            new Date(second.created_at).getTime() -
+            new Date(first.created_at).getTime(),
+    ),
+);
+
+const currentStudentPhotos = groupedStudentDocuments
+    .map((group: any) => group[0])
+    .filter((document: any) => document && isImageDocument(document));
+
+const previousStudentPhotos = groupedStudentDocuments
+    .flatMap((group: any) => group.slice(1))
+    .filter(isImageDocument);
+
+
+
+
+
+
+
+    const scoreForm = useForm({
+    written_score: application.placement_test?.written_score ?? '',
+    speaking_score: application.placement_test?.speaking_score ?? '',
+    placement_level: application.placement_test?.placement_level ?? '',
+    reviewer_notes: application.placement_test?.reviewer_notes ?? '',
+});
+
+    const decisionForm = useForm({
+        notes: '',
+        message: '',
+    });
+
+    const [approveModalOpen, setApproveModalOpen] = useState(false);
+    const [rejectModalOpen, setRejectModalOpen] = useState(false);
+    const [correctionModalOpen, setCorrectionModalOpen] = useState(false);
+
+    const [rejectError, setRejectError] = useState('');
+
+    const isApproved = application.status === 'approved';
+    const isRejected = application.status === 'rejected';
+    const isFinalDecision = isApproved || isRejected;
+
+
+
+    useEffect(() => {
+    if (window.location.hash) {
+        const element = document.querySelector(window.location.hash);
+
+        if (element) {
+            element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+            });
+        }
+    }
+}, []);
+
+
+
+    function submitScore(e: React.FormEvent) {
+        e.preventDefault();
+
+        scoreForm.post(`/applications/${application.id}/score`, {
+            preserveScroll: true,
+        });
+    }
+
+
+
+
+    
+    return (
+        <AppLayout>
+            <div className="space-y-8 p-6">
+                <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 p-8 text-white shadow-xl">
+                    <Link href="/applications" className="text-sm text-blue-200 hover:underline">
+                        ← Back to Applications
+                    </Link>
+
+                    <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                        <div>
+                            <p className="text-sm uppercase tracking-[0.3em] text-blue-200">
+                                Application Review
+                            </p>
+
+                            <h1 className="mt-3 text-4xl font-bold">
+                                {application.full_name ?? 'Applicant'}
+                            </h1>
+
+                            <p className="mt-2 text-blue-100">
+                                {application.tracking_code ?? '-'}
+                            </p>
+                        </div>
+
+                        <StatusBadge status={application.status} />
+                    </div>
+                </div>
+
+                <Section title="Applicant Information">
+                    <InfoGrid
+                        items={[
+                            ['Full Name', application.full_name],
+                            ['Father Name', application.father_name],
+                            ['Email', application.email],
+                            ['Phone', application.phone],
+                            ['Date of Birth', application.date_of_birth],
+                            ['Gender', application.gender],
+                            ['Address', application.address],
+                        ]}
+                    />
+                </Section>
+
+                <Section title="Course Selection">
+                    <InfoGrid
+                        items={[
+                            ['Category', application.course_category],
+                            ['Track', application.course_track],
+                            ['Computer Topic', application.selected_computer_topic ?? '-'],
+                            ['Test Required', application.test_required ? 'Yes' : 'No'],
+                            ['Speaking Required', application.speaking_required ? 'Yes' : 'No'],
+                        ]}
+                    />
+                </Section>
+
+                
+
+                <Section title="Current Uploaded Photos">
+    {currentStudentPhotos.length === 0 ? (
+        <p className="text-gray-500">
+            No uploaded photos found.
+        </p>
+    ) : (
+        <div className="grid gap-5 md:grid-cols-2">
+            {currentStudentPhotos.map((document: any) => (
+                <StudentPhotoCard
+                    key={document.id}
+                    document={document}
+                    label={studentDocumentLabel(
+                        document.document_type,
+                    )}
+                />
+            ))}
+        </div>
+    )}
+
+    {previousStudentPhotos.length > 0 && (
+        <div className="mt-6">
+            <button
+                type="button"
+                onClick={() =>
+                    setShowPreviousPhotos((current) => !current)
+                }
+                className="rounded-xl border border-blue-300 bg-blue-50 px-5 py-3 font-semibold text-blue-800 hover:bg-blue-100"
+            >
+                {showPreviousPhotos
+                    ? 'Hide Previous Photos'
+                    : `View Previous Photos (${previousStudentPhotos.length})`}
+            </button>
+
+            {showPreviousPhotos && (
+                <div className="mt-5 grid gap-5 md:grid-cols-2">
+                    {previousStudentPhotos.map((document: any) => (
+                        <StudentPhotoCard
+                            key={document.id}
+                            document={document}
+                            label={`Previous ${studentDocumentLabel(
+                                document.document_type,
+                            )}`}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    )}
+</Section>
+
+          <Section title="Placement Test">
+    {!application.placement_test && (
+        <p className="text-gray-500">No placement test found.</p>
+    )}
+
+    {application.placement_test && (
+        <div className="space-y-5">
+            <InfoGrid
+                items={[
+                    ['Test Code', application.placement_test.test_code],
+                    ['Status', application.placement_test.status],
+                    ['Started', application.placement_test.started_at],
+                    ['Submitted', application.placement_test.submitted_at ?? '-'],
+                ]}
+            />
+
+            <div className="grid gap-4 md:grid-cols-4">
+                <MiniStat
+                    label="Total Answers"
+                    value={placementSummary.total}
+                    color="blue"
+                />
+
+                <MiniStat
+                    label="Correct"
+                    value={placementSummary.correct}
+                    color="green"
+                />
+
+                <MiniStat
+                    label="Wrong"
+                    value={placementSummary.wrong}
+                    color="red"
+                />
+
+                <MiniStat
+                    label="Placement Score"
+                    value={`${placementSummary.score} / ${placementSummary.total}`}
+                    color="amber"
+                />
+            </div>
+
+            <div className="rounded-2xl border bg-slate-50 p-5">
+                <p className="font-semibold">
+                    Overall MCQ Performance
+                </p>
+
+                <p className="mt-2 text-sm text-gray-600">
+                    The applicant scored {placementSummary.score} out of {placementSummary.total}
+                    questions. Use this score together with writing, speaking, and reviewer judgment
+                    to assign the final placement level.
+                </p>
+            </div>
+
+            <Link
+                href={`/applications/${application.id}/placement-test`}
+                className="inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+            >
+                View Questions & Answers →
+            </Link>
+        </div>
+    )}
+</Section>
+
+
+
+{application.course_track === 'cel' && (
+    <div id="writing">
+    <Section title="Writing Assessment">
+        <InfoGrid
+            items={[
+                [
+                    'Status',
+                    application.placement_test?.writing_answer
+                        ? 'Completed'
+                        : 'Not completed',
+                ],
+                [
+                    'Word Count',
+                    application.placement_test?.writing_answer
+                        ? application.placement_test.writing_answer
+                              .trim()
+                              .split(/\s+/)
+                              .filter(Boolean).length
+                        : 0,
+                ],
+            ]}
+        />
+
+        <Link
+            href={`/applications/${application.id}/writing`}
+            className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+        >
+            Review Writing →
+        </Link>
+    </Section>
+    </div>
+
+
+
+)}
+
+
+
+{application.course_track === 'cel' && (
+    <div id="speaking">
+    <Section title="Speaking Assessment">
+    <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-xl bg-slate-50 p-4">
+            <p className="text-sm font-medium text-gray-500">Status</p>
+
+            <span
+                className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
+                    application.speaking_test?.status === 'skipped'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : application.speaking_test?.audio_path
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                }`}
+            >
+                {application.speaking_test?.status === 'skipped'
+                    ? 'Skipped by applicant'
+                    : application.speaking_test?.audio_path
+                      ? 'Completed'
+                      : 'Not completed'}
+            </span>
+        </div>
+
+        <div className="rounded-xl bg-slate-50 p-4">
+            <p className="text-sm font-medium text-gray-500">Submitted</p>
+            <p className="mt-1 font-semibold text-slate-900">
+                {application.speaking_test?.submitted_at ?? '-'}
+            </p>
+        </div>
+    </div>
+
+    <Link
+        href={`/applications/${application.id}/speaking`}
+        className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+    >
+        Review Speaking →
+    </Link>
+</Section>
+    </div>
+)}
+  <Section title="Review Timeline">
+    <div className="space-y-4">
+        {application.status_logs?.length === 0 && (
+            <p className="text-gray-500">No timeline updates yet.</p>
+        )}
+
+        {[...(application.status_logs ?? [])]
+            .slice(-5)
+            .reverse()
+            .map((log: any) => (
+                <div
+                    key={log.id}
+                    className={`rounded-2xl border p-5 ${
+                        log.new_status === 'need_correction'
+                            ? 'border-orange-200 bg-orange-50'
+                            : log.new_status === 'correction_submitted'
+                              ? 'border-blue-200 bg-blue-50'
+                              : log.new_status === 'approved'
+                                ? 'border-green-200 bg-green-50'
+                                : log.new_status === 'rejected'
+                                  ? 'border-red-200 bg-red-50'
+                                  : 'bg-slate-50'
+                    }`}
+                >
+                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                        <h3 className="font-bold">
+                            {log.new_status.replaceAll('_', ' ')}
+                        </h3>
+
+                        <p className="text-sm text-gray-500">
+                            {new Date(log.created_at).toLocaleString()}
+                        </p>
+                    </div>
+
+                    <p className="mt-3 text-sm text-gray-700">
+                        {log.notes ?? 'No notes.'}
+                    </p>
+
+                    <p className="mt-2 text-xs text-gray-500">
+                        {log.old_status ?? '-'} → {log.new_status}
+                    </p>
+                </div>
+            ))}
+    </div>
+
+    <div className="mt-6 flex justify-end">
+        <Link
+            href={`/applications/${application.id}/history`}
+            className="rounded-xl bg-slate-800 px-5 py-3 font-semibold text-white hover:bg-slate-900"
+        >
+            View Complete History →
+        </Link>
+    </div>
+</Section>
+
+           <div id="assessment">
+    <Section title="Assessment Evaluation">
+    <div className="grid gap-6 lg:grid-cols-3">
+        <MiniStat
+    label="Placement Score"
+    value={`${placementSummary.score} / ${placementSummary.total}`}
+    color="blue"
+/>
+        <MiniStat label="Correct Answers" value={placementSummary.correct} color="green" />
+        <MiniStat label="Wrong Answers" value={placementSummary.wrong} color="red" />
+    </div>
+
+    <form onSubmit={submitScore} className="mt-6 space-y-5 rounded-2xl border bg-slate-50 p-6">
+        <h3 className="text-xl font-bold">Manual Evaluation</h3>
+
+        <div className="grid gap-5 md:grid-cols-2">
+            <Input
+                label="Writing / MCQ Score"
+                type="number"
+                value={scoreForm.data.written_score}
+                onChange={(value) => scoreForm.setData('written_score', value)}
+            />
+
+            <Input
+                label="Speaking Score"
+                type="number"
+                value={scoreForm.data.speaking_score}
+                onChange={(value) => scoreForm.setData('speaking_score', value)}
+            />
+        </div>
+
+        <div>
+            <label className="mb-2 block text-sm font-medium">
+                Overall Placement
+            </label>
+
+            <div className="grid gap-3 md:grid-cols-2">
+                {(placementLevels ?? []).map((level) => {
+                    const selected = scoreForm.data.placement_level === level.level_code;
+
+                    return (
+                        <label
+                            key={level.id}
+                            className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition ${
+                                selected
+                                    ? 'border-blue-600 bg-blue-50 shadow-sm'
+                                    : 'hover:border-gray-400'
+                            }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <span
+                                    className={`flex h-5 w-5 items-center justify-center rounded-full border ${
+                                        selected
+                                            ? 'border-blue-600 bg-blue-600'
+                                            : 'border-gray-400 bg-white'
+                                    }`}
+                                >
+                                    {selected && <span className="h-2 w-2 rounded-full bg-white" />}
+                                </span>
+
+                                <span className="font-medium">{level.display_name}</span>
+                            </div>
+
+                            <input
+                                type="radio"
+                                name="placement_level"
+                                className="hidden"
+                                checked={selected}
+                                onChange={() =>
+                                    scoreForm.setData('placement_level', level.level_code)
+                                }
+                            />
+                        </label>
+                    );
+                })}
+            </div>
+        </div>
+
+        <Textarea
+            label="Reviewer Notes"
+            value={scoreForm.data.reviewer_notes}
+            onChange={(value) => scoreForm.setData('reviewer_notes', value)}
+            placeholder="Write evaluation notes..."
+        />
+
+        <button
+            type="submit"
+            disabled={scoreForm.processing || isFinalDecision}
+            className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:bg-gray-400"
+        >
+            {scoreForm.processing ? 'Saving Evaluation...' : 'Save Evaluation'}
+        </button>
+    </form>
+
+        <div className="mt-6 rounded-2xl border bg-white p-6">
+            <h3 className="text-xl font-bold">Decision Actions</h3>
+
+            <div className="mt-5 grid gap-6 lg:grid-cols-3">
+                {!isApproved && (
+                    <div className="rounded-2xl border bg-green-50 p-5">
+                        <h4 className="font-semibold text-green-900">
+                            {isRejected ? 'Approve Instead' : 'Approve Application'}
+                        </h4>
+
+                        <p className="mt-2 text-sm text-green-700">
+                            {isRejected
+                                ? 'This will change the final decision from rejected to approved.'
+                                : 'This will approve the applicant and make them ready for student creation by the academic team.'}
+                        </p>
+
+                        <button
+                            type="button"
+                            disabled={decisionForm.processing}
+                            onClick={() => setApproveModalOpen(true)}
+                            className="mt-4 w-full rounded-xl bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700 disabled:bg-gray-400"
+                        >
+                            {isRejected ? 'Approve Instead' : 'Approve Application'}
+                        </button>
+                    </div>
+                )}
+
+
+                {!isRejected && (
+                <div className="space-y-4 rounded-2xl border bg-red-50 p-5">
+
+                <h4 className="font-semibold text-red-900">
+                    {isApproved ? 'Reject Instead' : 'Reject Application'}
+                </h4>
+
+                <p className="mt-2 text-sm text-red-700">
+                    {isApproved
+                        ? 'This will change the final decision from approved to rejected.'
+                        : 'Reject this application and record the reason below.'}
+                </p>
+
+
+                    <Textarea
+                        label="Rejection Notes"
+                        value={decisionForm.data.notes}
+                        onChange={(value) => {
+                        decisionForm.setData('notes', value);
+                        setRejectError('');
+                    }}
+                        placeholder="Write reason for rejection..."
+                    />
+
+                    {rejectError && (
+                    <p className="text-sm font-medium text-red-600">
+                        {rejectError}
+                    </p>
+                )}
+
+                    <button
+                        type="button"
+                        disabled={decisionForm.processing}
+                       onClick={() => {
+                            if (!decisionForm.data.notes.trim()) {
+                            setRejectError('A rejection reason is required before you can reject this application.');
+                            return;
+                        }
+                            setRejectModalOpen(true);
+                        }}
+                                                className="w-full rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700 disabled:bg-gray-400"
+                    >
+                        Reject Application
+                    </button>
+                </div>
+                )}
+
+                <div className="space-y-4 rounded-2xl border bg-yellow-50 p-5">
+                    <Textarea
+                        label="Correction Message"
+                        value={decisionForm.data.message}
+                        onChange={(value) => decisionForm.setData('message', value)}
+                        placeholder="Explain what the applicant must correct..."
+                    />
+
+                    <button
+                        type="button"
+                        disabled={decisionForm.processing}
+                        onClick={() => {
+                        if (!decisionForm.data.message.trim()) {
+                            alert('Please write a correction message first.');
+                            return;
+                        }
+
+                        setCorrectionModalOpen(true);
+                    }}
+                                            className="w-full rounded-xl bg-yellow-500 px-5 py-3 font-semibold text-white hover:bg-yellow-600 disabled:bg-gray-400"
+                    >
+                        Request Correction
+                    </button>
+                </div>
+            </div>
+        </div>
+    
+
+    {isFinalDecision && (
+        <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6">
+            <h3 className="text-2xl font-bold text-green-800">
+                ✓ Final Admission Decision
+            </h3>
+
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+                <div>
+                    <p className="text-sm text-gray-500">Status</p>
+                    <p className="mt-1 font-semibold">{application.status}</p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-500">Placement Level</p>
+                    <p className="mt-1 font-semibold">
+                        {application.placement_test?.placement_level ?? '-'}
+                    </p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-500">Writing Score</p>
+                    <p className="mt-1 font-semibold">
+                        {application.placement_test?.written_score ?? '-'}
+                    </p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-500">Speaking Score</p>
+                    <p className="mt-1 font-semibold">
+                        {application.placement_test?.speaking_score ?? '-'}
+                    </p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-500">Reviewed At</p>
+                    <p className="mt-1 font-semibold">
+                        {application.reviewed_at
+                            ? new Date(application.reviewed_at).toLocaleString()
+                            : '-'}
+                    </p>
+                </div>
+
+                <div>
+                    <p className="text-sm text-gray-500">Next Step</p>
+                    <p className="mt-1 font-semibold text-green-700">
+                        Ready for Student Creation
+                    </p>
+                </div>
+            </div>
+        </div>
+    )}
+</Section>
+</div>
+            </div>
+
+
+            <ConfirmationModal
+    open={approveModalOpen}
+    title="Approve Application?"
+   message={
+    isRejected
+        ? `Change ${application.full_name}'s final decision from rejected to approved? This change will be saved in the application history.`
+        : `Approve ${application.full_name} and mark the application as ready for student creation?`
+}
+confirmText={isRejected ? 'Approve Instead' : 'Approve Application'}    confirmColor="green"
+    loading={decisionForm.processing}
+    onCancel={() => setApproveModalOpen(false)}
+    onConfirm={() => {
+        decisionForm.post(`/applications/${application.id}/approve`, {
+            preserveScroll: true,
+            onSuccess: () => setApproveModalOpen(false),
+        });
+    }}
+/>
+
+
+
+
+<ConfirmationModal
+    open={rejectModalOpen}
+    title={isApproved ? 'Reject Approved Applicant?' : 'Reject Application?'}
+message={
+    isApproved
+        ? `Change ${application.full_name}'s final decision from approved to rejected? This change will be saved in the application history.`
+        : `Are you sure you want to reject ${application.full_name}? This decision will be recorded in the application history.`
+}
+confirmText={isApproved ? 'Reject Instead' : 'Reject Application'}
+    confirmColor="red"
+    loading={decisionForm.processing}
+    onCancel={() => setRejectModalOpen(false)}
+    onConfirm={() => {
+        decisionForm.post(`/applications/${application.id}/reject`, {
+            preserveScroll: true,
+            onSuccess: () => {
+            setRejectModalOpen(false);
+            decisionForm.reset('notes');
+        },
+            onError: () => setRejectModalOpen(false),
+        });
+    }}
+/>
+
+
+
+
+
+<ConfirmationModal
+    open={correctionModalOpen}
+    title="Send Correction Request?"
+    message={`The applicant will be notified and asked to update the requested information before the review continues.`}
+    confirmText="Send Request"
+    confirmColor="yellow"
+    loading={decisionForm.processing}
+    onCancel={() => setCorrectionModalOpen(false)}
+    onConfirm={() => {
+        decisionForm.post(`/applications/${application.id}/request-correction`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setCorrectionModalOpen(false);
+                decisionForm.reset('message');
+            },
+            onError: () => setCorrectionModalOpen(false),
+        });
+    }}
+/>
+
+
+        </AppLayout>
+    );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+        <section className="rounded-3xl border bg-white p-6 shadow-sm">
+            <h2 className="mb-5 text-2xl font-bold text-slate-900">{title}</h2>
+            {children}
+        </section>
+    );
+}
+
+function InfoGrid({ items }: { items: [string, any][] }) {
+    return (
+        <div className="grid gap-4 md:grid-cols-2">
+            {items.map(([label, value]) => (
+                <div key={label} className="rounded-xl bg-slate-50 p-4">
+                    <p className="text-sm font-medium text-gray-500">{label}</p>
+                    <p className="mt-1 font-semibold text-slate-900">{value ?? '-'}</p>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+function StatusBadge({ status }: { status: string }) {
+    const styles: Record<string, string> = {
+        waiting_review: 'bg-yellow-100 text-yellow-800',
+        approved: 'bg-green-100 text-green-800',
+        rejected: 'bg-red-100 text-red-800',
+        need_correction: 'bg-orange-100 text-orange-800',
+        incomplete: 'bg-gray-100 text-gray-700',
+    };
+
+    return (
+        <span className={`rounded-full px-4 py-2 font-semibold ${styles[status] ?? 'bg-gray-100 text-gray-700'}`}>
+            {status?.replaceAll('_', ' ') ?? '-'}
+        </span>
+    );
+}
+
+function Input({
+    label,
+    type,
+    value,
+    onChange,
+}: {
+    label: string;
+    type: string;
+    value: any;
+    onChange: (value: string) => void;
+}) {
+    return (
+        <div>
+            <label className="mb-1 block text-sm font-medium">{label}</label>
+            <input
+                type={type}
+                className="w-full rounded-xl border px-4 py-3"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+        </div>
+    );
+}
+
+function Textarea({
+    label,
+    value,
+    onChange,
+    placeholder,
+}: {
+    label: string;
+    value: any;
+    onChange: (value: string) => void;
+    placeholder?: string;
+}) {
+    return (
+        <div>
+            <label className="mb-1 block text-sm font-medium">{label}</label>
+            <textarea
+                rows={4}
+                className="w-full rounded-xl border px-4 py-3"
+                value={value}
+                placeholder={placeholder}
+                onChange={(e) => onChange(e.target.value)}
+            />
+        </div>
+    );
+}
+
+function HistoryList({
+    title,
+    empty,
+    items,
+    render,
+}: {
+    title: string;
+    empty: string;
+    items: any[];
+    render: (item: any) => React.ReactNode;
+}) {
+    return (
+        <div>
+            <h3 className="mb-3 font-semibold">{title}</h3>
+
+            {items?.length === 0 && <p className="text-gray-500">{empty}</p>}
+
+            <div className="space-y-3">
+                {items?.map((item: any) => (
+                    <div key={item.id} className="rounded-xl border bg-slate-50 p-4">
+                        {render(item)}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+
+function MiniStat({
+    label,
+    value,
+    color,
+}: {
+    label: string;
+    value: string | number;
+    color: 'blue' | 'green' | 'red' | 'amber';
+}) {
+    const colors = {
+        blue: 'border-blue-500 bg-blue-50 text-blue-900',
+        green: 'border-green-500 bg-green-50 text-green-900',
+        red: 'border-red-500 bg-red-50 text-red-900',
+        amber: 'border-amber-500 bg-amber-50 text-amber-900',
+    };
+
+    return (
+        <div className={`rounded-2xl border-l-4 p-5 ${colors[color]}`}>
+            <p className="text-sm font-medium opacity-80">
+                {label}
+            </p>
+
+            <p className="mt-2 text-3xl font-bold">
+                {value}
+            </p>
+        </div>
+    );
+}
+
+
+
+function StudentPhotoCard({
+    document,
+    label,
+}: {
+    document: any;
+    label: string;
+}) {
+    const filename =
+        document.original_name ??
+        document.file_name ??
+        document.file_path?.split('/').pop() ??
+        'Uploaded photo';
+
+    return (
+        <div className="rounded-2xl border bg-slate-50 p-5">
+            <InfoGrid
+                items={[
+                    [
+                        'Owner',
+                        formatDocumentOwner(
+                            document.document_owner_type,
+                        ),
+                    ],
+                    ['Type', label],
+                    ['Number', document.document_number ?? '-'],
+                    ['Status', document.status ?? '-'],
+                ]}
+            />
+
+            <p className="mt-4 truncate text-sm text-gray-500">
+                {filename}
+            </p>
+
+            {document.created_at && (
+                <p className="mt-1 text-xs text-gray-400">
+                    Uploaded:{' '}
+                    {new Date(document.created_at).toLocaleString()}
+                </p>
+            )}
+
+            {document.file_url && (
+                <>
+                    <a
+                        href={document.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900"
+                    >
+                        Open Photo
+                    </a>
+
+                    <img
+                        src={document.file_url}
+                        alt={label}
+                        className="mt-4 max-h-80 w-full rounded-xl border bg-white object-contain"
+                    />
+                </>
+            )}
+        </div>
+    );
+}
+
+function studentDocumentLabel(type: string) {
+    const normalizedType = type
+        .replace(/_correction$/i, '')
+        .replace(/_replacement$/i, '')
+        .replace(/_updated$/i, '');
+
+    switch (normalizedType) {
+        case 'photo':
+            return 'Applicant Photo';
+
+        case 'afghan_id':
+        case 'id_card':
+        case 'tazkira':
+            return 'Identity Document';
+
+        case 'guardian_id':
+            return 'Guardian Identity Document';
+
+        case 'other':
+            return 'Other Uploaded Photo';
+
+        default:
+            return normalizedType
+                .replaceAll('_', ' ')
+                .replace(/\b\w/g, (character) =>
+                    character.toUpperCase(),
+                );
+    }
+}
+
+function formatDocumentOwner(owner: string | null) {
+    if (!owner) {
+        return 'Applicant';
+    }
+
+    return owner
+        .replaceAll('_', ' ')
+        .replace(/\b\w/g, (character) =>
+            character.toUpperCase(),
+        );
+}

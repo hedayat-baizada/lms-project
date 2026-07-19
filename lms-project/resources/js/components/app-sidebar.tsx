@@ -3,8 +3,8 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { type NavItem, type SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
     Folder,
@@ -27,12 +27,30 @@ import {
     BarChart3,
     History,
     Settings,
-    CircleUser,
-    BookUser, 
-    
+    UserCheck,
+    Monitor,
+    Calendar,
+    ClipboardList,
+    Trophy,
+    UsersRound,
+    UserX,
+    UserRoundX,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import Dashboard from '@/pages/Admin/Dashboard';
+
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Repository',
+        url: 'https://github.com/laravel/react-starter-kit',
+        icon: Folder,
+    },
+    {
+        title: 'Documentation',
+        url: 'https://laravel.com/docs/starter-kits',
+        icon: BookOpen,
+    },
+];
 
 const mainNavItems: NavItem[] = [
     {
@@ -40,12 +58,10 @@ const mainNavItems: NavItem[] = [
         url: '/dashboard',
         icon: LayoutGrid,
     },
-
     {
         title: 'User Management',
         icon: Users,
         children: [
-
             {
                 title: 'Users',
                 url: '/users',
@@ -66,7 +82,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Admissions',
         icon: FileText,
@@ -77,67 +92,42 @@ const mainNavItems: NavItem[] = [
                 icon: FileText,
                 permission: 'applications.view',
             },
+
             {
-                title: 'Students',
-                url: '/students',
+                title: 'Approved Applicants',
+                url: '/approved-applicants',
+                icon: UserCheck,
+                permission: 'approved-applicants.view',
+            },
+            {
+                title: 'Approved Teachers',
+                url: '/approved-teachers',
                 icon: GraduationCap,
-                permission: 'students.view',
+                permission: 'approved-teachers-applications.view',
             },
             {
-                title: 'Guardians',
-                url: '/guardians',
-                icon: UserRound,
-                permission: 'guardians.view',
+                title: 'Approved Staffs',
+                url: '/approved-staffs',
+                icon: UsersRound,
+                permission: 'approved-staffs-applications.view',
             },
             {
-                title: 'Interviews',
-                url: '/interviews',
-                icon: ClipboardCheck,
-                permission: 'interviews.view',
+                title: 'Team Applications',
+                url: '/team-applications',
+                icon: Users,
+                permission: 'team-applications.view',
             },
             {
-                title: 'Placement Tests',
-                url: '/placement-tests',
-                icon: FileCheck,
-                permission: 'placement-tests.view',
-            },
-        ],
-    },
-
-
-    {
-        title: 'Academic',
-        icon: GraduationCap,
-        children: [
-            {
-                title: 'Programs',
-                url: '/programs',
-                icon: BookOpen,
-                permission: 'programs.view',
+                title: 'Rejected Students',
+                url: '/rejected-students',
+                icon: UserX,
+                permission: 'rejected-students-applications.view',
             },
             {
-                title: 'Courses',
-                url: '/courses',
-                icon: BookMarked,
-                permission: 'courses.view',
-            },
-            {
-                title: 'Class Groups',
-                url: '/class-groups',
-                icon: Layers3,
-                permission: 'class-groups.view',
-            },
-            {
-                title: 'Student Attendance',
-                url: '/attendance',
-                icon: CalendarCheck,
-                permission: 'attendance.view',
-            },
-            {
-                title: 'Result Cards',
-                url: '/result-cards',
-                icon: Award,
-                permission: 'result-cards.view',
+                title: 'Rejected Team',
+                url: '/rejected-team-applications',
+                icon: UserRoundX,
+                permission: 'rejected-team-applications.view',
             },
         ],
     },
@@ -178,7 +168,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Volunteers',
         icon: HandHelping,
@@ -209,7 +198,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Teaching Operations',
         icon: BookOpen,
@@ -234,7 +222,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Communication',
         icon: Megaphone,
@@ -247,7 +234,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
     {
         title: 'Reports',
         icon: BarChart3,
@@ -296,8 +282,6 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
-
-
     {
         title: 'System',
         icon: Settings,
@@ -306,70 +290,154 @@ const mainNavItems: NavItem[] = [
                 title: 'Audit Logs',
                 url: '/audit-logs',
                 icon: History,
-                permission: 'audit-logs',
+                permission: 'audit-logs.view',
             },
             {
                 title: 'Settings',
                 url: '/settings',
                 icon: Settings,
-                permission: 'settings',
+                permission: 'settings.view',
             },
         ],
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        url: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        url: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
+    const { auth } = usePage<SharedData>().props;
     const can = useCan();
+    const roles: string[] = (auth.user?.roles as string[]) ?? [];
+    const isSuperAdmin = roles.includes('Super Admin');
+    const isAdmin = roles.includes('Admin') || isSuperAdmin;
+    const isTeacher = roles.includes('Teacher');
+    const isStudent = roles.includes('Student') || roles.length === 0;
 
-    const filteredItems = mainNavItems
-        .map(item => ({
-            ...item,
-            children: item.children?.filter(
-                child =>
-                    !child.permission ||
-                    can(child.permission)
-            ),
-        }))
-        .filter(
-            item =>
-                !item.children ||
-                item.children.length > 0
+    const lmsNavItems: NavItem[] = [];
+
+    if (isAdmin) {
+        lmsNavItems.push(
+            { title: 'Classes', url: '/admin/classes', icon: GraduationCap },
+            { title: 'Students', url: '/admin/students', icon: Users },
+            { title: 'Teachers', url: '/admin/teachers', icon: Monitor }
         );
+    } else if (isTeacher) {
+        if (can('classes.view')) {
+            lmsNavItems.push({
+                title: 'My Classes',
+                url: '/teacher/classes',
+                icon: GraduationCap,
+            });
+        }
+
+        if (can('homework.view')) {
+            lmsNavItems.push({
+                title: 'Homework',
+                url: '/teacher/homework',
+                icon: BookOpen,
+            });
+        }
+
+        if (can('attendance.approve')) {
+            lmsNavItems.push({
+                title: 'Attendance',
+                url: '/teacher/attendance',
+                icon: Calendar,
+            });
+        }
+
+        if (can('exams.view')) {
+            lmsNavItems.push({
+                title: 'Exams',
+                url: '/teacher/exams',
+                icon: ClipboardList,
+            });
+        }
+    } else if (isStudent) {
+        if (can('classes.view')) {
+            lmsNavItems.push({
+                title: 'My Classes',
+                url: '/student/classes',
+                icon: GraduationCap,
+            });
+        }
+
+        if (can('result-cards.view')) {
+            lmsNavItems.push({
+                title: 'My Results',
+                url: '/student/results',
+                icon: Trophy,
+            });
+        }
+    }
+
+    let filteredTeamItems: NavItem[] = [];
+
+    if (isTeacher) {
+        // Teacher only sees Dashboard
+        filteredTeamItems = mainNavItems.filter(
+            item => item.title === 'Dashboard'
+        );
+    } else {
+        filteredTeamItems = mainNavItems
+            .map(item => ({
+                ...item,
+                children: item.children?.filter(child => {
+                    if (isAdmin) return true;
+                    return !child.permission || can(child.permission);
+                }),
+            }))
+            .filter(item => !item.children || item.children.length > 0);
+    }
+
+    const allNavItems = [...filteredTeamItems];
+
+    if (lmsNavItems.length > 0) {
+        allNavItems.push({
+            title: 'My LMS',
+            icon: BookOpen,
+            children: lmsNavItems,
+        });
+    }
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+        <Sidebar
+            collapsible="icon"
+            variant="inset"
+            className="bg-gradient-to-b from-slate-50/90 via-white/90 to-indigo-50/80 backdrop-blur-md border-r border-white/50 shadow-xl shadow-indigo-200/20"
+        >
+            <SidebarHeader className="relative border-b border-indigo-100/50 pb-4">
+                <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-300 to-purple-300 opacity-20 blur-3xl pointer-events-none"></div>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
-                                <AppLogo />
+                        <SidebarMenuButton
+                            size="lg"
+                            asChild
+                            className="hover:bg-white/50 transition-all duration-200 data-[state=open]:bg-white/50 rounded-xl"
+                        >
+                            <Link href="/dashboard" prefetch className="group flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-md shadow-indigo-200 transition-transform group-hover:scale-105 group-hover:shadow-indigo-300">
+                                    <GraduationCap className="h-6 w-6 text-white" />
+                                </div>
+                                <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700 transition-all">
+                                    EduPortal
+                                </span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
-                <NavMain items={filteredItems} />
+            <SidebarContent className="py-4">
+                <div className="space-y-1">
+                    <NavMain items={allNavItems} />
+                </div>
             </SidebarContent>
 
-            <SidebarFooter>
+            <SidebarFooter className="relative border-t border-indigo-100/50 pt-4">
+                <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-gradient-to-tr from-purple-300 to-pink-300 opacity-20 blur-3xl pointer-events-none"></div>
                 <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavUser />
+                <div className="mt-3 rounded-xl bg-white/40 backdrop-blur-sm border border-white/50 shadow-sm transition-all hover:shadow-md hover:bg-white/60 p-1">
+                    <NavUser />
+                </div>
             </SidebarFooter>
         </Sidebar>
     );
