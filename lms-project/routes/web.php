@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\FinalExamController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\StudentProgressController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ResultController;
 use Illuminate\Http\Request;
 
 Route::get('/', function () {
@@ -192,6 +193,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('results', function () {
             return Inertia::render('student/results/index');
         });
+        
+        Route::get('classes/{id}/result', function ($id) {
+            return Inertia::render('student/results/show', ['classId' => (int) $id]);
+        })->name('student.result.show');
     });
 
     // ================================================================
@@ -316,7 +321,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/api/attendance/{attendance}/approve', [AttendanceController::class, 'approve'])->middleware('auth');
     Route::put('/api/attendance/{attendance}/reject', [AttendanceController::class, 'reject'])->middleware('auth');
 
-    // ---- Student Results ----
+    // ---- Student Results (existing endpoint) ----
     Route::get('/api/student/results', function () {
         $student = auth()->user();
         $homework = \App\Models\HomeworkSubmission::where('user_id', $student->id)
@@ -392,6 +397,32 @@ Route::middleware(['auth'])->group(function () {
             ->with(['student', 'question', 'finalExam'])
             ->orderBy('created_at', 'desc')
             ->get();
+    })->middleware('auth');
+
+    // ---- Result Routes ----
+    Route::get('/api/classes/{classRoom}/results/{student}', [ResultController::class, 'show']);
+    Route::get('/api/classes/{classRoom}/results', [ResultController::class, 'index']);
+
+    // ---- Get all classes with results for a student (for My Results page) ----
+    Route::get('/api/student/classes-with-results', function () {
+        $student = auth()->user();
+        // ✅ FIXED: use the correct relationship name (classRooms, not classes)
+        $classes = $student->classRooms()->get();
+        $controller = new App\Http\Controllers\ResultController();
+        $results = [];
+        foreach ($classes as $class) {
+            $result = $controller->calculateResult($class, $student);
+            $results[] = [
+                'class_id' => $class->id,
+                'class_name' => $class->name,
+                'teacher' => $class->teacher->name ?? 'N/A',
+                'final_percentage' => $result['final_percentage'],
+                'grade' => $result['grade'],
+                'status' => $result['status'],
+                'eligible_for' => $result['eligible_for'],
+            ];
+        }
+        return response()->json($results);
     })->middleware('auth');
 
     // ---- Notifications (OLD API) – now commented out, use web routes above ----

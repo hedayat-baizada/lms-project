@@ -2,7 +2,7 @@ import { useCan } from '@/lib/can';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
@@ -356,10 +356,11 @@ const mainNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
     const can = useCan();
-   const roles: string[] = (auth.user?.roles as string[]) ?? [];
-const isSuperAdmin = roles.includes('Super Admin');
-const isAdmin = roles.includes('Admin') || isSuperAdmin;
-const isTeacher = roles.includes('Teacher');
+    const { state } = useSidebar(); // get current sidebar state
+    const roles: string[] = (auth.user?.roles as string[]) ?? [];
+    const isSuperAdmin = roles.includes('Super Admin');
+    const isAdmin = roles.includes('Admin') || isSuperAdmin;
+    const isTeacher = roles.includes('Teacher');
     const isStudent = roles.includes('Student') || roles.length === 0;
 
     const lmsNavItems: NavItem[] = [];
@@ -404,6 +405,8 @@ const isTeacher = roles.includes('Teacher');
         });
     }
 
+    const isCollapsed = state === 'collapsed';
+
     return (
         <Sidebar 
             collapsible="icon" 
@@ -419,13 +422,27 @@ const isTeacher = roles.includes('Teacher');
                             asChild
                             className="hover:bg-white/50 transition-all duration-200 data-[state=open]:bg-white/50 rounded-xl"
                         >
-                            <Link href="/dashboard" prefetch className="group flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-md shadow-indigo-200 transition-transform group-hover:scale-105 group-hover:shadow-indigo-300">
-                                    <GraduationCap className="h-6 w-6 text-white" />
-                                </div>
-                                <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:from-indigo-700 group-hover:to-purple-700 transition-all">
-                                    EduPortal
-                                </span>
+                            <Link href="/dashboard" prefetch className="group flex items-center justify-center gap-3 py-2">
+                                {/* Conditional logo based on sidebar state */}
+                                {isCollapsed ? (
+                                    // Small icon when collapsed
+                                    <div className="flex items-center justify-center">
+                                        <img 
+                                            src="/images/logo.png" 
+                                            alt="Alpha Academy"
+                                            className="h-8 w-auto object-contain"
+                                        />
+                                    </div>
+                                ) : (
+                                    // Full text logo when expanded
+                                    <div className="flex items-center justify-center">
+                                        <img 
+                                            src="/images/logo_text1.png" 
+                                            alt="Alpha Academy"
+                                            className="h-15 w-auto object-contain"
+                                        />
+                                    </div>
+                                )}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
