@@ -56,10 +56,7 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
-        $mehdi->syncRoles([
-            'Teacher',
-            'Volunteer',
-        ]);
+        $mehdi->syncRoles(['Teacher']);
 
         /// Admin (Hassan)
 $hassan = User::firstOrCreate(
