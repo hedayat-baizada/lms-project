@@ -380,7 +380,7 @@ export function AppSidebar() {
 
     if (lmsNavItems.length > 0) {
         allNavItems.push({
-            title: 'My LMS',
+            title: 'Academics',
             icon: BookOpen,
             children: lmsNavItems,
         });
@@ -418,7 +418,7 @@ export function AppSidebar() {
                                     // Full text logo when expanded
                                     <div className="flex items-center justify-center">
                                         <img 
-                                            src="/images/logo_text1.png" 
+                                            src="/images/alpha-logo-wide.png" 
                                             alt="Alpha Academy"
                                             className="h-15 w-auto object-contain"
                                         />
