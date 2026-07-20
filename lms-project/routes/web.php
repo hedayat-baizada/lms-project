@@ -267,13 +267,13 @@ Route::middleware(['auth'])->group(function () {
         );
 }
 
-        Mail::to($user->email)->send(
-    new StudentAccountCreated(
-        $user->name,
-        $user->email,
-        $request->password
-    )
-);
+//         Mail::to($user->email)->send(
+//     new StudentAccountCreated(
+//         $user->name,
+//         $user->email,
+//         $request->password
+//     )
+// );
 
         return response()->json($user, 201);
     })->middleware('auth');
