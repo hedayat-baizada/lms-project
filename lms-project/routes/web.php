@@ -20,6 +20,9 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ResultController;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\StudentAccountCreated;
+use App\Mail\StudentAccountCreatedMail;
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
@@ -251,6 +254,26 @@ Route::middleware(['auth'])->group(function () {
         ]);
 
         $user->assignRole(ucfirst($request->role));
+
+        if ($request->role === 'student') {
+
+    Mail::to($user->email)
+        ->send(
+            new StudentAccountCreatedMail(
+                $user->name,
+                $user->email,
+                $request->password
+            )
+        );
+}
+
+        Mail::to($user->email)->send(
+    new StudentAccountCreated(
+        $user->name,
+        $user->email,
+        $request->password
+    )
+);
 
         return response()->json($user, 201);
     })->middleware('auth');
