@@ -157,33 +157,9 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Volunteers',
+        url: '/volunteers',
         icon: HandHelping,
-        children: [
-            {
-                title: 'Volunteers',
-                url: '/volunteers',
-                icon: HandHelping,
-                permission: 'volunteers.view',
-            },
-            {
-                title: 'Volunteer Roles',
-                url: '/volunteer-roles',
-                icon: Shield,
-                permission: 'volunteer-roles.view',
-            },
-            {
-                title: 'Volunteer Attendance',
-                url: '/volunteer-attendance',
-                icon: CalendarCheck,
-                permission: 'volunteer-attendance.view',
-            },
-            {
-                title: 'Volunteer Assignments',
-                url: '/volunteer-assignments',
-                icon: ClipboardCheck,
-                permission: 'volunteer-assignments.view',
-            },
-        ],
+        permission: 'volunteers.view',
     },
     {
         title: 'Teaching Operations',
@@ -300,6 +276,7 @@ export function AppSidebar() {
     const isStudent = roles.includes('Student') || roles.length === 0;
 
     const lmsNavItems: NavItem[] = [];
+    const attendanceNavItems: NavItem[] = [];
 
     if (isAdmin) {
         lmsNavItems.push(
@@ -339,6 +316,40 @@ export function AppSidebar() {
                 icon: ClipboardList,
             });
         }
+        attendanceNavItems.push(
+            {
+                title: 'Attendance Setting',
+                url: '/teacher/attendance-setting',
+                icon: Settings,
+            },
+            {
+                title: 'Attendance Period',
+                url: '/teacher/attendance-period',
+                icon: Calendar,
+            },
+            {
+                title: 'Teacher Attendance',
+                url: '/teacher/attendance-record',
+                icon: ClipboardCheck,
+            },
+            {
+                title: 'Attendance Holidays',
+                url: '/teacher/attendance-holiday',
+                icon: CalendarCheck,
+            },
+            {
+                title: 'Attendance Summary',
+                url: '/teacher/attendance-summary',
+                icon: BarChart3,
+            },
+            {
+                title: 'Attendance Session',
+                url: '/teacher/attendance-session',
+                icon: Calendar,
+            }
+        );
+
+
     } else if (isStudent) {
         if (can('classes.view')) {
             lmsNavItems.push({
@@ -383,6 +394,13 @@ export function AppSidebar() {
             title: 'My LMS',
             icon: BookOpen,
             children: lmsNavItems,
+        });
+    }
+    if (attendanceNavItems.length > 0) {
+        allNavItems.push({
+            title: 'Attendance Management',
+            icon: CalendarCheck,
+            children: attendanceNavItems,
         });
     }
 
