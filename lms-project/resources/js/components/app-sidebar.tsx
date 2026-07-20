@@ -315,6 +315,27 @@ export function AppSidebar() {
                 icon: ClipboardList,
             });
         }
+
+    } else if (isStudent) {
+        if (can('classes.view')) {
+            lmsNavItems.push({
+                title: 'My Classes',
+                url: '/student/classes',
+                icon: GraduationCap,
+            });
+        }
+
+
+
+        if (can('result-cards.view')) {
+            lmsNavItems.push({
+                title: 'My Results',
+                url: '/student/results',
+                icon: Trophy,
+            });
+        }
+    }
+    if (isAdmin || isTeacher) {
         attendanceNavItems.push(
             {
                 title: 'Attendance Setting',
@@ -347,24 +368,6 @@ export function AppSidebar() {
                 icon: Calendar,
             }
         );
-
-
-    } else if (isStudent) {
-        if (can('classes.view')) {
-            lmsNavItems.push({
-                title: 'My Classes',
-                url: '/student/classes',
-                icon: GraduationCap,
-            });
-        }
-
-        if (can('result-cards.view')) {
-            lmsNavItems.push({
-                title: 'My Results',
-                url: '/student/results',
-                icon: Trophy,
-            });
-        }
     }
 
     let filteredTeamItems: NavItem[] = [];
