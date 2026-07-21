@@ -35,8 +35,10 @@ import {
     UsersRound,
     UserX,
     UserRoundX,
+    SettingsIcon,
 } from 'lucide-react';
 import AppLogo from './app-logo';
+import Dashboard from '@/pages/Admin/Dashboard';
 
 const footerNavItems: NavItem[] = [
     {
@@ -132,6 +134,18 @@ const mainNavItems: NavItem[] = [
     },
 
     {
+        title: 'Teacher',
+        icon: UserRound,
+        children: [
+            {
+                title: 'Dashboard',
+                url: '/teacherdashbord',
+                icon: LayoutGrid,
+            },
+        ],
+    },
+
+    {
         title: 'Teachers',
         icon: Presentation,
         children: [
@@ -144,9 +158,15 @@ const mainNavItems: NavItem[] = [
             {
                 title: 'Teacher Attendance',
                 url: '/teacher-attendance',
-                icon: CalendarCheck,
                 permission: 'teacher-attendance.view',
+                icon: CalendarCheck,
             },
+            // {
+            //     title: 'Attendance Setting',
+            //     url: '/',
+            //     icon: SettingsIcon,
+            //     permission: 'teacher-attendance.view',
+            // },
             {
                 title: 'Teacher Assignments',
                 url: '/teacher-assignments',
