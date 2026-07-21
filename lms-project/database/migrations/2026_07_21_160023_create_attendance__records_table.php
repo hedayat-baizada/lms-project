@@ -6,46 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('attendance__records', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('attendance_session_id')
-                ->constrained()
+                ->constrained('attendance__sessions')
                 ->cascadeOnDelete();
-
             $table->foreignId('student_id')
-                ->constrained()
+                ->constrained('users')
                 ->cascadeOnDelete();
-
-            $table->enum('status',[
-                'present',
-                'absent',
-                'late',
-                'excused'
-            ])->default('present');
-
+            $table->enum('status', ['present', 'absent', 'late', 'excused'])->default('present');
             $table->text('remarks')->nullable();
-
             $table->timestamp('marked_at')->nullable();
-
             $table->timestamps();
-
-            $table->unique([
-                'attendance_session_id',
-                'student_id'
-            ]);
-            $table->timestamps();
+            $table->unique(['attendance_session_id', 'student_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('attendance__records');
