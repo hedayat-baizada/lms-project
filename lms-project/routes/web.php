@@ -22,7 +22,8 @@ use App\Http\Controllers\AttendanceHolidaysController;
 use App\Http\Controllers\AttendancePeriodsController;
 use App\Http\Controllers\AttendanceRecordController;
 use App\Http\Controllers\ClassSessionController;
-use App\Http\Controllers\AttendaceSummaryController;
+use App\Http\Controllers\AttendanceSummaryController;
+use App\Http\Controllers\ResultController;
 use Illuminate\Http\Request;
 
 
@@ -203,6 +204,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('results', function () {
             return Inertia::render('student/results/index');
         });
+        
+        Route::get('classes/{id}/result', function ($id) {
+            return Inertia::render('student/results/show', ['classId' => (int) $id]);
+        })->name('student.result.show');
     });
 
     // ================================================================
@@ -327,7 +332,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/api/attendance/{attendance}/approve', [AttendanceController::class, 'approve'])->middleware('auth');
     Route::put('/api/attendance/{attendance}/reject', [AttendanceController::class, 'reject'])->middleware('auth');
 
-    // ---- Student Results ----
+    // ---- Student Results (existing endpoint) ----
     Route::get('/api/student/results', function () {
         $student = auth()->user();
         $homework = \App\Models\HomeworkSubmission::where('user_id', $student->id)
@@ -405,6 +410,32 @@ Route::middleware(['auth'])->group(function () {
             ->get();
     })->middleware('auth');
 
+    // ---- Result Routes ----
+    Route::get('/api/classes/{classRoom}/results/{student}', [ResultController::class, 'show']);
+    Route::get('/api/classes/{classRoom}/results', [ResultController::class, 'index']);
+
+    // ---- Get all classes with results for a student (for My Results page) ----
+    Route::get('/api/student/classes-with-results', function () {
+        $student = auth()->user();
+        // ✅ FIXED: use the correct relationship name (classRooms, not classes)
+        $classes = $student->classRooms()->get();
+        $controller = new App\Http\Controllers\ResultController();
+        $results = [];
+        foreach ($classes as $class) {
+            $result = $controller->calculateResult($class, $student);
+            $results[] = [
+                'class_id' => $class->id,
+                'class_name' => $class->name,
+                'teacher' => $class->teacher->name ?? 'N/A',
+                'final_percentage' => $result['final_percentage'],
+                'grade' => $result['grade'],
+                'status' => $result['status'],
+                'eligible_for' => $result['eligible_for'],
+            ];
+        }
+        return response()->json($results);
+    })->middleware('auth');
+
     // ---- Notifications (OLD API) – now commented out, use web routes above ----
     // Route::get('/api/notifications', function () {
     //     $user = auth()->user();
@@ -478,7 +509,7 @@ Route::post('/apply/student/{application}/speaking/skip', [ApplicationController
     ->name('apply.student.speaking.skip');
 
 Route::post('/apply/student/{application}/test', [ApplicationController::class, 'storeTestAnswers'])
-    ->name('apply.student.test.store');
+    ->name('apply.student.test.store'); 
 
 Route::get('/apply/student/{application}/writing', [ApplicationController::class, 'writing'])
     ->name('apply.student.writing');
@@ -510,22 +541,23 @@ Route::post('/apply/team/{teamApplication}/correction', [TeamApplicationControll
 
 
     // ====================attendance routes======================
+    // ==================== Attendance Routes ======================
+
+        // Attendance Settings Page
+ Route::get('teacher/attendance-setting', [AttendanceSettingController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-setting');
+ Route::get('teacher/attendance-period', [AttendancePeriodsController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-period');
+        
 
 
-Route::get('teacher/Attendance_setting',[AttendanceSettingController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_setting');
+
+Route::get('teacher/attendance-record',[AttendanceRecordController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-record');
 
 
-Route::get('teacher/atttendance_period',[AttendancePeriodsController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_period');
+Route::get('teacher/attendance-holiday',[AttendanceHolidaysController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-holiday');
 
 
-Route::get('teacher/attendacne_record',[AttendanceRecordController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_record');
+Route::get('teacher/attendance-session',[ClassSessionController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-session');
 
-
-Route::get('teacher/atttendance_holiday',[AttendanceHolidaysController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_holiday');
-
-Route::get('teacher/attendace_sammary',[AttendaceSummaryController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_summary');
-
-
-Route::get('teacher/attendance_session',[ClassSessionController::class, 'index'])->middleware(['auth'])->name('teacher.attendance_session');
+Route::get('teacher/attendance-summary',[AttendanceSummaryController::class,'index'])->middleware(['auth'])->name('teacher.attendance-summary');
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

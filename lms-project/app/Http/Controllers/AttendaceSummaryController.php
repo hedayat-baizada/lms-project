@@ -5,7 +5,7 @@ use Inertia\Inertia;
 use App\Models\Attendace_summary;
 use Illuminate\Http\Request;
 
-class AttendaceSummaryController extends Controller
+class AttendanceSummaryController extends Controller
 {
     /**
      * Display a listing of the resource.
