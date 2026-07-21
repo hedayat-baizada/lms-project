@@ -352,7 +352,7 @@ class PermissionSeeder extends Seeder
 
            // 'result-cards.view',
 
-           // 'announcements.view',
+            'announcements.view',
 
             // --- LMS ---
             'classes.view',
@@ -388,6 +388,7 @@ class PermissionSeeder extends Seeder
             'reports.volunteers.view',
             'reports.admissions.view',
             'reports.results.view',
+            'announcements.view',
         ]);
 
         
