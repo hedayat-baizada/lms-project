@@ -339,21 +339,6 @@ class PermissionSeeder extends Seeder
         $teacher->syncPermissions([
             'dashboard.view',
 
-           // 'students.view',
-
-            //'attendance.view',
-           // 'attendance.mark',
-
-            //'courses.view',
-            //'class-groups.view',
-
-           // 'lesson-plans.view',
-           // 'assessments.view',
-
-           // 'result-cards.view',
-
-            'announcements.view',
-
             // --- LMS ---
             'classes.view',
             'lessons.view',
@@ -371,6 +356,8 @@ class PermissionSeeder extends Seeder
             'attendance.approve',
             'attendance.reject',
             'enrollments.create',
+
+             'announcements.view',
         ]);
 
 

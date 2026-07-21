@@ -21,6 +21,7 @@ use App\Http\Controllers\ResultController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AnnouncementController;
 
+
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
@@ -532,20 +533,70 @@ Route::post('/apply/team/{teamApplication}/correction', [TeamApplicationControll
 
     ////////////////////////////
 
-    //Announcemnets
-   Route::middleware(['auth'])->group(function () {
 
-      Route::resource('announcements', AnnouncementController::class);
-    });
-    Route::patch(
-    '/announcements/{announcement}/pin',
-    [AnnouncementController::class, 'togglePin']
-)->name('announcements.pin');
+/*
+|--------------------------------------------------------------------------
+| View Announcements
+|--------------------------------------------------------------------------
+*/
 
-Route::patch(
-    '/announcements/{announcement}/status',
-    [AnnouncementController::class, 'toggleStatus']
-)->name('announcements.status');
+Route::middleware(['auth', 'permission:announcements.view'])->group(function () {
+
+    Route::get('/announcements', [AnnouncementController::class, 'index'])
+        ->name('announcements.index');
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| Create Announcement
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:announcements.create'])->group(function () {
+
+    Route::get('/announcements/create', [AnnouncementController::class, 'create'])
+        ->name('announcements.create');
+
+    Route::post('/announcements', [AnnouncementController::class, 'store'])
+        ->name('announcements.store');
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| Edit Announcement
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:announcements.edit'])->group(function () {
+
+    Route::get('/announcements/{announcement}/edit', [AnnouncementController::class, 'edit'])
+        ->name('announcements.edit');
+
+    Route::put('/announcements/{announcement}', [AnnouncementController::class, 'update'])
+        ->name('announcements.update');
+
+    Route::patch('/announcements/{announcement}/pin', [AnnouncementController::class, 'togglePin'])
+        ->name('announcements.pin');
+
+    Route::patch('/announcements/{announcement}/status', [AnnouncementController::class, 'toggleStatus'])
+        ->name('announcements.status');
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| Delete Announcement
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:announcements.delete'])->group(function () {
+
+    Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])
+        ->name('announcements.destroy');
+
+});
 
 
 require __DIR__.'/settings.php';

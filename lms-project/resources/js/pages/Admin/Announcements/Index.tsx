@@ -1,6 +1,18 @@
+import { useCan } from '@/lib/can';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
     Plus,
     Pencil,
@@ -73,6 +85,19 @@ export default function Index({
     filters,
     stats,
 }: Props) {
+    const can = useCan();
+
+    const canCreate = can('announcements.create');
+    const canEdit = can('announcements.edit');
+    const canDelete = can('announcements.delete');
+    const canManage = can('announcements.edit');
+
+    const canViewStats =
+        can('announcements.create') ||
+        can('announcements.edit') ||
+        can('announcements.delete');
+
+
 
     const [search, setSearch] = useState(filters.search ?? '');
 
@@ -123,214 +148,217 @@ export default function Index({
 
                     </div>
 
-                    <Link href={route('announcements.create')}>
-                        <Button>
-
-                            <Plus className="mr-2 h-4 w-4" />
-
-                            New Announcement
-
-                        </Button>
-                    </Link>
+                    {canCreate && (
+                        <Link href={route('announcements.create')}>
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                New Announcement
+                            </Button>
+                        </Link>
+                    )}
 
                 </div>
 
                 {/* Statistics */}
 
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {canViewStats && (
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 
-                    <Card>
+                        <Card>
 
-                        <CardContent className="flex items-center justify-between pt-6">
+                            <CardContent className="flex items-center justify-between pt-6">
 
-                            <div>
+                                <div>
 
-                                <p className="text-sm text-muted-foreground">
-                                    Total
-                                </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Total
+                                    </p>
 
-                                <h2 className="text-3xl font-bold">
-                                    {stats.total}
-                                </h2>
+                                    <h2 className="text-3xl font-bold">
+                                        {stats.total}
+                                    </h2>
 
-                            </div>
+                                </div>
 
-                            <Megaphone className="h-8 w-8 text-blue-600" />
+                                <Megaphone className="h-8 w-8 text-blue-600" />
 
-                        </CardContent>
+                            </CardContent>
 
-                    </Card>
+                        </Card>
 
-                    <Card>
+                        <Card>
 
-                        <CardContent className="flex items-center justify-between pt-6">
+                            <CardContent className="flex items-center justify-between pt-6">
 
-                            <div>
+                                <div>
 
-                                <p className="text-sm text-muted-foreground">
-                                    Active
-                                </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Active
+                                    </p>
 
-                                <h2 className="text-3xl font-bold">
-                                    {stats.active}
-                                </h2>
+                                    <h2 className="text-3xl font-bold">
+                                        {stats.active}
+                                    </h2>
 
-                            </div>
+                                </div>
 
-                            <CheckCircle className="h-8 w-8 text-green-600" />
+                                <CheckCircle className="h-8 w-8 text-green-600" />
 
-                        </CardContent>
+                            </CardContent>
 
-                    </Card>
+                        </Card>
 
-                    <Card>
+                        <Card>
 
-                        <CardContent className="flex items-center justify-between pt-6">
+                            <CardContent className="flex items-center justify-between pt-6">
 
-                            <div>
+                                <div>
 
-                                <p className="text-sm text-muted-foreground">
-                                    Pinned
-                                </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Pinned
+                                    </p>
 
-                                <h2 className="text-3xl font-bold">
-                                    {stats.pinned}
-                                </h2>
+                                    <h2 className="text-3xl font-bold">
+                                        {stats.pinned}
+                                    </h2>
 
-                            </div>
+                                </div>
 
-                            <Pin className="h-8 w-8 text-orange-500" />
+                                <Pin className="h-8 w-8 text-orange-500" />
 
-                        </CardContent>
+                            </CardContent>
 
-                    </Card>
+                        </Card>
 
-                    <Card>
+                        <Card>
 
-                        <CardContent className="flex items-center justify-between pt-6">
+                            <CardContent className="flex items-center justify-between pt-6">
 
-                            <div>
+                                <div>
 
-                                <p className="text-sm text-muted-foreground">
-                                    Inactive
-                                </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Inactive
+                                    </p>
 
-                                <h2 className="text-3xl font-bold">
-                                    {stats.inactive}
-                                </h2>
+                                    <h2 className="text-3xl font-bold">
+                                        {stats.inactive}
+                                    </h2>
 
-                            </div>
+                                </div>
 
-                            <XCircle className="h-8 w-8 text-red-600" />
+                                <XCircle className="h-8 w-8 text-red-600" />
 
-                        </CardContent>
+                            </CardContent>
 
-                    </Card>
+                        </Card>
 
-                </div>
+                    </div>
+                )}
 
                 {/* Filters */}
+                {canViewStats && (
+                    <Card>
 
-                <Card>
+                        <CardContent className="pt-6">
 
-                    <CardContent className="pt-6">
+                            <div className="grid gap-4 md:grid-cols-3">
 
-                        <div className="grid gap-4 md:grid-cols-3">
+                                <div className="relative">
 
-                            <div className="relative">
+                                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
 
-                                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                    <Input
+                                        className="pl-10"
+                                        placeholder="Search announcement..."
+                                        value={search}
+                                        onChange={(e) => {
+                                            setSearch(e.target.value);
 
-                                <Input
-                                    className="pl-10"
-                                    placeholder="Search announcement..."
-                                    value={search}
+                                            filterAnnouncements(
+                                                e.target.value,
+                                                audience,
+                                                status
+                                            );
+                                        }}
+                                    />
+
+                                </div>
+
+                                <select
+                                    className="h-10 rounded-md border px-3"
+                                    value={audience}
                                     onChange={(e) => {
-                                        setSearch(e.target.value);
+
+                                        setAudience(e.target.value);
 
                                         filterAnnouncements(
+                                            search,
                                             e.target.value,
-                                            audience,
                                             status
                                         );
+
                                     }}
-                                />
+                                >
+
+                                    <option value="">
+                                        All Audience
+                                    </option>
+
+                                    <option value="all">
+                                        Everyone
+                                    </option>
+
+                                    <option value="students">
+                                        Students
+                                    </option>
+
+                                    <option value="teachers">
+                                        Teachers
+                                    </option>
+
+                                    <option value="volunteers">
+                                        Volunteers
+                                    </option>
+
+                                </select>
+
+                                <select
+                                    className="h-10 rounded-md border px-3"
+                                    value={status}
+                                    onChange={(e) => {
+
+                                        setStatus(e.target.value);
+
+                                        filterAnnouncements(
+                                            search,
+                                            audience,
+                                            e.target.value
+                                        );
+
+                                    }}
+                                >
+
+                                    <option value="">
+                                        All Status
+                                    </option>
+
+                                    <option value="1">
+                                        Active
+                                    </option>
+
+                                    <option value="0">
+                                        Inactive
+                                    </option>
+
+                                </select>
 
                             </div>
 
-                            <select
-                                className="h-10 rounded-md border px-3"
-                                value={audience}
-                                onChange={(e) => {
+                        </CardContent>
 
-                                    setAudience(e.target.value);
+                    </Card>
 
-                                    filterAnnouncements(
-                                        search,
-                                        e.target.value,
-                                        status
-                                    );
-
-                                }}
-                            >
-
-                                <option value="">
-                                    All Audience
-                                </option>
-
-                                <option value="all">
-                                    Everyone
-                                </option>
-
-                                <option value="students">
-                                    Students
-                                </option>
-
-                                <option value="teachers">
-                                    Teachers
-                                </option>
-
-                                <option value="volunteers">
-                                    Volunteers
-                                </option>
-
-                            </select>
-
-                            <select
-                                className="h-10 rounded-md border px-3"
-                                value={status}
-                                onChange={(e) => {
-
-                                    setStatus(e.target.value);
-
-                                    filterAnnouncements(
-                                        search,
-                                        audience,
-                                        e.target.value
-                                    );
-
-                                }}
-                            >
-
-                                <option value="">
-                                    All Status
-                                </option>
-
-                                <option value="1">
-                                    Active
-                                </option>
-
-                                <option value="0">
-                                    Inactive
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </CardContent>
-
-                </Card>
+                )}
                 {/* Announcement List */}
 
                 {announcements.data.length === 0 ? (
@@ -351,19 +379,17 @@ export default function Index({
                                     There are no announcements matching your filters.
                                 </p>
 
-                                <Link
-                                    href={route('announcements.create')}
-                                    className="mt-6 inline-block"
-                                >
-                                    <Button>
-
-                                        <Plus className="mr-2 h-4 w-4" />
-
-                                        Create Announcement
-
-                                    </Button>
-
-                                </Link>
+                                {canCreate && (
+                                    <Link
+                                        href={route('announcements.create')}
+                                        className="mt-6 inline-block"
+                                    >
+                                        <Button>
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Create Announcement
+                                        </Button>
+                                    </Link>
+                                )}
 
                             </div>
 
@@ -444,89 +470,100 @@ export default function Index({
 
                                         <div className="flex gap-2">
 
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() =>
-                                                    router.patch(
-                                                        route(
-                                                            'announcements.pin',
-                                                            announcement.id
-                                                        )
-                                                    )
-                                                }
-                                            >
-
-                                                <Pin className="h-4 w-4" />
-
-                                            </Button>
-
-                                            <Button
-                                                variant={
-                                                    announcement.is_active
-                                                        ? "secondary"
-                                                        : "default"
-                                                }
-                                                onClick={() =>
-                                                    router.patch(
-                                                        route(
-                                                            'announcements.status',
-                                                            announcement.id
-                                                        )
-                                                    )
-                                                }
-                                            >
-
-                                                {announcement.is_active
-                                                    ? "Deactivate"
-                                                    : "Activate"}
-
-                                            </Button>
-
-                                            <Link
-                                                href={route(
-                                                    'announcements.edit',
-                                                    announcement.id
-                                                )}
-                                            >
-
+                                            {canManage && (
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
-                                                >
-
-                                                    <Pencil className="h-4 w-4" />
-
-                                                </Button>
-
-                                            </Link>
-
-                                            <Button
-                                                variant="destructive"
-                                                size="icon"
-                                                onClick={() => {
-
-                                                    if (
-                                                        confirm(
-                                                            "Delete this announcement?"
+                                                    onClick={() =>
+                                                        router.patch(
+                                                            route('announcements.pin', announcement.id)
                                                         )
-                                                    ) {
-
-                                                        router.delete(
-                                                            route(
-                                                                "announcements.destroy",
-                                                                announcement.id
-                                                            )
-                                                        );
-
                                                     }
+                                                >
+                                                    <Pin className="h-4 w-4" />
+                                                </Button>
+                                            )}
 
-                                                }}
-                                            >
+                                            {canManage && (
+                                                <Button
+                                                    variant={
+                                                        announcement.is_active
+                                                            ? "secondary"
+                                                            : "default"
+                                                    }
+                                                    onClick={() =>
+                                                        router.patch(
+                                                            route('announcements.status', announcement.id)
+                                                        )
+                                                    }
+                                                >
+                                                    {announcement.is_active
+                                                        ? "Deactivate"
+                                                        : "Activate"}
+                                                </Button>
+                                            )}
 
-                                                <Trash2 className="h-4 w-4" />
+                                            {canEdit && (
+                                                <Link
+                                                    href={route(
+                                                        'announcements.edit',
+                                                        announcement.id
+                                                    )}
+                                                >
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                </Link>
+                                            )}
 
-                                            </Button>
+                                            {canDelete && (
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            variant="destructive"
+                                                            size="icon"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>
+                                                                Delete Announcement?
+                                                            </AlertDialogTitle>
+
+                                                            <AlertDialogDescription>
+                                                                This action cannot be undone.
+                                                                The announcement will be permanently deleted.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>
+                                                                Cancel
+                                                            </AlertDialogCancel>
+
+                                                            <AlertDialogAction
+                                                                onClick={() =>
+                                                                    router.delete(
+                                                                        route(
+                                                                            "announcements.destroy",
+                                                                            announcement.id
+                                                                        )
+                                                                    )
+                                                                }
+                                                                className="bg-red-600 hover:bg-red-700"
+                                                            >
+                                                                Delete
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            )}
 
                                         </div>
 

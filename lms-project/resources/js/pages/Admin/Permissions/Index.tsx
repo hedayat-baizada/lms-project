@@ -1,5 +1,17 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { ArrowLeft } from 'lucide-react';
 
 type Permission = {
@@ -12,11 +24,11 @@ export default function Index({
 }: {
     permissions: Permission[];
 }) {
-    const destroy = (id: number) => {
-        if (confirm('Delete permission?')) {
-            router.delete(route('permissions.destroy', id));
-        }
-    };
+    // const destroy = (id: number) => {
+    //     if (confirm('Delete permission?')) {
+    //         router.delete(route('permissions.destroy', id));
+    //     }
+    // };
 
     return (
         <AppLayout>
@@ -188,23 +200,55 @@ export default function Index({
                                                         Edit
                                                     </Link>
 
-                                                    <button
-                                                        onClick={() =>
-                                                            destroy(permission.id)
-                                                        }
-                                                        className="
-                                                            rounded-lg
-                                                            bg-red-600
-                                                            px-3 py-1.5
-                                                            text-xs
-                                                            font-medium
-                                                            text-white
-                                                            transition
-                                                            hover:bg-red-700
-                                                        "
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <button
+                                                                className="
+                rounded-lg
+                bg-red-600
+                px-3 py-1.5
+                text-xs
+                font-medium
+                text-white
+                transition
+                hover:bg-red-700
+            "
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </AlertDialogTrigger>
+
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>
+                                                                    Delete Permission?
+                                                                </AlertDialogTitle>
+
+                                                                <AlertDialogDescription>
+                                                                    This action cannot be undone.
+                                                                    This will permanently delete the permission
+                                                                    <strong> "{permission.name}"</strong>.
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>
+                                                                    Cancel
+                                                                </AlertDialogCancel>
+
+                                                                <AlertDialogAction
+                                                                    onClick={() =>
+                                                                        router.delete(
+                                                                            route('permissions.destroy', permission.id)
+                                                                        )
+                                                                    }
+                                                                    className="bg-red-600 hover:bg-red-700"
+                                                                >
+                                                                    Delete
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
 
                                                 </div>
 

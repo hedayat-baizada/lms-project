@@ -371,24 +371,29 @@ export function AppSidebar() {
         );
     }
 
-    let filteredTeamItems: NavItem[] = [];
+    const filteredTeamItems = mainNavItems
+        .filter(item => {
+            // Hide Teaching Operations for students
+            if (isStudent && item.title === 'Teaching Operations') {
+                return false;
+            }
 
-    if (isTeacher) {
-        // Teacher only sees Dashboard
-        filteredTeamItems = mainNavItems.filter(
-            item => item.title === 'Dashboard'
-        );
-    } else {
-        filteredTeamItems = mainNavItems
-            .map(item => ({
-                ...item,
-                children: item.children?.filter(child => {
-                    if (isAdmin) return true;
-                    return !child.permission || can(child.permission);
-                }),
-            }))
-            .filter(item => !item.children || item.children.length > 0);
-    }
+            return true;
+        })
+        .map(item => ({
+            ...item,
+            children: item.children?.filter(child => {
+                if (isAdmin) return true;
+                return !child.permission || can(child.permission);
+            }),
+        }))
+        .filter(item => {
+            if (item.children) {
+                return item.children.length > 0;
+            }
+
+            return isAdmin || !item.permission || can(item.permission);
+        });
 
     const allNavItems = [...filteredTeamItems];
 

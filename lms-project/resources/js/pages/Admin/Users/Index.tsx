@@ -3,6 +3,17 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { useCan } from '@/lib/can';
 import { ArrowLeft } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -185,17 +196,46 @@ export default function Index({ users }: Props) {
                                                     </Link>}
 
                                                     {/* DELETE */}
-                                                    {can('users.delete') && <button
-                                                        onClick={() => {
-                                                            if (confirm('Are you sure you want to delete this user?')) {
-                                                                router.delete(route('users.destroy', user.id));
-                                                            }
-                                                        }}
-                                                        className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
-                                                    >
-                                                        Delete
-                                                    </button>}
+                                                    {can('users.delete') && (
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <button className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">
+                                                                    Delete
+                                                                </button>
+                                                            </AlertDialogTrigger>
 
+                                                            <AlertDialogContent className="sm:max-w-md">
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle className="text-red-600">
+                                                                        Delete User
+                                                                    </AlertDialogTitle>
+
+                                                                    <AlertDialogDescription>
+                                                                        Are you sure you want to delete
+                                                                        <strong> {user.name}</strong>?
+                                                                        <br />
+                                                                        <br />
+                                                                        This action cannot be undone and will permanently remove this user.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>
+                                                                        Cancel
+                                                                    </AlertDialogCancel>
+
+                                                                    <AlertDialogAction
+                                                                        className="bg-red-600 hover:bg-red-700"
+                                                                        onClick={() =>
+                                                                            router.delete(route('users.destroy', user.id))
+                                                                        }
+                                                                    >
+                                                                        Delete User
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    )}
                                                 </div>
                                             </td>
 
