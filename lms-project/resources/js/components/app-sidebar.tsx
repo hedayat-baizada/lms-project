@@ -316,39 +316,6 @@ export function AppSidebar() {
                 icon: ClipboardList,
             });
         }
-        attendanceNavItems.push(
-            {
-                title: 'Attendance Setting',
-                url: '/teacher/attendance-setting',
-                icon: Settings,
-            },
-            {
-                title: 'Attendance Period',
-                url: '/teacher/attendance-period',
-                icon: Calendar,
-            },
-            {
-                title: 'Teacher Attendance',
-                url: '/teacher/attendance-record',
-                icon: ClipboardCheck,
-            },
-            {
-                title: 'Attendance Holidays',
-                url: '/teacher/attendance-holiday',
-                icon: CalendarCheck,
-            },
-            {
-                title: 'Attendance Summary',
-                url: '/teacher/attendance-summary',
-                icon: BarChart3,
-            },
-            {
-                title: 'Attendance Session',
-                url: '/teacher/attendance-session',
-                icon: Calendar,
-            }
-        );
-
 
     } else if (isStudent) {
         if (can('classes.view')) {
@@ -359,6 +326,8 @@ export function AppSidebar() {
             });
         }
 
+
+
         if (can('result-cards.view')) {
             lmsNavItems.push({
                 title: 'My Results',
@@ -366,6 +335,40 @@ export function AppSidebar() {
                 icon: Trophy,
             });
         }
+    }
+    if (isAdmin || isTeacher) {
+        attendanceNavItems.push(
+            {
+                title: 'Attendance Setting',
+                url: 'teacher.attendance_setting',
+                icon: Settings,
+            },
+            {
+                title: 'Attendance Period',
+                url: 'teacher.attendance_period',
+                icon: Calendar,
+            },
+            {
+                title: 'Teacher Attendance',
+                url: 'teacher.attendance_record',
+                icon: ClipboardCheck,
+            },
+            {
+                title: 'Attendance Holidays',
+                url: 'teacher.attendance_holiday',
+                icon: CalendarCheck,
+            },
+            {
+                title: 'Attendance Summary',
+                url: 'teacher.attendance_summary',
+                icon: BarChart3,
+            },
+            {
+                title: 'Attendance Session',
+                url: 'teacher.attendance_session',
+                icon: Calendar,
+            }
+        );
     }
 
     let filteredTeamItems: NavItem[] = [];

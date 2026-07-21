@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\StudentProgressController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ResultController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\AnnouncementController;
 
 use Illuminate\Support\Facades\Mail;
 use App\Mail\StudentAccountCreated;
@@ -547,6 +548,28 @@ Route::get('/apply/team/{teamApplication}/correction', [TeamApplicationControlle
 
 Route::post('/apply/team/{teamApplication}/correction', [TeamApplicationController::class, 'storeCorrection'])
     ->name('apply.team.correction.store');
+
+
+
+
+
+    ////////////////////////////
+
+    //Announcemnets
+   Route::middleware(['auth'])->group(function () {
+
+      Route::resource('announcements', AnnouncementController::class);
+    });
+    Route::patch(
+    '/announcements/{announcement}/pin',
+    [AnnouncementController::class, 'togglePin']
+)->name('announcements.pin');
+
+Route::patch(
+    '/announcements/{announcement}/status',
+    [AnnouncementController::class, 'toggleStatus']
+)->name('announcements.status');
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
