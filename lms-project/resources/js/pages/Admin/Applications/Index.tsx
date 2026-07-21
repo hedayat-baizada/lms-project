@@ -14,6 +14,7 @@ type Application = {
     selected_computer_topic: string | null;
     status: string;
     created_at: string;
+    applicant_photo?: string | null;
 };
 
 type Props = {
@@ -224,19 +225,33 @@ function resetFilters() {
 
                         {/* Left */}
 
+                        <div className="flex gap-4">
+
+                        {application.applicant_photo ? (
+                            <img
+                                src={application.applicant_photo}
+                                alt={application.full_name ?? 'Applicant'}
+                                className="h-20 w-20 rounded-full border object-cover"
+                            />
+                        ) : (
+                            <div className="flex h-20 w-20 items-center justify-center rounded-full border bg-slate-100 text-xs text-slate-500">
+                                No Photo
+                            </div>
+                        )}
+
                         <div className="space-y-3">
 
                             <div className="flex items-center gap-3">
 
-                                <h2 className="text-xl font-bold">
-                                    {application.full_name ?? '-'}
-                                </h2>
+                            <h2 className="text-xl font-bold">
+                                {application.full_name ?? '-'}
+                            </h2>
 
-                                <StatusBadge
-                                    status={application.status}
-                                />
+                            <StatusBadge
+                                status={application.status}
+                            />
 
-                            </div>
+                        </div>
 
                             <p className="font-medium text-blue-600">
                                 {application.tracking_code}
@@ -261,6 +276,7 @@ function resetFilters() {
                             </div>
 
                         </div>
+                        </div> {/* closes flex gap-4 */}
 
                         {/* Right */}
 

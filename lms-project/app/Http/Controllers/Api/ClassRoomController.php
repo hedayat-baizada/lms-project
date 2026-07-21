@@ -239,10 +239,24 @@ class ClassRoomController extends Controller
         return response()->json(['message' => 'Student enrolled successfully']);
     }
 
+    /**
+     * Get students of a class.
+     * Teachers can view students only if they are the owner of the class.
+     * Admins/Super Admins can view all.
+     */
     public function students(ClassRoom $classRoom)
     {
         $user = auth()->user();
 
+        // ✅ Allow teachers who own the class to view students without explicit permission
+        if ($this->isTeacherRole($user) && $classRoom->teacher_id === $user->id) {
+            $students = $classRoom->students()
+                ->wherePivot('status', 'active')
+                ->get(['users.id', 'users.name', 'users.email']);
+            return response()->json($students);
+        }
+
+        // For other users, require the students.view permission
         if (!$user->hasPermissionTo('students.view')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }

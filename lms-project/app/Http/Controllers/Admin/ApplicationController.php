@@ -17,7 +17,8 @@ class ApplicationController extends Controller
 
 public function rejectedStudents()
 {
-    $students = Application::where('status', 'rejected')
+    $students = Application::with('documents')
+        ->where('status', 'rejected')
         ->latest('updated_at')
         ->get([
             'id',
@@ -26,7 +27,20 @@ public function rejectedStudents()
             'tracking_code',
             'course_track',
             'updated_at',
-        ]);
+        ])
+        ->map(function ($student) {
+
+            $photo = $student->documents
+                ->firstWhere('document_type', 'applicant_photo');
+
+            return [
+                ...$student->toArray(),
+
+                'applicant_photo' => $photo
+                    ? asset('storage/' . $photo->file_path)
+                    : null,
+            ];
+        });
 
     return Inertia::render(
         'Admin/Applications/RejectedStudents',
@@ -39,10 +53,26 @@ public function rejectedStudents()
 
 public function approvedApplicants()
 {
-    $applications = Application::with('placementTest')
+    $applications = Application::with([
+        'placementTest',
+        'documents',
+    ])
         ->where('status', 'approved')
         ->latest('reviewed_at')
-        ->get();
+        ->get()
+        ->map(function ($application) {
+
+            $photo = $application->documents
+                ->firstWhere('document_type', 'applicant_photo');
+
+            return [
+                ...$application->toArray(),
+
+                'applicant_photo' => $photo
+                    ? asset('storage/' . $photo->file_path)
+                    : null,
+            ];
+        });
 
     return Inertia::render('Admin/ApprovedApplicants/Index', [
         'applications' => $applications,
@@ -71,7 +101,7 @@ public function showApprovedApplicant(Application $application)
             }),
         ],
     ]);
-}
+}  
 
 
 
@@ -274,7 +304,7 @@ public function requestCorrection(Application $application)
 
 public function index(Request $request)
 {
-    $query = Application::query();
+    $query = Application::with('documents');
 
     /*
     |--------------------------------------------------------------------------
@@ -326,7 +356,22 @@ public function index(Request $request)
             'status',
             'created_at',
         ])
-        ->get();
+        ->get()
+->map(function ($application) {
+
+    $photo = $application->documents
+        ->where('document_type', 'applicant_photo')
+        ->sortByDesc('created_at')
+        ->first();
+
+    return [
+        ...$application->toArray(),
+
+        'applicant_photo' => $photo
+            ? asset('storage/' . $photo->file_path)
+            : null,
+    ];
+});
 
 
         $stats = [
@@ -456,7 +501,6 @@ $placementSummary = [
     'wrong' => $wrong,
     'score' => $correct,
 ];
-
 
 
     
