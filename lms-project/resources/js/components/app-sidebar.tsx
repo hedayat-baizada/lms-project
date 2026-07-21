@@ -340,32 +340,32 @@ export function AppSidebar() {
         attendanceNavItems.push(
             {
                 title: 'Attendance Setting',
-                url: '/teacher/attendance-setting',
+                url: 'teacher.attendance_setting',
                 icon: Settings,
             },
             {
                 title: 'Attendance Period',
-                url: '/teacher/attendance-period',
+                url: 'teacher.attendance_period',
                 icon: Calendar,
             },
             {
                 title: 'Teacher Attendance',
-                url: '/teacher/attendance-record',
+                url: 'teacher.attendance_record',
                 icon: ClipboardCheck,
             },
             {
                 title: 'Attendance Holidays',
-                url: '/teacher/attendance-holiday',
+                url: 'teacher.attendance_holiday',
                 icon: CalendarCheck,
             },
             {
                 title: 'Attendance Summary',
-                url: '/teacher/attendance-summary',
+                url: 'teacher.attendance_summary',
                 icon: BarChart3,
             },
             {
                 title: 'Attendance Session',
-                url: '/teacher/attendance-session',
+                url: 'teacher.attendance_session',
                 icon: Calendar,
             }
         );
@@ -429,8 +429,8 @@ export function AppSidebar() {
                                 {isCollapsed ? (
                                     // Small icon when collapsed
                                     <div className="flex items-center justify-center">
-                                        <img 
-                                            src="/images/logo.png" 
+                                        <img
+                                            src="/images/logo.png"
                                             alt="Alpha Academy"
                                             className="h-8 w-auto object-contain"
                                         />
@@ -438,8 +438,8 @@ export function AppSidebar() {
                                 ) : (
                                     // Full text logo when expanded
                                     <div className="flex items-center justify-center">
-                                        <img 
-                                            src="/images/logo_text1.png" 
+                                        <img
+                                            src="/images/logo_text1.png"
                                             alt="Alpha Academy"
                                             className="h-15 w-auto object-contain"
                                         />
