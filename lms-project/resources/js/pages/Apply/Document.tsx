@@ -14,19 +14,22 @@ export default function DocumentStep() {
     const [preview, setPreview] = useState<string | null>(null);
 
     const { application } = usePage<PageProps>().props;
+   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
-    const { data, setData, post, processing, errors } = useForm({
-        document_option: '',
-        document_number: '',
-        document_name: '',
-        document_file: null as File | null,
+const { data, setData, post, processing, errors } = useForm({
+    document_option: '',
+    document_number: '',
+    document_name: '',
+    document_file: null as File | null,
 
-        guardian_full_name: '',
-        guardian_relationship: '',
-        guardian_phone: '',
-        guardian_document_type: '',
-        guardian_document_number: '',
-    });
+    applicant_photo: null as File | null,
+
+    guardian_full_name: '',
+    guardian_relationship: '',
+    guardian_phone: '',
+    guardian_document_type: '',
+    guardian_document_number: '',
+});
 
     const isGuardian = data.document_option === 'no_own_document';
     const isOther = data.document_option === 'other';
@@ -184,6 +187,55 @@ export default function DocumentStep() {
                             />
                         </>
                     )}
+
+                    <hr className="my-6" />
+
+<div>
+    <h2 className="mb-2 text-lg font-semibold">
+        Applicant Photo
+    </h2>
+
+    <p className="mb-3 text-sm text-gray-600">
+        Please upload a recent passport-style photo.
+    </p>
+
+    <input
+        type="file"
+        accept="image/*"
+        className="w-full rounded border p-2"
+        onChange={(e) => {
+            const file = e.target.files?.[0] ?? null;
+
+            setData('applicant_photo', file);
+
+            if (file) {
+                setPhotoPreview(URL.createObjectURL(file));
+            } else {
+                setPhotoPreview(null);
+            }
+        }}
+    />
+
+    {errors.applicant_photo && (
+        <p className="mt-1 text-sm text-red-600">
+            {errors.applicant_photo}
+        </p>
+    )}
+
+    {photoPreview && (
+        <div className="mt-4">
+            <p className="mb-2 text-sm font-medium text-gray-600">
+                Photo Preview
+            </p>
+
+            <img
+                src={photoPreview}
+                alt="Applicant Photo"
+                className="h-36 w-36 rounded-xl border object-cover"
+            />
+        </div>
+    )}
+</div>
 
                     <button
                         type="submit"

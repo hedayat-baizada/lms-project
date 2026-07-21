@@ -12,6 +12,7 @@ export default function FlashToast() {
     const { flash } = usePage<{ flash: Flash }>().props;
 
     const [visible, setVisible] = useState(false);
+    const [toastKey, setToastKey] = useState(0);
 
     const text =
     flash.success ||
@@ -25,17 +26,18 @@ const type = flash.error
       ? 'warning'
       : 'success';
 
-    useEffect(() => {
-        if (!text) return;
+   useEffect(() => {
+    if (!text) return;
 
-        setVisible(true);
+    setToastKey((prev) => prev + 1);
+    setVisible(true);
 
-        const timer = setTimeout(() => {
-            setVisible(false);
-        }, 4000);
+    const timer = setTimeout(() => {
+        setVisible(false);
+    }, 4000);
 
-        return () => clearTimeout(timer);
-    }, [text]);
+    return () => clearTimeout(timer);
+}, [flash]);
 
     if (!text || !visible) {
         return null;
@@ -44,6 +46,7 @@ const type = flash.error
     return (
         <div className="fixed right-6 top-6 z-50">
             <div
+            key={toastKey}
                 className={`rounded-2xl px-5 py-4 shadow-xl ${
                 type === 'error'
                     ? 'bg-red-600 text-white'

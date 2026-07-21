@@ -9,6 +9,7 @@ type Student = {
     course_track: string | null;
     rejected_at?: string | null;
     updated_at?: string | null;
+    applicant_photo?: string | null;
 };
 
 type Props = {
@@ -106,6 +107,9 @@ export default function RejectedStudents({ students }: Props) {
                                 <thead>
                                     <tr className="border-b text-sm text-slate-500">
                                         <th className="py-3">
+                                            Photo
+                                        </th>
+                                        <th className="py-3">
                                             Name
                                         </th>
 
@@ -133,6 +137,19 @@ export default function RejectedStudents({ students }: Props) {
                                             key={student.id}
                                             className="border-b last:border-none"
                                         >
+                                            <td className="py-4">
+    {student.applicant_photo ? (
+        <img
+            src={student.applicant_photo}
+            alt={student.full_name}
+            className="h-14 w-14 rounded-full border object-cover"
+        />
+    ) : (
+        <div className="flex h-14 w-14 items-center justify-center rounded-full border bg-slate-100 text-xs text-slate-500">
+            No Photo
+        </div>
+    )}
+</td>
                                             <td className="py-4 font-semibold text-slate-900">
                                                 {student.full_name}
                                             </td>
