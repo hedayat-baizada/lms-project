@@ -10,6 +10,8 @@ type TeamApplication = {
     teacher_subject: string | null;
     professional_role: string | null;
     updated_at: string | null;
+    applicant_photo?: string | null;
+
 };
 
 type Props = {
@@ -133,9 +135,27 @@ export default function RejectedTeamApplications({
                                             className="border-b last:border-none"
                                         >
 
-                                            <td className="py-4 font-semibold">
-                                                {application.full_name}
-                                            </td>
+                                            <td className="py-4">
+    <div className="flex items-center gap-3">
+
+        {application.applicant_photo ? (
+            <img
+                src={application.applicant_photo}
+                alt={application.full_name}
+                className="h-14 w-14 rounded-full border object-cover"
+            />
+        ) : (
+            <div className="flex h-14 w-14 items-center justify-center rounded-full border bg-slate-100 text-xs text-slate-500">
+                No Photo
+            </div>
+        )}
+
+        <div className="font-semibold">
+            {application.full_name}
+        </div>
+
+    </div>
+</td>
 
                                             <td className="py-4">
                                                 <span className="inline-flex rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-700">

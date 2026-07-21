@@ -709,6 +709,12 @@ public function storeDocument(Request $request, Application $application)
         'document_number' => 'nullable|string|max:255',
         'document_name' => 'nullable|string|max:255',
         'document_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:4096',
+        'applicant_photo' => [
+    'required',
+    'image',
+    'mimes:jpg,jpeg,png',
+    'max:5120',
+],
 
         'guardian_full_name' => 'nullable|string|max:255',
         'guardian_relationship' => 'nullable|string|max:255',
@@ -718,6 +724,21 @@ public function storeDocument(Request $request, Application $application)
     ]);
 
     $filePath = $request->file('document_file')->store('application-documents', 'public');
+
+     if ($request->hasFile('applicant_photo')) {
+
+            $photoPath = $request->file('applicant_photo')
+                ->store('application_documents', 'public');
+
+            ApplicationDocument::create([
+                'application_id' => $application->id,
+                'document_owner_type' => 'applicant',
+                'document_type' => 'applicant_photo',
+                'document_number' => null,
+                'file_path' => $photoPath,
+                'status' => 'submitted',
+            ]);
+        }
 
     if ($validated['document_option'] === 'no_own_document') {
         $request->validate([
@@ -736,6 +757,7 @@ public function storeDocument(Request $request, Application $application)
             'document_type' => $validated['guardian_document_type'],
             'document_number' => $validated['guardian_document_number'],
         ]);
+       
 
         ApplicationDocument::create([
             'application_id' => $application->id,

@@ -25,12 +25,16 @@ use App\Http\Controllers\ClassSessionController;
 use App\Http\Controllers\AttendanceSummaryController;
 use App\Http\Controllers\ResultController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\AnnouncementController;
 
 
 
 
 
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\StudentAccountCreated;
+use App\Mail\StudentAccountCreatedMail;
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
@@ -262,6 +266,26 @@ Route::middleware(['auth'])->group(function () {
         ]);
 
         $user->assignRole(ucfirst($request->role));
+
+        if ($request->role === 'student') {
+
+    Mail::to($user->email)
+        ->send(
+            new StudentAccountCreatedMail(
+                $user->name,
+                $user->email,
+                $request->password
+            )
+        );
+}
+
+//         Mail::to($user->email)->send(
+//     new StudentAccountCreated(
+//         $user->name,
+//         $user->email,
+//         $request->password
+//     )
+// );
 
         return response()->json($user, 201);
     })->middleware('auth');
@@ -559,5 +583,25 @@ Route::get('teacher/attendance-holiday',[AttendanceHolidaysController::class, 'i
 Route::get('teacher/attendance-session',[ClassSessionController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-session');
 
 Route::get('teacher/attendance-summary',[AttendanceSummaryController::class,'index'])->middleware(['auth'])->name('teacher.attendance-summary');
+
+
+    ////////////////////////////
+
+    //Announcemnets
+   Route::middleware(['auth'])->group(function () {
+
+      Route::resource('announcements', AnnouncementController::class);
+    });
+    Route::patch(
+    '/announcements/{announcement}/pin',
+    [AnnouncementController::class, 'togglePin']
+)->name('announcements.pin');
+
+Route::patch(
+    '/announcements/{announcement}/status',
+    [AnnouncementController::class, 'toggleStatus']
+)->name('announcements.status');
+
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

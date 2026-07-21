@@ -1,11 +1,42 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
+import { useState } from 'react';
+import axios from 'axios';
 
 type Props = {
     application: any;
 };
 
 export default function ApprovedApplicantShow({ application }: Props) {
+
+    const [showCreateModal, setShowCreateModal] = useState(false);
+
+const [studentForm, setStudentForm] = useState({
+    name: application.full_name || '',
+    email: application.email || '',
+    password: generatePassword(),
+});
+
+async function createStudent() {
+    try {
+        await axios.post('/api/admin/users', {
+            name: studentForm.name,
+            email: studentForm.email,
+            password: studentForm.password,
+            role: 'student',
+        });
+
+        alert('Student account created successfully.');
+
+        setShowCreateModal(false);
+    } catch (error: any) {
+        alert(
+            error?.response?.data?.message ||
+                'Failed to create student.'
+        );
+    }
+}
     return (
         <AppLayout>
             <div className="space-y-8 p-6">
@@ -132,13 +163,21 @@ export default function ApprovedApplicantShow({ application }: Props) {
                             This applicant has been approved by Admissions. The Academic Department can now create the student account, assign the class, and send login details.
                         </p>
 
-                        <button
-                            type="button"
-                            disabled
-                            className="mt-6 rounded-xl bg-gray-400 px-6 py-3 font-semibold text-white"
-                        >
-                            Create Student
-                        </button>
+                       <button
+                        type="button"
+                        onClick={() => {
+    setStudentForm({
+        name: application.full_name,
+        email: application.email,
+        password: generatePassword(),
+    });
+
+    setShowCreateModal(true);
+}}
+                        className="mt-6 rounded-xl bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700"
+                    >
+                        Create Student
+                    </button>
 
                         <p className="mt-3 text-sm text-blue-700">
                             This button is reserved for the Academic Management module.
@@ -146,7 +185,78 @@ export default function ApprovedApplicantShow({ application }: Props) {
                     </div>
                 </Section>
             </div>
+
+            {showCreateModal && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+
+            <h2 className="mb-5 text-2xl font-bold">
+                Create Student Account
+            </h2>
+
+            <div className="space-y-4">
+
+                <input
+                    value={studentForm.name}
+                    onChange={(e) =>
+                        setStudentForm({
+                            ...studentForm,
+                            name: e.target.value,
+                        })
+                    }
+                    className="w-full rounded-xl border px-4 py-3"
+                />
+
+                <input
+                    value={studentForm.email}
+                    onChange={(e) =>
+                        setStudentForm({
+                            ...studentForm,
+                            email: e.target.value,
+                        })
+                    }
+                    className="w-full rounded-xl border px-4 py-3"
+                />
+
+                <input
+                    value={studentForm.password}
+                    onChange={(e) =>
+                        setStudentForm({
+                            ...studentForm,
+                            password: e.target.value,
+                        })
+                    }
+                    className="w-full rounded-xl border px-4 py-3"
+                />
+
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+
+                <button
+                    onClick={() =>
+                        setShowCreateModal(false)
+                    }
+                    className="rounded-xl border px-4 py-2"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    onClick={createStudent}
+                    className="rounded-xl bg-green-600 px-5 py-2 text-white"
+                >
+                    Create Student
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+)}
         </AppLayout>
+
+        
     );
 }
 
@@ -194,3 +304,22 @@ function MiniStat({
         </div>
     );
 }
+
+function generatePassword(length = 10) {
+    const chars =
+        'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$';
+
+    let password = '';
+
+    for (let i = 0; i < length; i++) {
+        password += chars.charAt(
+            Math.floor(Math.random() * chars.length),
+        );
+    }
+
+    return password;
+}
+
+
+
+

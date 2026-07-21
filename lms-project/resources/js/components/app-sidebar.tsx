@@ -336,39 +336,6 @@ export function AppSidebar() {
                 icon: ClipboardList,
             });
         }
-        attendanceNavItems.push(
-            {
-                title: 'Attendance Setting',
-                url: '/teacher/attendance-setting',
-                icon: Settings,
-            },
-            {
-                title: 'Attendance Period',
-                url: '/teacher/attendance-period',
-                icon: Calendar,
-            },
-            {
-                title: 'Teacher Attendance',
-                url: '/teacher/attendance-record',
-                icon: ClipboardCheck,
-            },
-            {
-                title: 'Attendance Holidays',
-                url: '/teacher/attendance-holiday',
-                icon: CalendarCheck,
-            },
-            {
-                title: 'Attendance Summary',
-                url: '/teacher/attendance-summary',
-                icon: BarChart3,
-            },
-            {
-                title: 'Attendance Session',
-                url: '/teacher/attendance-session',
-                icon: Calendar,
-            }
-        );
-
 
     } else if (isStudent) {
         if (can('classes.view')) {
@@ -379,6 +346,8 @@ export function AppSidebar() {
             });
         }
 
+
+
         if (can('result-cards.view')) {
             lmsNavItems.push({
                 title: 'My Results',
@@ -386,6 +355,40 @@ export function AppSidebar() {
                 icon: Trophy,
             });
         }
+    }
+    if (isAdmin || isTeacher) {
+        attendanceNavItems.push(
+            {
+                title: 'Attendance Setting',
+                url: 'teacher.attendance_setting',
+                icon: Settings,
+            },
+            {
+                title: 'Attendance Period',
+                url: 'teacher.attendance_period',
+                icon: Calendar,
+            },
+            {
+                title: 'Teacher Attendance',
+                url: 'teacher.attendance_record',
+                icon: ClipboardCheck,
+            },
+            {
+                title: 'Attendance Holidays',
+                url: 'teacher.attendance_holiday',
+                icon: CalendarCheck,
+            },
+            {
+                title: 'Attendance Summary',
+                url: 'teacher.attendance_summary',
+                icon: BarChart3,
+            },
+            {
+                title: 'Attendance Session',
+                url: 'teacher.attendance_session',
+                icon: Calendar,
+            }
+        );
     }
 
     let filteredTeamItems: NavItem[] = [];
@@ -411,7 +414,7 @@ export function AppSidebar() {
 
     if (lmsNavItems.length > 0) {
         allNavItems.push({
-            title: 'My LMS',
+            title: 'Academics',
             icon: BookOpen,
             children: lmsNavItems,
         });
@@ -447,7 +450,7 @@ export function AppSidebar() {
                                     // Small icon when collapsed
                                     <div className="flex items-center justify-center">
                                         <img 
-                                            src="/images/logo.png" 
+                                            src="/images/logo1.png" 
                                             alt="Alpha Academy"
                                             className="h-8 w-auto object-contain"
                                         />
@@ -456,7 +459,7 @@ export function AppSidebar() {
                                     // Full text logo when expanded
                                     <div className="flex items-center justify-center">
                                         <img 
-                                            src="/images/logo_text1.png" 
+                                            src="/images/alpha-logo-wide.png"
                                             alt="Alpha Academy"
                                             className="h-15 w-auto object-contain"
                                         />
