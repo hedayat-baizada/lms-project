@@ -27,6 +27,9 @@ export default function ApplicationShow({ application, placementSummary, placeme
 
 
 const [showPreviousPhotos, setShowPreviousPhotos] = useState(false);
+// const applicantPhoto = application.documents.find(
+//     (document) => document.document_type === 'applicant_photo'
+// );
 
 
 const allDocuments = application.documents ?? [];
@@ -194,7 +197,19 @@ const previousStudentPhotos = groupedStudentDocuments
                     />
                 </Section>
 
-                
+                {/* {applicantPhoto && (
+    <div className="mb-6 rounded-lg border bg-white p-4">
+        <h3 className="mb-3 text-lg font-semibold">
+            Applicant Photo
+        </h3>
+
+        <img
+            src={applicantPhoto.file_url}
+            alt="Applicant Photo"
+            className="h-40 w-40 rounded-lg border object-cover"
+        />
+    </div>
+)} */}
 
                 <Section title="Current Uploaded Photos">
     {currentStudentPhotos.length === 0 ? (
@@ -545,7 +560,7 @@ const previousStudentPhotos = groupedStudentDocuments
 
             <div className="mt-5 grid gap-6 lg:grid-cols-3">
                 {!isApproved && (
-                    <div className="rounded-2xl border bg-green-50 p-5">
+                    <div className="flex h-full flex-col rounded-2xl border bg-green-50 p-5">
                         <h4 className="font-semibold text-green-900">
                             {isRejected ? 'Approve Instead' : 'Approve Application'}
                         </h4>
@@ -560,7 +575,7 @@ const previousStudentPhotos = groupedStudentDocuments
                             type="button"
                             disabled={decisionForm.processing}
                             onClick={() => setApproveModalOpen(true)}
-                            className="mt-4 w-full rounded-xl bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700 disabled:bg-gray-400"
+                            className="mt-auto w-full rounded-xl bg-green-600 px-5 py-3 font-semibold text-white hover:bg-green-700 disabled:bg-gray-400"
                         >
                             {isRejected ? 'Approve Instead' : 'Approve Application'}
                         </button>
@@ -569,7 +584,7 @@ const previousStudentPhotos = groupedStudentDocuments
 
 
                 {!isRejected && (
-                <div className="space-y-4 rounded-2xl border bg-red-50 p-5">
+                <div className="flex h-full flex-col rounded-2xl border bg-red-50 p-5">
 
                 <h4 className="font-semibold text-red-900">
                     {isApproved ? 'Reject Instead' : 'Reject Application'}
@@ -608,14 +623,14 @@ const previousStudentPhotos = groupedStudentDocuments
                         }
                             setRejectModalOpen(true);
                         }}
-                                                className="w-full rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700 disabled:bg-gray-400"
+                                                className="mt-auto w-full rounded-xl bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700 disabled:bg-gray-400"
                     >
                         Reject Application
                     </button>
                 </div>
                 )}
 
-                <div className="space-y-4 rounded-2xl border bg-yellow-50 p-5">
+               <div className="flex h-full flex-col rounded-2xl border bg-yellow-50 p-5">
                     <Textarea
                         label="Correction Message"
                         value={decisionForm.data.message}
@@ -634,7 +649,7 @@ const previousStudentPhotos = groupedStudentDocuments
 
                         setCorrectionModalOpen(true);
                     }}
-                                            className="w-full rounded-xl bg-yellow-500 px-5 py-3 font-semibold text-white hover:bg-yellow-600 disabled:bg-gray-400"
+                                             className="mt-auto w-full rounded-xl bg-yellow-500 px-5 py-3 font-semibold text-white hover:bg-yellow-600 disabled:bg-gray-400"
                     >
                         Request Correction
                     </button>
@@ -990,8 +1005,9 @@ function studentDocumentLabel(type: string) {
         .replace(/_updated$/i, '');
 
     switch (normalizedType) {
-        case 'photo':
-            return 'Applicant Photo';
+       case 'photo':
+        case 'applicant_photo':
+    return 'Applicant Photo';
 
         case 'afghan_id':
         case 'id_card':

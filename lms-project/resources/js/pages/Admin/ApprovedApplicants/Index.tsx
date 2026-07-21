@@ -91,23 +91,37 @@ function resetSearch() {
                             className="rounded-2xl bg-white p-6 shadow"
                         >
                             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                                <div>
-                                    <h2 className="text-xl font-bold">
-                                        {application.full_name}
-                                    </h2>
+                                <div className="flex items-start gap-4">
+    {application.applicant_photo ? (
+        <img
+            src={application.applicant_photo}
+            alt={application.full_name}
+            className="h-20 w-20 rounded-full border object-cover"
+        />
+    ) : (
+        <div className="flex h-20 w-20 items-center justify-center rounded-full border bg-slate-100 text-slate-500">
+            No Photo
+        </div>
+    )}
 
-                                    <p className="mt-1 text-blue-600">
-                                        {application.email}
-                                    </p>
+    <div>
+        <h2 className="text-xl font-bold">
+            {application.full_name}
+        </h2>
 
-                                    <p className="mt-1 text-gray-600">
-                                        {application.phone ?? '-'}
-                                    </p>
+        <p className="mt-1 text-blue-600">
+            {application.email}
+        </p>
 
-                                    <div className="mt-3 inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-800">
-                                        Approved
-                                    </div>
-                                </div>
+        <p className="mt-1 text-gray-600">
+            {application.phone ?? '-'}
+        </p>
+
+        <div className="mt-3 inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-800">
+            Approved
+        </div>
+    </div>
+</div>
 
                                 <div className="text-left lg:text-right">
                                     <p className="text-sm text-gray-500">

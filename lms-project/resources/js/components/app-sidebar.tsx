@@ -391,7 +391,7 @@ export function AppSidebar() {
 
     if (lmsNavItems.length > 0) {
         allNavItems.push({
-            title: 'My LMS',
+            title: 'Academics',
             icon: BookOpen,
             children: lmsNavItems,
         });

@@ -18,18 +18,23 @@ class TeamApplicationReviewController extends Controller
 
 public function rejectedTeamApplications()
 {
-    $applications = TeamApplication::where('status', 'rejected')
-        ->latest('updated_at')
-        ->get([
-            'id',
-            'full_name',
-            'email',
-            'tracking_code',
-            'application_type',
-            'teacher_subject',
-            'professional_role',
-            'updated_at',
-        ]);
+   $applications = TeamApplication::with('documents')
+    ->where('status', 'rejected')
+    ->latest('updated_at')
+    ->get()
+    ->map(function ($application) {
+
+        $photo = $application->documents
+            ->firstWhere('document_type', 'photo');
+
+        return [
+            ...$application->toArray(),
+
+            'applicant_photo' => $photo
+                ? asset('storage/' . $photo->file_path)
+                : null,
+        ];
+    });
 
     return Inertia::render(
         'Admin/TeamApplications/RejectedTeamApplications',
@@ -70,15 +75,29 @@ public function correctionReview(TeamApplication $teamApplication)
 
 
 
-    public function index()
-    {
-        $applications = TeamApplication::latest()
-            ->get();
+  public function index()
+{
+    $applications = TeamApplication::with('documents')
+        ->latest()
+        ->get()
+        ->map(function ($application) {
 
-        return Inertia::render('Admin/TeamApplications/Index', [
-            'applications' => $applications,
-        ]);
-    }
+            $photo = $application->documents
+                ->firstWhere('document_type', 'photo');
+
+            return [
+                ...$application->toArray(),
+
+                'applicant_photo' => $photo
+                    ? asset('storage/' . $photo->file_path)
+                    : null,
+            ];
+        });
+
+    return Inertia::render('Admin/TeamApplications/Index', [
+        'applications' => $applications,
+    ]);
+}
 
     public function show(TeamApplication $teamApplication)
 {
@@ -107,7 +126,8 @@ public function correctionReview(TeamApplication $teamApplication)
 
 public function approvedTeachers()
 {
-    $teachers = TeamApplication::where('status', 'approved')
+    $teachers = TeamApplication::with('documents')
+        ->where('status', 'approved')
         ->where(function ($query) {
             $query
                 ->where('application_type', 'volunteer_teacher')
@@ -118,7 +138,20 @@ public function approvedTeachers()
                 });
         })
         ->latest('approved_at')
-        ->get();
+        ->get()
+        ->map(function ($teacher) {
+
+            $photo = $teacher->documents
+                ->firstWhere('document_type', 'photo');
+
+            return [
+                ...$teacher->toArray(),
+
+                'applicant_photo' => $photo
+                    ? asset('storage/' . $photo->file_path)
+                    : null,
+            ];
+        });
 
     return Inertia::render(
         'Admin/TeamApplications/ApprovedTeachers',
@@ -232,19 +265,33 @@ public function requestCorrection(Request $request, TeamApplication $teamApplica
 
 public function approvedStaffs()
 {
-    $staffs = TeamApplication::where('status', 'approved')
-        ->where(function ($query) {
-            $query
-                ->where('application_type', 'volunteer_manager')
-                ->orWhere('application_type', 'volunteer_support')
-                ->orWhere(function ($professionalQuery) {
-                    $professionalQuery
-                        ->where('application_type', 'professional_staff')
-                        ->where('professional_role', 'staff');
-                });
-        })
-        ->latest('approved_at')
-        ->get();
+   $staffs = TeamApplication::with('documents')
+    ->where('status', 'approved')
+    ->where(function ($query) {
+        $query
+            ->where('application_type', 'volunteer_manager')
+            ->orWhere('application_type', 'volunteer_support')
+            ->orWhere(function ($professionalQuery) {
+                $professionalQuery
+                    ->where('application_type', 'professional_staff')
+                    ->where('professional_role', 'staff');
+            });
+    })
+    ->latest('approved_at')
+    ->get()
+    ->map(function ($staff) {
+
+        $photo = $staff->documents
+            ->firstWhere('document_type', 'photo');
+
+        return [
+            ...$staff->toArray(),
+
+            'applicant_photo' => $photo
+                ? asset('storage/' . $photo->file_path)
+                : null,
+        ];
+    });
 
     return Inertia::render('Admin/TeamApplications/ApprovedStaffs', [
         'staffs' => $staffs,
