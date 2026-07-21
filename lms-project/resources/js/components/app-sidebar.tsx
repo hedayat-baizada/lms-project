@@ -427,7 +427,7 @@ export function AppSidebar() {
                                     // Small icon when collapsed
                                     <div className="flex items-center justify-center">
                                         <img 
-                                            src="/images/logo.png" 
+                                            src="/images/logo1.png" 
                                             alt="Alpha Academy"
                                             className="h-8 w-auto object-contain"
                                         />
