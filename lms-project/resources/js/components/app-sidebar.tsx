@@ -340,32 +340,32 @@ export function AppSidebar() {
         attendanceNavItems.push(
             {
                 title: 'Attendance Setting',
-                url: 'teacher.attendance_setting',
+                url: 'teacher/attendance_setting',
                 icon: Settings,
             },
-            {
-                title: 'Attendance Period',
-                url: 'teacher.attendance_period',
-                icon: Calendar,
-            },
+            // {
+            //     title: 'Attendance Period',
+            //     url: 'teacher.attendance_period',
+            //     icon: Calendar,
+            // },
             {
                 title: 'Teacher Attendance',
-                url: 'teacher.attendance_record',
+                url: 'teacher/attendance_record',
                 icon: ClipboardCheck,
             },
-            {
-                title: 'Attendance Holidays',
-                url: 'teacher.attendance_holiday',
-                icon: CalendarCheck,
-            },
+            // {
+            //     title: 'Attendance Holidays',
+            //     url: 'teacher.attendance_holiday',
+            //     icon: CalendarCheck,
+            // },
             {
                 title: 'Attendance Summary',
-                url: 'teacher.attendance_summary',
+                url: 'teacher/attendance_summary',
                 icon: BarChart3,
             },
             {
                 title: 'Attendance Session',
-                url: 'teacher.attendance_session',
+                url: 'teacher/attendance_session',
                 icon: Calendar,
             }
         );
@@ -434,8 +434,8 @@ export function AppSidebar() {
                                 {isCollapsed ? (
                                     // Small icon when collapsed
                                     <div className="flex items-center justify-center">
-                                        <img 
-                                            src="/images/logo1.png" 
+                                        <img
+                                            src="/images/logo1.png"
                                             alt="Alpha Academy"
                                             className="h-8 w-auto object-contain"
                                         />
@@ -443,7 +443,7 @@ export function AppSidebar() {
                                 ) : (
                                     // Full text logo when expanded
                                     <div className="flex items-center justify-center">
-                                        <img 
+                                        <img
                                             src="/images/alpha-logo-wide.png"
                                             alt="Alpha Academy"
                                             className="h-15 w-auto object-contain"
