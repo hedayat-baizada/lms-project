@@ -1,9 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-use Inertia\Inertia;
 
-use App\Models\Attendance_record;
+use App\Models\Attendance_Record;
 use Illuminate\Http\Request;
 
 class AttendanceRecordController extends Controller
@@ -13,7 +12,7 @@ class AttendanceRecordController extends Controller
      */
     public function index()
     {
-        return Inertia::render('teacher/attendance/Attendance_record');
+        //
     }
 
     /**
@@ -35,7 +34,7 @@ class AttendanceRecordController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Attendance_record $attendance_record)
+    public function show(Attendance_Record $attendance_Record)
     {
         //
     }
@@ -43,7 +42,7 @@ class AttendanceRecordController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Attendance_record $attendance_record)
+    public function edit(Attendance_Record $attendance_Record)
     {
         //
     }
@@ -51,7 +50,7 @@ class AttendanceRecordController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Attendance_record $attendance_record)
+    public function update(Request $request, Attendance_Record $attendance_Record)
     {
         //
     }
@@ -59,7 +58,7 @@ class AttendanceRecordController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Attendance_record $attendance_record)
+    public function destroy(Attendance_Record $attendance_Record)
     {
         //
     }

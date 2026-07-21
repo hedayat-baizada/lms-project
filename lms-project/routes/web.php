@@ -17,12 +17,11 @@ use App\Http\Controllers\Api\FinalExamController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\StudentProgressController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\AttendanceSettingController;
-use App\Http\Controllers\AttendanceHolidaysController;
-use App\Http\Controllers\AttendancePeriodsController;
+use App\Http\Controllers\AttendanceSessionController;
 use App\Http\Controllers\AttendanceRecordController;
-use App\Http\Controllers\ClassSessionController;
-use App\Http\Controllers\AttendanceSummaryController;
+use App\Http\Controllers\AttendanceHolidayController;
+use App\Http\Controllers\AttendanceSettingController;
+
 use App\Http\Controllers\ResultController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AnnouncementController;
@@ -564,25 +563,6 @@ Route::post('/apply/team/{teamApplication}/correction', [TeamApplicationControll
 
 
 
-    // ====================attendance routes======================
-    // ==================== Attendance Routes ======================
-
-        // Attendance Settings Page
- Route::get('teacher/attendance-setting', [AttendanceSettingController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-setting');
- Route::get('teacher/attendance-period', [AttendancePeriodsController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-period');
-        
-
-
-
-Route::get('teacher/attendance-record',[AttendanceRecordController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-record');
-
-
-Route::get('teacher/attendance-holiday',[AttendanceHolidaysController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-holiday');
-
-
-Route::get('teacher/attendance-session',[ClassSessionController::class, 'index'])->middleware(['auth'])->name('teacher.attendance-session');
-
-Route::get('teacher/attendance-summary',[AttendanceSummaryController::class,'index'])->middleware(['auth'])->name('teacher.attendance-summary');
 
 
     ////////////////////////////
@@ -601,6 +581,24 @@ Route::patch(
     '/announcements/{announcement}/status',
     [AnnouncementController::class, 'toggleStatus']
 )->name('announcements.status');
+
+
+
+
+
+
+    // ====================attendance routes======================
+    // ==================== Attendance Routes ======================
+
+
+    Route::get('/attendance/settings', [AttendanceSettingController::class, 'index'])->name('attendance.settings');
+ 
+
+
+
+
+
+
 
 
 require __DIR__.'/settings.php';

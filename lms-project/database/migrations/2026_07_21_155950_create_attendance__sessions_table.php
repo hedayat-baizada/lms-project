@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendance__periods', function (Blueprint $table) {
+        Schema::create('attendance__sessions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('class_rooms_id')
+            $table->foreignId('class_room_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
@@ -21,22 +21,20 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->date('start_date');
+            $table->date('lesson_date');
 
-            $table->date('end_date');
+            $table->time('start_time');
 
-            $table->enum('status', [
-                'draft',
-                'active',
-                'completed'
-            ])->default('draft');
+            $table->time('end_time');
 
-            $table->timestamps();
-
-            $table->index([
-                'class_id',
-                'teacher_id'
+            $table->enum('lesson_type',[
+                'zoom',
+                'platform'
             ]);
+
+            $table->string('meeting_link')->nullable();
+
+            $table->boolean('attendance_locked')->default(false);
             $table->timestamps();
         });
     }
@@ -46,6 +44,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendance__periods');
+        Schema::dropIfExists('attendance__sessions');
     }
 };

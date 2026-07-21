@@ -11,44 +11,33 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendance_records', function (Blueprint $table) {
+        Schema::create('attendance__records', function (Blueprint $table) {
             $table->id();
-             $table->foreignId('class_session_id')
-                ->constrained('class_sessions')
+
+            $table->foreignId('attendance_session_id')
+                ->constrained()
                 ->cascadeOnDelete();
 
             $table->foreignId('student_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->enum('status', [
+            $table->enum('status',[
                 'present',
                 'absent',
                 'late',
-                'excused',
-                'left_early'
-            ]);
+                'excused'
+            ])->default('present');
 
-            $table->text('note')->nullable();
+            $table->text('remarks')->nullable();
 
-            $table->foreignId('marked_by')
-                ->constrained('teachers');
-
-            $table->foreignId('updated_by')
-                ->nullable()
-                ->constrained('teachers')
-                ->nullOnDelete();
+            $table->timestamp('marked_at')->nullable();
 
             $table->timestamps();
 
             $table->unique([
-                'class_session_id',
+                'attendance_session_id',
                 'student_id'
-            ]);
-
-            $table->index([
-                'student_id',
-                'status'
             ]);
             $table->timestamps();
         });
@@ -59,6 +48,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendance_records');
+        Schema::dropIfExists('attendance__records');
     }
 };

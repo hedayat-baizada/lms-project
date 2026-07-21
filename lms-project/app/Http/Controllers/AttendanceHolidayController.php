@@ -1,18 +1,18 @@
 <?php
 
 namespace App\Http\Controllers;
-use Inertia\Inertia;
-use App\Models\Class_Session;
+
+use App\Models\Attendance_Holiday;
 use Illuminate\Http\Request;
 
-class ClassSessionController extends Controller
+class AttendanceHolidayController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return inertia::render('teacher/attendance/Class_session');
+        //
     }
 
     /**
@@ -34,7 +34,7 @@ class ClassSessionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Class_Session $class_Session)
+    public function show(Attendance_Holiday $attendance_Holiday)
     {
         //
     }
@@ -42,7 +42,7 @@ class ClassSessionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Class_Session $class_Session)
+    public function edit(Attendance_Holiday $attendance_Holiday)
     {
         //
     }
@@ -50,7 +50,7 @@ class ClassSessionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Class_Session $class_Session)
+    public function update(Request $request, Attendance_Holiday $attendance_Holiday)
     {
         //
     }
@@ -58,7 +58,7 @@ class ClassSessionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Class_Session $class_Session)
+    public function destroy(Attendance_Holiday $attendance_Holiday)
     {
         //
     }

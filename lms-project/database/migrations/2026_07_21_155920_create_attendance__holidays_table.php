@@ -13,20 +13,19 @@ return new class extends Migration
     {
         Schema::create('attendance__holidays', function (Blueprint $table) {
             $table->id();
-             $table->foreignId('attendance_period_id')
+            $table->foreignId('class_room_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
             $table->date('holiday_date');
 
-            $table->string('reason')->nullable();
+            $table->string('title');
 
-            $table->timestamps();
+            $table->text('reason')->nullable();
 
-            $table->unique([
-                'attendance_period_id',
-                'holiday_date'
-            ]);
+            $table->foreignId('teacher_id')
+                ->constrained()
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

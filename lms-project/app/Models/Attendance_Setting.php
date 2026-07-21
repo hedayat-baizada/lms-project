@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Class_Session extends Model
+class Attendance_Setting extends Model
 {
     //
 }
