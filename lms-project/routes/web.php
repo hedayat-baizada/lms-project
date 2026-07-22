@@ -17,9 +17,18 @@ use App\Http\Controllers\Api\FinalExamController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\StudentProgressController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\AttendanceSessionController;
+use App\Http\Controllers\AttendanceRecordController;
+use App\Http\Controllers\AttendanceHolidayController;
+use App\Http\Controllers\AttendanceSettingController;
+
 use App\Http\Controllers\ResultController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AnnouncementController;
+
+
+
+
 
 
 use Illuminate\Support\Facades\Mail;
@@ -474,6 +483,8 @@ Route::middleware(['auth'])->group(function () {
     //     return response()->json(['message' => 'All notifications marked as read']);
     // })->middleware('auth');
 
+    
+        
 });
 
 // ==================== Public / Apply Routes ====================
@@ -521,7 +532,7 @@ Route::post('/apply/student/{application}/speaking/skip', [ApplicationController
     ->name('apply.student.speaking.skip');
 
 Route::post('/apply/student/{application}/test', [ApplicationController::class, 'storeTestAnswers'])
-    ->name('apply.student.test.store');
+    ->name('apply.student.test.store'); 
 
 Route::get('/apply/student/{application}/writing', [ApplicationController::class, 'writing'])
     ->name('apply.student.writing');
@@ -620,6 +631,24 @@ Route::middleware(['auth', 'permission:announcements.delete'])->group(function (
         ->name('announcements.destroy');
 
 });
+
+
+
+
+
+
+    // ====================attendance routes======================
+    // ==================== Attendance Routes ======================
+
+
+    Route::get('/attendance/settings', [AttendanceSettingController::class, 'index'])->name('attendance.settings');
+ 
+
+
+
+
+
+
 
 
 require __DIR__.'/settings.php';

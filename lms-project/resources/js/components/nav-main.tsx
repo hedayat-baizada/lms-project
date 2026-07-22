@@ -45,11 +45,19 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                         );
                     }
 
-                    const isGroupActive = (item: NavItem) => {
-                        return item.children?.some(
-                            (child) => child.url === page.url
+                  const isGroupActive = (item: NavItem) => {
+                    return item.children?.some((child) => {
+                        // Direct child is active
+                        if (child.url === page.url) {
+                            return true;
+                        }
+
+                        // One of the grandchildren is active
+                        return child.children?.some(
+                            (grandChild) => grandChild.url === page.url
                         );
-                    };
+                    });
+                };
 
 
                     // Collapsible Groups
@@ -80,26 +88,85 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                 <CollapsibleContent>
                                     <SidebarMenuSub>
 
-                                        {item.children?.map((child) => (
-                                            <SidebarMenuSubItem
-                                                key={child.title}
-                                            >
-                                                <SidebarMenuSubButton
-                                                    asChild
-                                                    isActive={
-                                                        child.url === page.url
-                                                    }
-                                                >
-                                                    <Link href={child.url ?? '#'}>
-                                                        {child.icon && (
-                                                            <child.icon className="mr-2 h-4 w-4" />
-                                                        )}
-                                                        {child.title}
-                                                    </Link>
-                                                </SidebarMenuSubButton>
-                                            </SidebarMenuSubItem>
-                                        ))}
+                                       {item.children?.map((child) =>
+    child.children ? (
+        <Collapsible 
+        key={child.title}
+    defaultOpen={child.children?.some(
+        (grandChild) => grandChild.url === page.url
+    )}
+     className="group/sub">
+            <SidebarMenuSubItem>
 
+                <CollapsibleTrigger asChild>
+                    <SidebarMenuSubButton>
+                        <ChevronRight
+                            className="mr-1 h-4 w-4 transition-transform group-data-[state=open]/sub:rotate-90"
+                        />
+
+                        {child.icon && (
+                            <child.icon className="mr-1 h-4 w-4" />
+                        )}
+
+                        <span className="truncate">
+                            {child.title}
+                        </span>
+                    </SidebarMenuSubButton>
+                </CollapsibleTrigger>
+
+                <CollapsibleContent>
+                    <SidebarMenuSub className="ml-2 border-l pl-2">
+                        {child.children.map((grandChild) => (
+                            <SidebarMenuSubItem
+                                key={grandChild.title}
+                                className="my-1"
+                            >
+                                <SidebarMenuSubButton
+                                    asChild
+                                    isActive={grandChild.url === page.url}
+                                >
+                                    <Link
+                                        href={grandChild.url ?? '#'}
+                                        className="flex items-center gap-2"
+                                    >
+                                        {grandChild.icon && (
+                                            <grandChild.icon className="h-4 w-4 shrink-0" />
+                                        )}
+
+                                        <span className="whitespace-normal">
+                                            {grandChild.title}
+                                        </span>
+                                    </Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                        ))}
+                    </SidebarMenuSub>
+                </CollapsibleContent>
+
+            </SidebarMenuSubItem>
+        </Collapsible>
+    ) : (
+        <SidebarMenuSubItem key={child.title}>
+            <SidebarMenuSubButton
+                asChild
+                isActive={child.url === page.url}
+            >
+                <Link
+                    href={child.url ?? '#'}
+                    className="flex items-center gap-2"
+                >
+                    {child.icon && (
+                        <child.icon className="h-4 w-4 shrink-0" />
+                    )}
+
+                    <span className="truncate">
+                        {child.title}
+                    </span>
+                </Link>
+            </SidebarMenuSubButton>
+        </SidebarMenuSubItem>
+    )
+)}
                                     </SidebarMenuSub>
                                 </CollapsibleContent>
 
