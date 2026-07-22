@@ -360,55 +360,60 @@ export function AppSidebar() {
         attendanceNavItems.push(
             {
                 title: 'Attendance Setting',
-                url: 'teacher.attendance_setting',
+                url: 'teacher/attendance_setting',
                 icon: Settings,
             },
-            {
-                title: 'Attendance Period',
-                url: 'teacher.attendance_period',
-                icon: Calendar,
-            },
+            // {
+            //     title: 'Attendance Period',
+            //     url: 'teacher.attendance_period',
+            //     icon: Calendar,
+            // },
             {
                 title: 'Teacher Attendance',
-                url: 'teacher.attendance_record',
+                url: 'teacher/attendance_record',
                 icon: ClipboardCheck,
             },
-            {
-                title: 'Attendance Holidays',
-                url: 'teacher.attendance_holiday',
-                icon: CalendarCheck,
-            },
+            // {
+            //     title: 'Attendance Holidays',
+            //     url: 'teacher.attendance_holiday',
+            //     icon: CalendarCheck,
+            // },
             {
                 title: 'Attendance Summary',
-                url: 'teacher.attendance_summary',
+                url: 'teacher/attendance_summary',
                 icon: BarChart3,
             },
             {
                 title: 'Attendance Session',
-                url: 'teacher.attendance_session',
+                url: 'teacher/attendance_session',
                 icon: Calendar,
             }
         );
     }
 
-    let filteredTeamItems: NavItem[] = [];
+    const filteredTeamItems = mainNavItems
+        .filter(item => {
+            // Hide Teaching Operations for students
+            if (isStudent && item.title === 'Teaching Operations') {
+                return false;
+            }
 
-    if (isTeacher) {
-        // Teacher only sees Dashboard
-        filteredTeamItems = mainNavItems.filter(
-            item => item.title === 'Dashboard'
-        );
-    } else {
-        filteredTeamItems = mainNavItems
-            .map(item => ({
-                ...item,
-                children: item.children?.filter(child => {
-                    if (isAdmin) return true;
-                    return !child.permission || can(child.permission);
-                }),
-            }))
-            .filter(item => !item.children || item.children.length > 0);
-    }
+            return true;
+        })
+        .map(item => ({
+            ...item,
+            children: item.children?.filter(child => {
+                if (isAdmin) return true;
+                return !child.permission || can(child.permission);
+            }),
+        }))
+        .filter(item => {
+            if (item.children) {
+                return item.children.length > 0;
+            }
+
+            return isAdmin || !item.permission || can(item.permission);
+        });
 
     const allNavItems = [...filteredTeamItems];
 
@@ -449,8 +454,8 @@ export function AppSidebar() {
                                 {isCollapsed ? (
                                     // Small icon when collapsed
                                     <div className="flex items-center justify-center">
-                                        <img 
-                                            src="/images/logo1.png" 
+                                        <img
+                                            src="/images/logo1.png"
                                             alt="Alpha Academy"
                                             className="h-8 w-auto object-contain"
                                         />
@@ -458,7 +463,7 @@ export function AppSidebar() {
                                 ) : (
                                     // Full text logo when expanded
                                     <div className="flex items-center justify-center">
-                                        <img 
+                                        <img
                                             src="/images/alpha-logo-wide.png"
                                             alt="Alpha Academy"
                                             className="h-15 w-auto object-contain"

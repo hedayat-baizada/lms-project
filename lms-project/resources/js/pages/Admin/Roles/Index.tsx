@@ -3,6 +3,17 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { useCan } from '@/lib/can';
 import { ArrowLeft } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -140,14 +151,47 @@ export default function Index({ roles }: Props) {
                                                     Edit
                                                 </Link>}
 
-                                                {can('roles.delete') && <button
-                                                    onClick={() =>
-                                                        deleteRole(role.id)
-                                                    }
-                                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs"
-                                                >
-                                                    Delete
-                                                </button>}
+                                                {can('roles.delete') && (
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <button className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">
+                                                                Delete
+                                                            </button>
+                                                        </AlertDialogTrigger>
+
+                                                        <AlertDialogContent className="sm:max-w-md">
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle className="text-red-600">
+                                                                    Delete Role
+                                                                </AlertDialogTitle>
+
+                                                                <AlertDialogDescription>
+                                                                    Are you sure you want to delete the role
+                                                                    <strong> "{role.name}"</strong>?
+                                                                    <br />
+                                                                    <br />
+                                                                    This action cannot be undone and all users assigned to
+                                                                    this role may lose their permissions.
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>
+                                                                    Cancel
+                                                                </AlertDialogCancel>
+
+                                                                <AlertDialogAction
+                                                                    className="bg-red-600 hover:bg-red-700"
+                                                                    onClick={() =>
+                                                                        router.delete(route('roles.destroy', role.id))
+                                                                    }
+                                                                >
+                                                                    Delete Role
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                )}
 
                                             </div>
                                         </td>
