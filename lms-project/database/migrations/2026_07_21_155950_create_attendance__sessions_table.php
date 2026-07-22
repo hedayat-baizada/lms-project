@@ -17,9 +17,9 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->foreignId('teacher_id')
-                ->constrained()
-                ->cascadeOnDelete();
+           $table->foreignId('teacher_id')
+    ->constrained('users')
+    ->cascadeOnDelete();
 
             $table->date('lesson_date');
 
