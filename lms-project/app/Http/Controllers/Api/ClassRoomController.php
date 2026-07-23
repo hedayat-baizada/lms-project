@@ -28,23 +28,39 @@ class ClassRoomController extends Controller
     }
 
      
-    private function validTeacherIds(): array
-    {
-        return User::where('role', 'teacher')
-            ->orWhereHas('roles', fn($q) => $q->where('name', 'Teacher'))
-            ->pluck('id')
-            ->unique()
-            ->toArray();
-    }
+    // private function validTeacherIds(): array
+    // {
+    //     return User::where('role', 'teacher')
+    //         ->orWhereHas('roles', fn($q) => $q->where('name', 'Teacher'))
+    //         ->pluck('id')
+    //         ->unique()
+    //         ->toArray();
+    // }
 
-    private function validStudentIds(): array
-    {
-        return User::where('role', 'student')
-            ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
-            ->pluck('id')
-            ->unique()
-            ->toArray();
-    }
+    // private function validStudentIds(): array
+    // {
+    //     return User::where('role', 'student')
+    //         ->orWhereHas('roles', fn($q) => $q->where('name', 'Student'))
+    //         ->pluck('id')
+    //         ->unique()
+    //         ->toArray();
+    // }
+
+
+    private function validTeacherIds(): array
+{
+    return User::role('Teacher')
+        ->pluck('id')
+        ->toArray();
+}
+
+private function validStudentIds(): array
+{
+    return User::role('Student')
+        ->pluck('id')
+        ->toArray();
+}
+
 
     public function index(Request $request)
     {

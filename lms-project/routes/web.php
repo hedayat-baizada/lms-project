@@ -261,7 +261,7 @@ Route::middleware(['auth'])->group(function () {
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => bcrypt($request->password),
-            'role'     => $request->role,
+            // 'role'     => $request->role,
         ]);
 
         $user->assignRole(ucfirst($request->role));
@@ -407,9 +407,23 @@ Route::middleware(['auth'])->group(function () {
             ->get();
     })->middleware('auth');
 
+//    Route::get('/api/teacher/homework/pending', function () {
+//     $teacher = auth()->user();
+
+//     return response()->json([
+//         'id' => $teacher->id,
+//         'name' => $teacher->name,
+//         'role_column' => $teacher->role,
+//         'spatie_roles' => $teacher->getRoleNames(),
+//         'isTeacher()' => $teacher->isTeacher(),
+//     ]);
+// })->middleware('auth');
+
     Route::get('/api/teacher/attendance/pending', function () {
         $teacher = auth()->user();
-        if (!$teacher->isTeacher()) return response()->json(['message' => 'Unauthorized'], 403);
+        // if (!$teacher->isTeacher()) return response()->json(['message' => 'Unauthorized'], 403);
+        if (!$teacher->hasRole('Teacher'))
+    return response()->json(['message' => 'Unauthorized'], 403);
         $classIds = \App\Models\ClassRoom::where('teacher_id', $teacher->id)->pluck('id');
         return \App\Models\AttendanceRequest::where('status', 'pending')
             ->whereHas('lesson.classRoom', function ($q) use ($classIds) {
