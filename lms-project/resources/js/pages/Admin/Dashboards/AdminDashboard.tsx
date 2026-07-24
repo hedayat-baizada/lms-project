@@ -33,7 +33,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        if (user.role === 'admin') {
+        if (user.role === 'Admin') {
             fetch('/api/admin/stats', {
                 headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                 credentials: 'include',
@@ -44,7 +44,7 @@ export default function Dashboard() {
                     setLoading(false)
                 })
                 .catch(() => setLoading(false))
-        } else if (user.role === 'teacher') {
+        } else if (user.role === 'Teacher') {
             fetch('/api/teacher/stats', {
                 headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                 credentials: 'include',
@@ -84,7 +84,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Admin Dashboard */}
-                {user.role === 'admin' && adminStats && (
+                {user.role === 'Admin' && adminStats && (
                     <>
                         {/* Stats Cards */}
                         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -218,7 +218,7 @@ export default function Dashboard() {
                 )}
 
                 {/* Teacher Dashboard */}
-                {user.role === 'teacher' && (
+                {user.role === 'Teacher' && (
                     <>
                         {/* Pending Cards - Teacher specific */}
                         {!loading && teacherStats ? (
@@ -295,7 +295,7 @@ export default function Dashboard() {
                 )}
 
                 {/* Student Dashboard */}
-                {user.role === 'student' && (
+                {user.role === 'Student' && (
                     <div className="grid gap-5 sm:grid-cols-2">
                         <div className="group rounded-2xl bg-gradient-to-br from-blue-50 to-sky-50/80 border border-blue-200/50 p-6 shadow-md hover:shadow-xl hover:shadow-blue-200/50 hover:-translate-y-1 transition-all duration-300">
                             <h2 className="text-xl font-bold text-blue-700">📚 My Classes</h2>

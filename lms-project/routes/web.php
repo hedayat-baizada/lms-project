@@ -261,7 +261,7 @@ Route::middleware(['auth'])->group(function () {
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => bcrypt($request->password),
-            'role'     => $request->role,
+            // 'role'     => $request->role,
         ]);
 
         $user->assignRole(ucfirst($request->role));
@@ -278,6 +278,8 @@ Route::middleware(['auth'])->group(function () {
         );
 }
 
+
+
 //         Mail::to($user->email)->send(
 //     new StudentAccountCreated(
 //         $user->name,
@@ -286,8 +288,19 @@ Route::middleware(['auth'])->group(function () {
 //     )
 // );
 
+    $applicationId = $request->application_id;
+
+if ($applicationId) {
+    \App\Models\Application::where('id', $applicationId)
+        ->update([
+            'student_created' => true,
+        ]);
+}
+
+
         return response()->json($user, 201);
     })->middleware('auth');
+
 
     Route::put('/api/admin/users/{user}', function (Request $request, \App\Models\User $user) {
         $request->validate([
@@ -394,22 +407,62 @@ Route::middleware(['auth'])->group(function () {
     })->middleware('auth');
 
     // ---- Teacher Pending Lists ----
+    // Route::get('/api/teacher/homework/pending', function () {
+    //     $teacher = auth()->user();
+    //     if (!$teacher->isTeacher()) return response()->json(['message' => 'Unauthorized'], 403);
+    //     $classIds = \App\Models\ClassRoom::where('teacher_id', $teacher->id)->pluck('id');
+    //     return \App\Models\HomeworkSubmission::where('status', 'pending')
+    //         ->whereHas('homework.lesson.classRoom', function ($q) use ($classIds) {
+    //             $q->whereIn('id', $classIds);
+    //         })
+    //         ->with(['homework.lesson.classRoom', 'student'])
+    //         ->orderBy('created_at', 'desc')
+    //         ->get();
+    // })->middleware('auth');
+
+
     Route::get('/api/teacher/homework/pending', function () {
-        $teacher = auth()->user();
-        if (!$teacher->isTeacher()) return response()->json(['message' => 'Unauthorized'], 403);
-        $classIds = \App\Models\ClassRoom::where('teacher_id', $teacher->id)->pluck('id');
-        return \App\Models\HomeworkSubmission::where('status', 'pending')
-            ->whereHas('homework.lesson.classRoom', function ($q) use ($classIds) {
-                $q->whereIn('id', $classIds);
-            })
-            ->with(['homework.lesson.classRoom', 'student'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-    })->middleware('auth');
+
+    $user = auth()->user();
+
+    if (!$user->isTeacher() && !$user->isAdmin()) {
+        return response()->json([
+            'message' => 'Unauthorized'
+        ], 403);
+    }
+
+    $query = \App\Models\HomeworkSubmission::where('status', 'pending');
+
+    // Teachers only see their own classes
+    if ($user->isTeacher()) {
+
+        $classIds = \App\Models\ClassRoom::where('teacher_id', $user->id)
+            ->pluck('id');
+
+        $query->whereHas('homework.lesson.classRoom', function ($q) use ($classIds) {
+            $q->whereIn('id', $classIds);
+        });
+
+    }
+
+    // Admin sees everything
+
+    return $query
+        ->with([
+            'student',
+            'homework.lesson.classRoom'
+        ])
+        ->latest()
+        ->get();
+
+});
+
 
     Route::get('/api/teacher/attendance/pending', function () {
         $teacher = auth()->user();
-        if (!$teacher->isTeacher()) return response()->json(['message' => 'Unauthorized'], 403);
+        // if (!$teacher->isTeacher()) return response()->json(['message' => 'Unauthorized'], 403);
+        if (!$teacher->hasRole('Teacher'))
+    return response()->json(['message' => 'Unauthorized'], 403);
         $classIds = \App\Models\ClassRoom::where('teacher_id', $teacher->id)->pluck('id');
         return \App\Models\AttendanceRequest::where('status', 'pending')
             ->whereHas('lesson.classRoom', function ($q) use ($classIds) {

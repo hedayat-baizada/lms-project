@@ -14,8 +14,10 @@ class DashboardController extends Controller
         $roles = $user->getRoleNames()->toArray();
 
         $stats = [
-            'students'    => User::where('role', 'student')->count(),
-            'teachers'    => User::where('role', 'teacher')->count(),
+            // 'students'    => User::where('role', 'student')->count(),
+            // 'teachers'    => User::where('role', 'teacher')->count(),
+            'students' => User::role('Student')->count(),
+            'teachers' => User::role('Teacher')->count(),
             'volunteers'  => 0,
             'applications'=> 0,
             'users'       => User::count(),
