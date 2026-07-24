@@ -117,9 +117,17 @@ function resetSearch() {
             {application.phone ?? '-'}
         </p>
 
-        <div className="mt-3 inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-800">
-            Approved
-        </div>
+        <div
+    className={`mt-3 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
+        application.student_created
+            ? 'bg-blue-100 text-blue-800'
+            : 'bg-green-100 text-green-800'
+    }`}
+>
+    {application.student_created
+        ? 'Student'
+        : 'Approved'}
+</div>
     </div>
 </div>
 

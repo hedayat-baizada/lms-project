@@ -20,12 +20,13 @@ const [studentForm, setStudentForm] = useState({
 
 async function createStudent() {
     try {
-        await axios.post('/api/admin/users', {
-            name: studentForm.name,
-            email: studentForm.email,
-            password: studentForm.password,
-            role: 'student',
-        });
+       await axios.post('/api/admin/users', {
+    name: studentForm.name,
+    email: studentForm.email,
+    password: studentForm.password,
+    role: 'student',
+    application_id: application.id,
+});
 
         alert('Student account created successfully.');
 

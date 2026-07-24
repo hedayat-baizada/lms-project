@@ -278,6 +278,8 @@ Route::middleware(['auth'])->group(function () {
         );
 }
 
+
+
 //         Mail::to($user->email)->send(
 //     new StudentAccountCreated(
 //         $user->name,
@@ -286,8 +288,19 @@ Route::middleware(['auth'])->group(function () {
 //     )
 // );
 
+    $applicationId = $request->application_id;
+
+if ($applicationId) {
+    \App\Models\Application::where('id', $applicationId)
+        ->update([
+            'student_created' => true,
+        ]);
+}
+
+
         return response()->json($user, 201);
     })->middleware('auth');
+
 
     Route::put('/api/admin/users/{user}', function (Request $request, \App\Models\User $user) {
         $request->validate([
